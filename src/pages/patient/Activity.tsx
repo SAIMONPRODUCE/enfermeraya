@@ -21,7 +21,7 @@ export default function Activity() {
     <div className="scroll-y h-full px-5 pb-6">
       <h1 className="text-2xl font-extrabold">Tu actividad</h1>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <Card><p className="text-[13px] text-mute">Servicios</p><p className="text-2xl font-extrabold">{mine.filter((s) => s.estado === 'completado').length}</p></Card>
+        <Card><p className="text-[13px] text-mute">Completados</p><p className="text-2xl font-extrabold">{mine.filter((s) => s.estado === 'completado').length}</p></Card>
         <Card><p className="text-[13px] text-mute">Total pagado</p><p className="text-2xl font-extrabold text-brand-700">{money(spent)}</p></Card>
       </div>
 

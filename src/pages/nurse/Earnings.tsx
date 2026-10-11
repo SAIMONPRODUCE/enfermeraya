@@ -42,7 +42,7 @@ export default function Earnings() {
                 <div className="flex h-full w-full items-end">
                   <div className={`w-full origin-bottom rounded-lg ${i === 6 ? 'bg-brand-600' : 'bg-brand-200'}`} style={{ height: `${Math.max(6, (b.v / max) * 100)}%`, animation: `enter-up 400ms var(--ease-out) ${i * 40}ms both` }} />
                 </div>
-                <span className="text-[11px] font-semibold text-mute">{b.label}</span>
+                <span className="text-[12px] font-semibold text-mute">{b.label}</span>
               </div>
             ))}
           </div>

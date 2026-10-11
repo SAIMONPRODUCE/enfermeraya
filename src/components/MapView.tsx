@@ -87,7 +87,7 @@ export function MapView({ markers, center, kmAcross = 10, fit, radiusKm, routes 
         return (
           <div
             className="pointer-events-none absolute rounded-full border border-brand-400/50 bg-brand-500/[0.07]"
-            style={{ width: r * 2, height: r * 2, left: 0, top: 0, transform: `translate(${p.x - r}px, ${p.y - r}px)`, transition: 'transform 600ms var(--ease-in-out), width 600ms var(--ease-in-out), height 600ms var(--ease-in-out)' }}
+            style={{ width: r * 2, height: r * 2, left: 0, top: 0, transform: `translate(${p.x - r}px, ${p.y - r}px)`, transition: 'transform 600ms var(--ease-in-out)' }}
           />
         )
       })()}

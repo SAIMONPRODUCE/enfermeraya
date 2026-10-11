@@ -37,7 +37,7 @@ export function Layout({ tabs, badge }: { tabs: Tab[]; badge: string }) {
           <span className="text-[17px] font-extrabold tracking-tight">
             Enfermera<span className="text-brand-600">Ya</span>
           </span>
-          <span className="ml-1 rounded-full bg-mint-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-mint-600">{badge}</span>
+          <span className="ml-1 rounded-full bg-mint-50 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-mint-600">{badge}</span>
         </div>
         <button
           aria-label="Notificaciones"
@@ -49,7 +49,7 @@ export function Layout({ tabs, badge }: { tabs: Tab[]; badge: string }) {
         >
           <Bell size={20} />
           {unread > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
+            <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[12px] font-bold text-white">
               {unread}
             </span>
           )}
@@ -75,7 +75,7 @@ export function Layout({ tabs, badge }: { tabs: Tab[]; badge: string }) {
                   key={t.to}
                   onClick={() => nav(t.to)}
                   aria-current={on ? 'page' : undefined}
-                  className={`press flex flex-col items-center gap-0.5 rounded-xl py-2 text-[11px] font-semibold ${on ? 'text-brand-600' : 'text-mute'}`}
+                  className={`press flex flex-col items-center gap-0.5 rounded-xl py-2 text-[12px] font-semibold ${on ? 'text-brand-600' : 'text-mute'}`}
                 >
                   <I size={22} strokeWidth={on ? 2.4 : 2} />
                   {t.label}

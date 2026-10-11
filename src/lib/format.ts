@@ -39,3 +39,9 @@ export function isSameDay(ts: number, ref = Date.now()): boolean {
   const b = new Date(ref)
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
 }
+
+// Telefono colombiano guardado como +57XXXXXXXXXX: "+57 319 244 5418". Otro formato se muestra tal cual.
+export function formatTelefono(t: string): string {
+  const m = t.replace(/\D/g, '').match(/^(\d{2})(\d{3})(\d{3})(\d{4})$/)
+  return m ? `+${m[1]} ${m[2]} ${m[3]} ${m[4]}` : t
+}
