@@ -40,7 +40,9 @@ export function availableNurses(
         c.detail.online &&
         c.detail.aprobado_por_admin === 'aprobado' &&
         c.dist <= radius &&
-        !state.servicios.some((s) => s.enfermero_id === c.user.id && BUSY.includes(s.estado)),
+        !state.servicios.some((s) => s.enfermero_id === c.user.id && BUSY.includes(s.estado)) &&
+        // ya tiene una oferta pendiente de respuesta
+        !state.servicios.some((s) => s.candidato === c.user.id && s.estado === 'solicitado'),
     )
     .sort((a, b) => a.dist - b.dist)
 }
@@ -102,6 +104,10 @@ export const actions = {
   },
 
   accept(state: AppState, id: string, nurseId: string, manual: boolean, now: number): AppState {
+    const offer = state.servicios.find((x) => x.id === id)
+    // no aceptar si el servicio ya no está abierto, no es para esta enfermera o ella está ocupada
+    if (!offer || offer.estado !== 'solicitado' || offer.candidato !== nurseId) return state
+    if (state.servicios.some((x) => x.enfermero_id === nurseId && BUSY.includes(x.estado))) return state
     return mutate(
       state,
       id,
@@ -163,7 +169,8 @@ export const actions = {
     const next = mutate(state, id, () => ({ calificacion: stars, resena }), now)
     if (!s?.enfermero_id) return next
     const nid = s.enfermero_id
-    const n = Math.max(1, next.nurses[nid]?.servicios ?? 1)
+    // `servicios` ya incluye este servicio (se contó al completar); el promedio previo es sobre n-1
+    const n = Math.max(0, (next.nurses[nid]?.servicios ?? 1) - 1)
     return {
       ...next,
       users: next.users.map((u) =>
@@ -177,6 +184,7 @@ export const actions = {
     const nurse = state.users.find((u) => u.id === nurseId)
     const patient = state.users.find((u) => u.rol === 'paciente')
     if (!nurse || !patient) return state
+    if (state.servicios.some((x) => x.enfermero_id === nurseId && BUSY.includes(x.estado))) return state
     const svc = CATALOGO[Math.floor(Math.random() * CATALOGO.length)]
     const loc = {
       lat: nurse.ubicacion.lat + (Math.random() - 0.5) * 0.03,
@@ -219,6 +227,8 @@ export function tick(state: AppState, now: number): AppState {
   let changed = false
   const notifs = [...state.notifs]
   const nurses = { ...state.nurses }
+  // enfermeras ofrecidas en este mismo tick (availableNurses solo ve el estado previo)
+  const claimed = new Set<string>()
 
   const servicios = state.servicios.map((orig) => {
     let s = orig
@@ -232,11 +242,12 @@ export function tick(state: AppState, now: number): AppState {
     switch (s.estado) {
       case 'solicitado': {
         if (!s.candidato) {
-          const c = availableNurses(state, s.ubicacion_paciente, s.rechazados)[0]
+          const c = availableNurses(state, s.ubicacion_paciente, [...s.rechazados, ...claimed])[0]
           if (!c) {
             set({ estado: 'sin_cobertura', estado_ts: now })
             N(s.paciente_id, 'Sin profesionales cerca', 'Ahora no hay enfermeros disponibles. Intenta de nuevo en unos minutos.', 'alerta')
           } else {
+            claimed.add(c.user.id)
             set({ candidato: c.user.id, oferta_inicio: now })
             N(c.user.id, 'Nueva solicitud cerca', `${serviceOf(s.servicio_id).nombre} a ${c.dist.toFixed(1)} km`, 'alerta')
           }

@@ -23,7 +23,9 @@ export default function Request() {
   const [params] = useSearchParams()
   const { me, state, requestService } = useApp()
   const [step, setStep] = useState(0)
-  const [sid, setSid] = useState(params.get('s') ?? 'inyect')
+  // ?s= viene de la URL: solo aceptar ids del catálogo para no romper la vista
+  const fromUrl = params.get('s')
+  const [sid, setSid] = useState(CATALOGO.some((c) => c.id === fromUrl) ? fromUrl! : 'inyect')
   const [inmediato, setInmediato] = useState(true)
   const [fecha, setFecha] = useState('')
   const [notas, setNotas] = useState('')

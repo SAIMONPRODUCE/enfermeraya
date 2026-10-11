@@ -1,20 +1,25 @@
 import { BellRing, CheckCircle2, Info, TriangleAlert } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useApp } from '../store/AppContext'
 import type { Notificacion } from '../types'
 
 function Toast({ n, onDone }: { n: Notificacion; onDone: () => void }) {
   const [inn, setIn] = useState(false)
+  // onDone cambia de identidad en cada render del padre; los timers no deben reiniciarse por eso
+  const done = useRef(onDone)
+  useEffect(() => {
+    done.current = onDone
+  })
   useEffect(() => {
     const a = requestAnimationFrame(() => setIn(true))
     const t1 = setTimeout(() => setIn(false), 4200)
-    const t2 = setTimeout(onDone, 4500)
+    const t2 = setTimeout(() => done.current(), 4500)
     return () => {
       cancelAnimationFrame(a)
       clearTimeout(t1)
       clearTimeout(t2)
     }
-  }, [onDone])
+  }, [])
   const Icon = n.tipo === 'exito' ? CheckCircle2 : n.tipo === 'alerta' ? TriangleAlert : Info
   const tone = n.tipo === 'exito' ? 'bg-mint-50 text-mint-600' : n.tipo === 'alerta' ? 'bg-amber-50 text-amber-600' : 'bg-brand-50 text-brand-600'
   return (

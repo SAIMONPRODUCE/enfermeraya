@@ -5,15 +5,31 @@ import type { AppState, LatLng, MetodoPago, Notificacion, NurseDetail, Servicio,
 import { actions, isActive, tick } from './sim'
 
 const KEY = 'enfermeraya-v2'
+const MAX_NOTIFS = 100
+const MAX_TERMINAL = 50
 
 function load(): AppState {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw) as AppState
+    if (raw) return prune(JSON.parse(raw) as AppState)
   } catch {
     /* ignore */
   }
   return seedState()
+}
+
+/** Acota notifs y servicios terminados para que localStorage no crezca sin límite. Devuelve el mismo objeto si no hay nada que podar. */
+function prune(s: AppState): AppState {
+  const terminal = s.servicios.filter((x) => !isActive(x))
+  const notifsOver = s.notifs.length > MAX_NOTIFS
+  const termOver = terminal.length > MAX_TERMINAL
+  if (!notifsOver && !termOver) return s
+  const keep = new Set(terminal.slice(0, MAX_TERMINAL).map((x) => x.id))
+  return {
+    ...s,
+    notifs: s.notifs.slice(0, MAX_NOTIFS),
+    servicios: s.servicios.filter((x) => isActive(x) || keep.has(x.id)),
+  }
 }
 
 export interface Draft {
@@ -61,12 +77,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const seen = useRef(new Set(state.notifs.map((n) => n.id)))
 
   useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify(state))
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state))
+    } catch {
+      // cuota llena o storage bloqueado (modo privado): la sesión sigue en memoria
+    }
   }, [state])
 
   // Simulación en tiempo real (1 paso por segundo)
   useEffect(() => {
-    const t = setInterval(() => setState((s) => tick(s, Date.now())), 1000)
+    const t = setInterval(() => setState((s) => prune(tick(s, Date.now()))), 1000)
     return () => clearInterval(t)
   }, [])
 
