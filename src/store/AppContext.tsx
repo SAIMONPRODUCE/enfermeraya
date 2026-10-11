@@ -253,6 +253,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const me = state.users.find((u) => u.id === state.sessionId) ?? null
   const myNurse = me && me.rol === 'enfermero' ? state.nurses[me.id] ?? null : null
 
+  // Posición real del profesional: solo mientras está conectado y aprobado. El servidor la usa para ofertas y el mapa del paciente.
+  const sendingLocation = !!userId && !!myNurse?.online && myNurse.aprobado_por_admin === 'aprobado'
+  useEffect(() => {
+    if (!sendingLocation || !('geolocation' in navigator)) return
+    let last = 0
+    const id = navigator.geolocation.watchPosition(
+      ({ coords }) => {
+        const now = Date.now()
+        if (now - last < 10000) return // máximo una escritura cada 10 s
+        last = now
+        supabase.rpc('set_ubicacion', { p_lat: coords.latitude, p_lng: coords.longitude }).then(({ error }) => {
+          if (error) console.error(error)
+        })
+      },
+      () => toast('Activa la ubicación para aparecer cerca de los pacientes.'),
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 },
+    )
+    return () => navigator.geolocation.clearWatch(id)
+  }, [sendingLocation, toast])
+
   // Acciones estables: leen el estado por ref, así su identidad no cambia entre actualizaciones.
   const api = useMemo<Actions>(() => {
     /** Llama una RPC; si falla muestra el error. Siempre refresca después. */
