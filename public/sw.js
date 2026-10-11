@@ -1,6 +1,6 @@
 const CACHE = 'enfermeraya-v1'
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['/', '/icon.svg'])))
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './icon.svg'])))
   self.skipWaiting()
 })
 self.addEventListener('activate', (e) => {
@@ -17,6 +17,6 @@ self.addEventListener('fetch', (e) => {
         caches.open(CACHE).then((c) => c.put(e.request, copy))
         return res
       })
-      .catch(() => caches.match(e.request).then((r) => r || caches.match('/'))),
+      .catch(() => caches.match(e.request).then((r) => r || caches.match('./'))),
   )
 })
