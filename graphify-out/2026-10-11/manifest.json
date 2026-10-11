@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "public/sw.js": {
-    "mtime": 1791676542.2455916,
-    "seen": 1791682970.097056,
-    "ast_hash": "777d3d79b3caeb31cd9462fa1ed8c988",
+    "mtime": 1791697921.005114,
+    "seen": 1791698462.656671,
+    "ast_hash": "86649553c9109e53f62ecd1043e779ce",
     "semantic_hash": ""
   },
   "scripts/test-sim.mjs": {
@@ -84,9 +84,9 @@
     "semantic_hash": ""
   },
   "src/main.tsx": {
-    "mtime": 1791681193.428022,
-    "seen": 1791682970.0970628,
-    "ast_hash": "903e3aad08bdaebd778313647f457967",
+    "mtime": 1791697921.0056863,
+    "seen": 1791698462.6570392,
+    "ast_hash": "e587f1487e6f7529636607e20aa33960",
     "semantic_hash": ""
   },
   "src/pages/Login.tsx": {
@@ -144,15 +144,15 @@
     "semantic_hash": ""
   },
   "src/pages/patient/Tracking.tsx": {
-    "mtime": 1791695866.2378461,
-    "seen": 1791695871.323487,
-    "ast_hash": "61e21f76262bafc0ec0b7d481438357d",
+    "mtime": 1791696252.305182,
+    "seen": 1791698462.657291,
+    "ast_hash": "0cf0d6a0d31855d5f6bccdcb8e773d5b",
     "semantic_hash": ""
   },
   "src/store/AppContext.tsx": {
-    "mtime": 1791694377.4515643,
-    "seen": 1791694598.2040849,
-    "ast_hash": "e88e9018940a1cd89d6088716cc382fe",
+    "mtime": 1791698201.9310343,
+    "seen": 1791698462.6572921,
+    "ast_hash": "2752f92d0631ca9a710cd2993e8d563d",
     "semantic_hash": ""
   },
   "src/store/sim.test.ts": {
@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1791676535.7588305,
-    "seen": 1791682970.0970728,
-    "ast_hash": "60b22c6831f3f0493394a9ffb67a7852",
+    "mtime": 1791697925.2516425,
+    "seen": 1791698462.6574159,
+    "ast_hash": "738b9b2a513afda4db30d530c36beecc",
     "semantic_hash": ""
   },
   "index.html": {
@@ -213,6 +213,18 @@
     "mtime": 1791694179.5339463,
     "seen": 1791694598.203923,
     "ast_hash": "cf6885065f213ddf8408222215b2f6cc",
+    "semantic_hash": ""
+  },
+  ".github/workflows/pages.yml": {
+    "mtime": 1791697991.4497452,
+    "seen": 1791698462.657417,
+    "ast_hash": "587825e8a3e8527f55d599aecac7b3de",
+    "semantic_hash": ""
+  },
+  "docs/EnfermeraYa-presentacion.pdf": {
+    "mtime": 1791699273.0832024,
+    "seen": 1791699311.496542,
+    "ast_hash": "fb99434611865ca3fbd290956f45b9f8",
     "semantic_hash": ""
   }
 }
