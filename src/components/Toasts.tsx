@@ -40,7 +40,7 @@ function Toast({ n, onDone }: { n: Notificacion; onDone: () => void }) {
 export function Toasts() {
   const { toasts, dismissToast } = useApp()
   return (
-    <div role="status" aria-live="polite" className="pointer-events-none absolute inset-x-0 top-0 z-50 flex flex-col gap-2 px-3 pt-[max(env(safe-area-inset-top,0px),12px)]">
+    <div role="status" aria-live="polite" className="pointer-events-none absolute inset-x-0 top-[80px] z-50 flex flex-col gap-2 px-3">
       {toasts.map((t) => (
         <Toast key={t.id} n={t} onDone={() => dismissToast(t.id)} />
       ))}

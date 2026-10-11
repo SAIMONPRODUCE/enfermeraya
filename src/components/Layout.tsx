@@ -37,7 +37,7 @@ export function Layout({ tabs, badge }: { tabs: Tab[]; badge: string }) {
           <span className="text-[17px] font-extrabold tracking-tight">
             Enfermera<span className="text-brand-600">Ya</span>
           </span>
-          <span className="ml-1 rounded-full bg-mint-50 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-mint-600">{badge}</span>
+          <span className="ml-2 rounded-full bg-mint-50 px-2 py-0.5 text-[12px] font-bold uppercase tracking-wide text-mint-600">{badge}</span>
         </div>
         <button
           aria-label="Notificaciones"

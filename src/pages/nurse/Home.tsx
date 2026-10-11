@@ -163,11 +163,11 @@ export default function NurseHome() {
   return (
     <div className="scroll-y h-full px-5 pb-6">
       <div className="stagger space-y-4">
-        <Card className={`flex items-center gap-4 transition-colors duration-300 ${myNurse.online ? '!bg-mint-500 !text-white' : ''}`} >
+        <Card className={`flex items-center gap-4 transition-colors duration-300 ${myNurse.online ? '!bg-mint-50 !ring-1 !ring-mint-500/40' : ''}`} >
           <div className="flex-1">
-            <p className={`text-[13px] font-semibold ${myNurse.online ? 'text-white/80' : 'text-mute'}`}>Estás</p>
-            <p className="text-2xl font-extrabold">{myNurse.online ? 'Conectado' : 'Desconectado'}</p>
-            <p className={`text-[13px] ${myNurse.online ? 'text-white/80' : 'text-mute'}`}>{myNurse.online ? 'Recibiendo solicitudes cercanas' : 'Conéctate para recibir servicios'}</p>
+            <p className={`text-[13px] font-semibold ${myNurse.online ? 'text-mint-700' : 'text-mute'}`}>Estás</p>
+            <p className={`text-2xl font-extrabold ${myNurse.online ? 'text-mint-700' : ''}`}>{myNurse.online ? 'Conectado' : 'Desconectado'}</p>
+            <p className={`text-[13px] ${myNurse.online ? 'text-mint-700/80' : 'text-mute'}`}>{myNurse.online ? 'Recibiendo solicitudes cercanas' : 'Conéctate para recibir servicios'}</p>
           </div>
           <Switch on={myNurse.online} onChange={toggleOnline} label="Conectado" />
         </Card>
@@ -194,7 +194,7 @@ export default function NurseHome() {
           </Card>
         ) : (
           <Card className="space-y-3">
-            <MapView className="h-52 rounded-2xl" center={me.ubicacion} kmAcross={11} radiusKm={5} markers={[{ id: 'me', pos: me.ubicacion, kind: 'me' }]} />
+            <MapView className="h-52 rounded-2xl" center={me.ubicacion} kmAcross={22} radiusKm={5} markers={[{ id: 'me', pos: me.ubicacion, kind: 'me' }]} />
             {myNurse.online ? (
               <div className="flex items-center gap-3">
                 <span className="relative h-3 w-3 shrink-0"><span className="pulse-dot relative block h-3 w-3 rounded-full bg-mint-500" /></span>
