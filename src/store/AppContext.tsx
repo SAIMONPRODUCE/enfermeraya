@@ -5,8 +5,8 @@ import { uid } from '../lib/format'
 import { errorMsg, supabase } from '../lib/supabase'
 import type { AppState, AprobacionEstado, Estado, LatLng, MetodoPago, Notificacion, NurseDetail, Role, Servicio, User } from '../types'
 
-// ponytail: polling cada 3 s (pausado con la pestaña oculta); pasar a Supabase Realtime si la carga o la latencia lo piden.
-const POLL_MS = 3000
+// ponytail: Realtime avisa de cambios y se vuelve a consultar el estado; respaldo cada 30 s.
+const FALLBACK_MS = 30000
 const EMPTY: AppState = { users: [], nurses: {}, servicios: [], notifs: [], sessionId: null }
 const ACTIVOS: Estado[] = ['aceptado', 'en_camino', 'en_atencion']
 
@@ -226,12 +226,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     // Diferido: onAuthStateChange no debe esperar llamadas a Supabase dentro del mismo ciclo.
     const first = setTimeout(refresh, 0)
+    // Cambios en tiempo real: RLS filtra lo que cada usuario recibe. Las ofertas llegan como notificación ("Nueva solicitud cerca").
+    const channel = supabase
+      .channel(`app-${userId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'servicios' }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notificaciones' }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nurse_details' }, refresh)
+      .subscribe()
+    // Respaldo por si se cae el socket: una consulta cada 30 s con la pestaña visible.
     const t = setInterval(() => {
       if (!document.hidden) refresh()
-    }, POLL_MS)
+    }, FALLBACK_MS)
     return () => {
       clearTimeout(first)
       clearInterval(t)
+      supabase.removeChannel(channel)
     }
   }, [userId, refresh])
 
