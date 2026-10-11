@@ -1,0 +1,212 @@
+{
+  "package.json": {
+    "mtime": 1791681118.396115,
+    "seen": 1791682970.0970528,
+    "ast_hash": "eb4b1c68e8d3c94d0684fcd24776a30d",
+    "semantic_hash": ""
+  },
+  "public/sw.js": {
+    "mtime": 1791676542.2455916,
+    "seen": 1791682970.097056,
+    "ast_hash": "777d3d79b3caeb31cd9462fa1ed8c988",
+    "semantic_hash": ""
+  },
+  "scripts/test-sim.mjs": {
+    "mtime": 1791681100.4329293,
+    "seen": 1791682970.097057,
+    "ast_hash": "8c188f18033a94583e55184cf1d14db0",
+    "semantic_hash": ""
+  },
+  "src/App.tsx": {
+    "mtime": 1791676935.2849402,
+    "seen": 1791682970.097058,
+    "ast_hash": "c7f7bb7f9481e1f3f62fd568764b395d",
+    "semantic_hash": ""
+  },
+  "src/components/ErrorBoundary.tsx": {
+    "mtime": 1791681189.5851922,
+    "seen": 1791682970.097058,
+    "ast_hash": "1b3e086f89bed03ff6241099c6648f0b",
+    "semantic_hash": ""
+  },
+  "src/components/Layout.tsx": {
+    "mtime": 1791681696.7154386,
+    "seen": 1791682970.097059,
+    "ast_hash": "a5b2adfb496a72cd3911455d1c7b1cbf",
+    "semantic_hash": ""
+  },
+  "src/components/LocationSheet.tsx": {
+    "mtime": 1791676803.2495346,
+    "seen": 1791682970.097059,
+    "ast_hash": "7621a041a0e767b7237f10bd637f613d",
+    "semantic_hash": ""
+  },
+  "src/components/MapView.tsx": {
+    "mtime": 1791681574.2875545,
+    "seen": 1791682970.0970602,
+    "ast_hash": "329fd1337cb3432b5302a40112d238cd",
+    "semantic_hash": ""
+  },
+  "src/components/Sheet.tsx": {
+    "mtime": 1791681686.2851033,
+    "seen": 1791682970.0970602,
+    "ast_hash": "d61da444bd89e7d90d55fd372b00ad12",
+    "semantic_hash": ""
+  },
+  "src/components/Toasts.tsx": {
+    "mtime": 1791681696.7673337,
+    "seen": 1791682970.0970612,
+    "ast_hash": "be37f3d0f6c889ebb680980ea4c7af22",
+    "semantic_hash": ""
+  },
+  "src/components/ui.tsx": {
+    "mtime": 1791676692.022432,
+    "seen": 1791682970.0970612,
+    "ast_hash": "ffe750649ffd978a64816c79645b7051",
+    "semantic_hash": ""
+  },
+  "src/data/seed.ts": {
+    "mtime": 1791676581.374354,
+    "seen": 1791682970.0970619,
+    "ast_hash": "d8caf402ebe7922f89df5c0d2a2dec33",
+    "semantic_hash": ""
+  },
+  "src/lib/format.ts": {
+    "mtime": 1791681321.432361,
+    "seen": 1791682970.0970619,
+    "ast_hash": "77c56fb5b570e4a1bb6173ed3697011b",
+    "semantic_hash": ""
+  },
+  "src/lib/geo.ts": {
+    "mtime": 1791676568.1904163,
+    "seen": 1791682970.0970628,
+    "ast_hash": "be264a515be9afbccefb5163b713a530",
+    "semantic_hash": ""
+  },
+  "src/main.tsx": {
+    "mtime": 1791681193.428022,
+    "seen": 1791682970.0970628,
+    "ast_hash": "903e3aad08bdaebd778313647f457967",
+    "semantic_hash": ""
+  },
+  "src/pages/Login.tsx": {
+    "mtime": 1791681697.0582635,
+    "seen": 1791682970.097064,
+    "ast_hash": "f3e719b2592067341cd8c14283937a09",
+    "semantic_hash": ""
+  },
+  "src/pages/Profile.tsx": {
+    "mtime": 1791676936.9361305,
+    "seen": 1791682970.097064,
+    "ast_hash": "0de6fd48aa35b0ea337e07709ea34545",
+    "semantic_hash": ""
+  },
+  "src/pages/Register.tsx": {
+    "mtime": 1791681696.929513,
+    "seen": 1791682970.097065,
+    "ast_hash": "6ccacae991674cc1df21699771c78bc5",
+    "semantic_hash": ""
+  },
+  "src/pages/admin/Admin.tsx": {
+    "mtime": 1791676933.0927682,
+    "seen": 1791682970.097066,
+    "ast_hash": "0f8987d09c151e2d5ca4218c459fd4b8",
+    "semantic_hash": ""
+  },
+  "src/pages/nurse/Earnings.tsx": {
+    "mtime": 1791681326.911445,
+    "seen": 1791682970.097066,
+    "ast_hash": "fd2dc704f5783b39109e9c10452ec465",
+    "semantic_hash": ""
+  },
+  "src/pages/nurse/Home.tsx": {
+    "mtime": 1791681330.6803777,
+    "seen": 1791682970.097067,
+    "ast_hash": "a53fbe355ce4bd778b59d9727e1717b0",
+    "semantic_hash": ""
+  },
+  "src/pages/patient/Activity.tsx": {
+    "mtime": 1791676869.640039,
+    "seen": 1791682970.097067,
+    "ast_hash": "c3d5ed35f1975496f90a43149c27a644",
+    "semantic_hash": ""
+  },
+  "src/pages/patient/Home.tsx": {
+    "mtime": 1791681696.8572636,
+    "seen": 1791682970.097068,
+    "ast_hash": "150cafac3c4d0ef98b6e565608b08a29",
+    "semantic_hash": ""
+  },
+  "src/pages/patient/Request.tsx": {
+    "mtime": 1791681180.0547216,
+    "seen": 1791682970.097068,
+    "ast_hash": "2dcfbb059b4f5897294048e84fd70492",
+    "semantic_hash": ""
+  },
+  "src/pages/patient/Tracking.tsx": {
+    "mtime": 1791681696.81276,
+    "seen": 1791682970.097069,
+    "ast_hash": "8070dea6e67ceed516956c7219c76888",
+    "semantic_hash": ""
+  },
+  "src/store/AppContext.tsx": {
+    "mtime": 1791681574.287919,
+    "seen": 1791682970.097069,
+    "ast_hash": "49cab121b32197e0bb158179975f5cce",
+    "semantic_hash": ""
+  },
+  "src/store/sim.test.ts": {
+    "mtime": 1791681110.1764789,
+    "seen": 1791682970.09707,
+    "ast_hash": "ea6bd49e9325152a266d33f3123e4d14",
+    "semantic_hash": ""
+  },
+  "src/store/sim.ts": {
+    "mtime": 1791681162.6631324,
+    "seen": 1791682970.0970712,
+    "ast_hash": "3dc9a9f4ffe3bec071fec2016c496858",
+    "semantic_hash": ""
+  },
+  "src/types.ts": {
+    "mtime": 1791676627.5278316,
+    "seen": 1791682970.0970712,
+    "ast_hash": "19e25ded523f0459b10d4d22c2cf46ae",
+    "semantic_hash": ""
+  },
+  "src/vite-env.d.ts": {
+    "mtime": 1791676951.0955875,
+    "seen": 1791682970.0970721,
+    "ast_hash": "0352474ba2918efe13895edbc3780d94",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1791681201.0860672,
+    "seen": 1791682970.0970721,
+    "ast_hash": "3cba9a39f550dd9de47d155498fd9148",
+    "semantic_hash": ""
+  },
+  "vite.config.ts": {
+    "mtime": 1791676535.7588305,
+    "seen": 1791682970.0970728,
+    "ast_hash": "60b22c6831f3f0493394a9ffb67a7852",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1791681707.578153,
+    "seen": 1791682970.0970728,
+    "ast_hash": "b88c64fec954e0c15c824612b19f5e14",
+    "semantic_hash": ""
+  },
+  "public/apple-touch-icon.png": {
+    "mtime": 1791681699.8978026,
+    "seen": 1791682970.097074,
+    "ast_hash": "b41cb715c9ad2feea0238d613e2b9626",
+    "semantic_hash": ""
+  },
+  "public/icon.svg": {
+    "mtime": 1791676542.2110045,
+    "seen": 1791682970.097074,
+    "ast_hash": "951c35aa09ad7c44c83791abf10cfbb5",
+    "semantic_hash": ""
+  }
+}
