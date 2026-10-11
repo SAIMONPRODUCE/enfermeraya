@@ -2,7 +2,7 @@ import { ArrowLeft, Check, FileText, Upload } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Field, inputCls } from '../components/ui'
-import { useApp } from '../store/AppContext'
+import { useAppActions } from '../store/AppContext'
 import { AuthShell, Segmented, homeOf } from './Login'
 
 type Kind = 'paciente' | 'enfermero'
@@ -25,7 +25,7 @@ function DocSlot({ label, file, onPick }: { label: string; file: string | null; 
 
 export default function Register() {
   const nav = useNavigate()
-  const { registerPatient, registerNurse } = useApp()
+  const { registerPatient, registerNurse } = useAppActions()
   const [kind, setKind] = useState<Kind>('paciente')
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')

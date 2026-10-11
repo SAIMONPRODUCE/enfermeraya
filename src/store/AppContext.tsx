@@ -67,7 +67,14 @@ interface Ctx {
   reset: () => void
 }
 
-const AppCtx = createContext<Ctx | null>(null)
+type Actions = Omit<Ctx, 'state' | 'me' | 'myNurse' | 'toasts'>
+type StateValue = Pick<Ctx, 'state' | 'me' | 'myNurse' | 'toasts'>
+
+// Dos contextos: quien solo dispara acciones no se re-renderiza en cada tick de simulación.
+const StateCtx = createContext<StateValue | null>(null)
+const ActionsCtx = createContext<Actions | null>(null)
+
+const PERSIST_MS = 3000
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(load)
@@ -76,13 +83,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Notificacion[]>([])
   const seen = useRef(new Set(state.notifs.map((n) => n.id)))
 
-  useEffect(() => {
+  // Persistencia con throttle: como máximo una escritura cada PERSIST_MS, y al ocultar o cerrar la pestaña.
+  const pending = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const writeNow = () => {
     try {
-      localStorage.setItem(KEY, JSON.stringify(state))
+      localStorage.setItem(KEY, JSON.stringify(ref.current))
     } catch {
       // cuota llena o storage bloqueado (modo privado): la sesión sigue en memoria
     }
+  }
+  useEffect(() => {
+    if (pending.current) return
+    pending.current = setTimeout(() => {
+      pending.current = null
+      writeNow()
+    }, PERSIST_MS)
   }, [state])
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') writeNow()
+    }
+    document.addEventListener('visibilitychange', onHide)
+    window.addEventListener('pagehide', writeNow)
+    return () => {
+      document.removeEventListener('visibilitychange', onHide)
+      window.removeEventListener('pagehide', writeNow)
+    }
+  }, [])
 
   // Simulación en tiempo real (1 paso por segundo)
   useEffect(() => {
@@ -104,14 +131,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const me = state.users.find((u) => u.id === state.sessionId) ?? null
   const myNurse = me && me.rol === 'enfermero' ? state.nurses[me.id] ?? null : null
 
-  const api = useMemo<Ctx>(() => {
+  // Acciones estables: no dependen del estado, así que su identidad no cambia entre ticks
+  const api = useMemo<Actions>(() => {
     const up = (fn: (s: AppState) => AppState) => setState(fn)
     const sid = () => ref.current.sessionId!
     return {
-      state,
-      me,
-      myNurse,
-      toasts,
       dismissToast,
       login: (userId) => up((s) => ({ ...s, sessionId: userId })),
       logout: () => {
@@ -184,13 +208,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setState(seedState())
       },
     }
-  }, [state, me, myNurse, toasts, dismissToast])
+  }, [dismissToast])
 
-  return <AppCtx.Provider value={api}>{children}</AppCtx.Provider>
+  const stateValue = useMemo<StateValue>(() => ({ state, me, myNurse, toasts }), [state, me, myNurse, toasts])
+
+  return (
+    <StateCtx.Provider value={stateValue}>
+      <ActionsCtx.Provider value={api}>{children}</ActionsCtx.Provider>
+    </StateCtx.Provider>
+  )
 }
 
-export function useApp() {
-  const c = useContext(AppCtx)
-  if (!c) throw new Error('useApp fuera de AppProvider')
-  return c
+/** Estado completo; se re-renderiza en cada cambio de simulación. */
+export function useApp(): Ctx {
+  const s = useContext(StateCtx)
+  const a = useContext(ActionsCtx)
+  if (!s || !a) throw new Error('useApp fuera de AppProvider')
+  return { ...s, ...a }
+}
+
+/** Solo acciones: no se re-renderiza con los ticks de simulación. */
+export function useAppActions(): Actions {
+  const a = useContext(ActionsCtx)
+  if (!a) throw new Error('useAppActions fuera de AppProvider')
+  return a
 }

@@ -1,5 +1,5 @@
 import { Home, MapPin } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { KM_PER_DEG_LAT, kmPerDegLng } from '../lib/geo'
 import { initials } from '../lib/format'
 import type { LatLng } from '../types'
@@ -162,13 +162,21 @@ function Pin({ m }: { m: MapMarker }) {
 
 function MapBackground({ ox, oy }: { ox: number; oy: number }) {
   // Calles/parques/río deterministas; se desplazan con el centro para dar sensación de mapa.
+  // Solo cambia el transform del contenedor: el SVG estático (Streets) no se vuelve a renderizar.
   return (
-    <svg
+    <div
       className="pointer-events-none absolute left-1/2 top-1/2 h-[900px] w-[900px] max-w-none"
       style={{ transform: `translate(calc(-50% - ${ox * 0.5}px), calc(-50% - ${oy * 0.5}px))`, transition: 'transform 600ms var(--ease-in-out)' }}
-      viewBox="0 0 900 900"
       aria-hidden
     >
+      <Streets />
+    </div>
+  )
+}
+
+const Streets = memo(function Streets() {
+  return (
+    <svg className="block h-full w-full" viewBox="0 0 900 900">
       <rect width="900" height="900" fill="#e9f1f5" />
       <path d="M-20 640 C 180 560, 260 700, 430 600 S 720 420, 930 470 L930 540 C 740 500, 560 640, 430 690 S 160 640, -20 720 Z" fill="#bcdcf1" />
       <ellipse cx="220" cy="220" rx="110" ry="80" fill="#cfe9d4" />
@@ -188,4 +196,4 @@ function MapBackground({ ox, oy }: { ox: number; oy: number }) {
       </g>
     </svg>
   )
-}
+})
