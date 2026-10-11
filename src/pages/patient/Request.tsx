@@ -1,5 +1,5 @@
 import { ArrowLeft, Banknote, Calendar, CreditCard, Landmark, MapPin, Zap } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LocationSheet } from '../../components/LocationSheet'
 import { MapView } from '../../components/MapView'
@@ -8,8 +8,8 @@ import { Segmented } from '../Login'
 import { CATALOGO } from '../../data/seed'
 import { etaMinutes, formatKm } from '../../lib/geo'
 import { money } from '../../lib/format'
-import { useApp } from '../../store/AppContext'
-import { availableNurses, quote } from '../../store/sim'
+import { useApp, type Quote } from '../../store/AppContext'
+import { availableNurses } from '../../store/sim'
 import type { MetodoPago } from '../../types'
 
 const PAGOS: { id: MetodoPago; label: string; sub: string; icon: typeof CreditCard }[] = [
@@ -21,7 +21,7 @@ const PAGOS: { id: MetodoPago; label: string; sub: string; icon: typeof CreditCa
 export default function Request() {
   const nav = useNavigate()
   const [params] = useSearchParams()
-  const { me, state, requestService } = useApp()
+  const { me, state, requestService, cotizar } = useApp()
   const [step, setStep] = useState(0)
   // ?s= viene de la URL: solo aceptar ids del catálogo para no romper la vista
   const fromUrl = params.get('s')
@@ -39,22 +39,36 @@ export default function Request() {
     () => (me ? availableNurses(state, me.ubicacion, [], Number(radio)) : []),
     [state, me, radio],
   )
+  // El total lo calcula el servidor (cotizar), el mismo que cobra solicitar_servicio.
+  const [q, setQ] = useState<Quote | null>(null)
+  const lat = me?.ubicacion.lat
+  const lng = me?.ubicacion.lng
+  useEffect(() => {
+    if (step !== 2 || lat === undefined || lng === undefined) return
+    let alive = true
+    setQ(null)
+    cotizar(sid, inmediato, { lat, lng }).then((r) => alive && setQ(r))
+    return () => {
+      alive = false
+    }
+  }, [step, sid, inmediato, lat, lng, cotizar])
   if (!me) return null
-  const q = quote(svc.precio_base, inmediato, near[0]?.dist ?? null)
 
-  const canNext = step === 0 ? inmediato || fecha !== '' : step === 1 ? near.length > 0 : true
+  const canNext = step === 0 ? inmediato || (fecha !== '' && new Date(fecha).getTime() > Date.now()) : step === 1 ? near.length > 0 : true
   const back = () => (step === 0 ? nav(-1) : setStep(step - 1))
 
-  const confirm = () => {
+  const confirm = async () => {
     setPhase('paying')
-    setTimeout(() => {
-      setPhase('ok')
-      const id = requestService({
-        servicio_id: sid, inmediato, fecha_hora: inmediato ? null : fecha, notas, metodo_pago: pago,
-        total: q.total, direccion: me.direccion, ubicacion: me.ubicacion,
-      })
-      setTimeout(() => nav(`/p/seguimiento/${id}`, { replace: true }), 1100)
-    }, pago === 'efectivo' ? 600 : 1500)
+    const id = await requestService({
+      servicio_id: sid, inmediato, fecha_hora: inmediato ? null : fecha, notas, metodo_pago: pago,
+      direccion: me.direccion, ubicacion: me.ubicacion,
+    })
+    if (!id) {
+      setPhase('idle') // el error ya salió como toast
+      return
+    }
+    setPhase('ok')
+    setTimeout(() => nav(`/p/seguimiento/${id}`, { replace: true }), 1100)
   }
 
   return (
@@ -147,6 +161,9 @@ export default function Request() {
             </div>
             <Card>
               <h3 className="mb-3 font-extrabold">Resumen</h3>
+              {!q ? (
+                <div className="shimmer h-24 rounded-2xl" aria-label="Calculando total" />
+              ) : (
               <div className="space-y-2 text-[14px]">
                 <Row l={svc.nombre} r={money(q.base)} />
                 {q.recargo > 0 && <Row l="Recargo inmediato" r={money(q.recargo)} />}
@@ -154,6 +171,7 @@ export default function Request() {
                 <div className="my-2 h-px bg-slate-100" />
                 <div className="flex items-baseline justify-between"><span className="font-bold">Total estimado</span><span className="text-xl font-extrabold text-brand-700">{money(q.total)}</span></div>
               </div>
+              )}
               <p className="mt-3 text-[12px] text-mute">{inmediato ? 'Servicio inmediato' : `Programado: ${new Date(fecha).toLocaleString('es-CO')}`} · {me.direccion}</p>
             </Card>
           </div>
@@ -164,7 +182,7 @@ export default function Request() {
         {step < 2 ? (
           <Button block disabled={!canNext} onClick={() => setStep(step + 1)}>Continuar</Button>
         ) : (
-          <Button block onClick={confirm}>Solicitar enfermero · {money(q.total)}</Button>
+          <Button block disabled={!q} onClick={confirm}>Solicitar enfermero{q ? ` · ${money(q.total)}` : ''}</Button>
         )}
       </div>
 

@@ -50,7 +50,7 @@ export default function Earnings() {
         <section>
           <h2 className="mb-2 font-extrabold">Servicios completados</h2>
           {done.length === 0 ? (
-            <p className="rounded-2xl bg-white p-6 text-center text-[14px] text-mute">Aún no has completado servicios en esta sesión.</p>
+            <p className="rounded-2xl bg-white p-6 text-center text-[14px] text-mute">Aún no has completado servicios.</p>
           ) : (
             <div className="space-y-2">
               {done.map((s) => (

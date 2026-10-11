@@ -1,10 +1,10 @@
-import { LogOut, Mail, Phone, RotateCcw, Star } from 'lucide-react'
+import { LogOut, Mail, Phone, Star } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Avatar, Button, Card } from '../components/ui'
 import { useApp } from '../store/AppContext'
 
 export default function Profile() {
-  const { me, myNurse, logout, reset } = useApp()
+  const { me, myNurse, logout } = useApp()
   const nav = useNavigate()
   if (!me) return null
   return (
@@ -24,10 +24,7 @@ export default function Profile() {
             <p className="flex items-center gap-3"><Phone size={18} className="text-mute" />{me.telefono}</p>
           </div>
         </Card>
-        <Button block variant="ghost" onClick={() => { logout(); nav('/login', { replace: true }) }}><LogOut size={18} /> Cerrar sesión / Cambiar de rol</Button>
-        <button onClick={() => { reset(); nav('/login', { replace: true }) }} className="press flex w-full items-center justify-center gap-2 py-3 text-[13px] font-semibold text-mute">
-          <RotateCcw size={15} /> Reiniciar datos de demo
-        </button>
+        <Button block variant="ghost" onClick={async () => { await logout(); nav('/login', { replace: true }) }}><LogOut size={18} /> Cerrar sesión</Button>
       </div>
     </div>
   )

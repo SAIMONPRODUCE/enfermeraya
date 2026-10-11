@@ -42,7 +42,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={me ? <Navigate to={homeOf(me.rol)} replace /> : <Login />} />
-      <Route path="/registro" element={<Register />} />
+      <Route path="/registro" element={me ? <Navigate to={homeOf(me.rol)} replace /> : <Register />} />
 
       <Route path="/p" element={<Guard role="paciente"><Layout tabs={patientTabs} badge="Paciente" /></Guard>}>
         <Route index element={<PatientHome />} />

@@ -96,7 +96,7 @@ export default function PatientHome() {
             radiusKm={5}
             markers={[
               { id: 'me', pos: me.ubicacion, kind: 'me' },
-              ...state.users.filter((u) => u.rol === 'enfermero' && state.nurses[u.id]?.aprobado_por_admin === 'aprobado').map((u) => ({ id: u.id, pos: u.ubicacion, kind: 'nurse' as const, label: u.nombre, color: u.color, offline: !state.nurses[u.id].online })),
+              ...near.map((c) => ({ id: c.user.id, pos: c.user.ubicacion, kind: 'nurse' as const, label: c.user.nombre, color: c.user.color })),
             ]}
           />
           <div className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1 scroll-y snap-x">

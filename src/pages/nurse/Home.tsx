@@ -1,10 +1,10 @@
-import { Check, Clock, FileCheck2, MapPin, Navigation, Wallet, X, Zap } from 'lucide-react'
+import { Check, Clock, FileCheck2, MapPin, Navigation, Upload, Wallet, X, Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { MapView } from '../../components/MapView'
 import { Sheet } from '../../components/Sheet'
 import { Avatar, Button, Card, ServiceIcon, Stars, Switch } from '../../components/ui'
 import { formatKm, haversine } from '../../lib/geo'
-import { isSameDay, money } from '../../lib/format'
+import { docName, isSameDay, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { OFFER_TTL, isActive, serviceOf } from '../../store/sim'
 import type { Servicio } from '../../types'
@@ -18,26 +18,79 @@ function useNow(ms: number) {
   return n
 }
 
+function DocSlot({ label, file, onPick }: { label: string; file: File | null; onPick: (f: File) => void }) {
+  return (
+    <label className={`press flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed p-3 transition-colors duration-200 ${file ? 'border-mint-400 bg-mint-50' : 'border-slate-300 bg-white'}`}>
+      <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${file ? 'bg-mint-500 text-white' : 'bg-slate-100 text-mute'}`}>
+        {file ? <Check size={20} /> : <Upload size={20} />}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[14px] font-semibold">{label}</span>
+        <span className="block truncate text-[13px] text-mute">{file?.name ?? 'Toca para adjuntar PDF o foto'}</span>
+      </span>
+      <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onPick(e.target.files[0])} />
+    </label>
+  )
+}
+
+const MAX_MB = 10
+
+function UploadDocs() {
+  const { uploadDocs } = useApp()
+  const [tp, setTp] = useState<File | null>(null)
+  const [dip, setDip] = useState<File | null>(null)
+  const [busy, setBusy] = useState(false)
+  const tooBig = [tp, dip].some((f) => f && f.size > MAX_MB * 1024 * 1024)
+  const send = async () => {
+    setBusy(true)
+    await uploadDocs([tp!, dip!])
+    setBusy(false)
+  }
+  return (
+    <div className="w-full space-y-3 text-left">
+      <DocSlot label="Tarjeta profesional" file={tp} onPick={setTp} />
+      <DocSlot label="Diploma o título" file={dip} onPick={setDip} />
+      {tooBig && <p role="alert" className="text-[13px] font-semibold text-red-600">Cada archivo debe pesar menos de {MAX_MB} MB.</p>}
+      <Button block loading={busy} disabled={!tp || !dip || tooBig} onClick={send}>Enviar documentos</Button>
+    </div>
+  )
+}
+
 function Pending() {
   const { me, myNurse } = useApp()
   const rejected = myNurse?.aprobado_por_admin === 'rechazado'
+  const docs = myNurse?.documentos_url ?? []
+  if (!docs.length || rejected)
+    return (
+      <div className="scroll-y h-full px-5 pb-6">
+        <div className="stagger flex flex-col items-center gap-4 pt-6 text-center">
+          <span style={{ ['--i' as string]: 0 }} className={`flex h-20 w-20 items-center justify-center rounded-full ${rejected ? 'bg-red-50 text-red-500' : 'bg-brand-50 text-brand-600'}`}>
+            {rejected ? <X size={38} /> : <Upload size={38} />}
+          </span>
+          <h1 style={{ ['--i' as string]: 1 }} className="text-2xl font-extrabold">{rejected ? 'Documentación rechazada' : 'Sube tus documentos'}</h1>
+          <p style={{ ['--i' as string]: 2 }} className="max-w-[300px] text-mute">
+            {rejected ? 'Vuelve a enviar tu tarjeta profesional y diploma para una nueva revisión.' : `Hola ${me?.nombre.split(' ')[0]}, para validar tu perfil necesitamos tu tarjeta profesional y tu diploma.`}
+          </p>
+          <UploadDocs />
+        </div>
+      </div>
+    )
   return (
     <div className="scroll-y h-full px-5 pb-6">
       <div className="stagger flex flex-col items-center gap-4 pt-8 text-center">
-        <span style={{ ['--i' as string]: 0 }} className={`flex h-24 w-24 items-center justify-center rounded-full ${rejected ? 'bg-red-50 text-red-500' : 'bg-amber-50 text-amber-500'}`}>
-          {rejected ? <X size={44} /> : <Clock size={44} />}
+        <span style={{ ['--i' as string]: 0 }} className="flex h-24 w-24 items-center justify-center rounded-full bg-amber-50 text-amber-500">
+          <Clock size={44} />
         </span>
-        <h1 style={{ ['--i' as string]: 1 }} className="text-2xl font-extrabold">{rejected ? 'Documentación rechazada' : 'Perfil en revisión'}</h1>
+        <h1 style={{ ['--i' as string]: 1 }} className="text-2xl font-extrabold">Perfil en revisión</h1>
         <p style={{ ['--i' as string]: 2 }} className="max-w-[300px] text-mute">
-          {rejected ? 'Revisa tus documentos y contacta a soporte para volver a enviarlos.' : `Hola ${me?.nombre.split(' ')[0]}, un administrador está validando tu tarjeta profesional y diploma. Te avisaremos apenas esté listo.`}
+          {`Hola ${me?.nombre.split(' ')[0]}, un administrador está validando tu tarjeta profesional y diploma. Te avisaremos apenas esté listo.`}
         </p>
         <Card className="w-full text-left" >
           <p className="mb-2 text-[13px] font-bold text-mute">Documentos enviados</p>
-          {myNurse?.documentos_url.map((d) => (
-            <p key={d} className="flex items-center gap-2 py-1 text-[14px] font-semibold"><FileCheck2 size={18} className="text-brand-600" />{d}</p>
+          {docs.map((d) => (
+            <p key={d} className="flex items-center gap-2 py-1 text-[14px] font-semibold"><FileCheck2 size={18} className="shrink-0 text-brand-600" /><span className="truncate">{docName(d)}</span></p>
           ))}
         </Card>
-        <p className="text-[13px] text-mute">💡 Demo: entra como Admin para aprobar este perfil.</p>
       </div>
     </div>
   )
@@ -90,7 +143,7 @@ function OfferSheet({ s }: { s: Servicio }) {
 }
 
 export default function NurseHome() {
-  const { me, myNurse, state, toggleOnline, advance, demoRequest } = useApp()
+  const { me, myNurse, state, toggleOnline, advance } = useApp()
   if (!me || !myNurse) return null
   if (myNurse.aprobado_por_admin !== 'aprobado') return <Pending />
 
@@ -150,7 +203,6 @@ export default function NurseHome() {
             ) : (
               <p className="text-center text-[14px] text-mute">Activa el interruptor para aparecer en el mapa de los pacientes.</p>
             )}
-            {myNurse.online && <Button block variant="soft" onClick={demoRequest}><Zap size={18} /> Simular solicitud cercana</Button>}
           </Card>
         )}
 

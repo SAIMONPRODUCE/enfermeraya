@@ -30,6 +30,9 @@ export function formatDate(ts: number): string {
 
 export const uid = (p: string) => p + Math.random().toString(36).slice(2, 9)
 
+/** Nombre legible de un documento en Storage: `<uid>/<timestamp>-<nombre>` → `<nombre>` */
+export const docName = (path: string) => path.split('/').pop()!.replace(/^\d+-/, '')
+
 /** true si `ts` cae en el mismo día calendario (hora local) que `ref` */
 export function isSameDay(ts: number, ref = Date.now()): boolean {
   const a = new Date(ts)

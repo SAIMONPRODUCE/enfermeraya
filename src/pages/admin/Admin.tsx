@@ -2,12 +2,12 @@ import { Check, FileText, X } from 'lucide-react'
 import { useState } from 'react'
 import { MapView } from '../../components/MapView'
 import { Avatar, Button, Card, StatusPill } from '../../components/ui'
-import { formatDate, money } from '../../lib/format'
+import { docName, formatDate, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { isActive, serviceOf } from '../../store/sim'
 
 export function Validations() {
-  const { state, approve } = useApp()
+  const { state, approve, openDoc } = useApp()
   const [leaving, setLeaving] = useState<string | null>(null)
   const pending = state.users.filter((u) => state.nurses[u.id]?.aprobado_por_admin === 'pendiente')
   const decided = state.users.filter((u) => ['aprobado', 'rechazado'].includes(state.nurses[u.id]?.aprobado_por_admin ?? ''))
@@ -33,13 +33,14 @@ export function Validations() {
                 <Card className={`space-y-3 transition-[opacity,transform] duration-200 ${leaving === u.id ? 'scale-95 opacity-0' : ''}`}>
                   <div className="flex items-center gap-3"><Avatar name={u.nombre} color={u.color} size={48} /><div><p className="font-extrabold">{u.nombre}</p><p className="text-[13px] text-mute">{d.especialidad} · {d.experiencia} año(s)</p></div></div>
                   <div className="space-y-1.5">
+                    {d.documentos_url.length === 0 && <p className="rounded-xl bg-amber-50 px-3 py-2 text-[13px] font-semibold text-amber-700">Aún no subió documentos</p>}
                     {d.documentos_url.map((doc) => (
-                      <p key={doc} className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-[13px] font-semibold"><FileText size={16} className="text-brand-600" />{doc}</p>
+                      <button key={doc} onClick={() => openDoc(doc)} className="press flex w-full items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-left text-[13px] font-semibold"><FileText size={16} className="shrink-0 text-brand-600" /><span className="truncate underline underline-offset-2">{docName(doc)}</span></button>
                     ))}
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <Button variant="danger" onClick={() => decide(u.id, false)}><X size={18} /> Rechazar</Button>
-                    <Button variant="mint" onClick={() => decide(u.id, true)}><Check size={18} /> Aprobar</Button>
+                    <Button variant="mint" disabled={d.documentos_url.length === 0} onClick={() => decide(u.id, true)}><Check size={18} /> Aprobar</Button>
                   </div>
                 </Card>
               </div>

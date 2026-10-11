@@ -1,34 +1,117 @@
+import type { Session } from '@supabase/supabase-js'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { seedState } from '../data/seed'
+import { CENTER } from '../data/seed'
 import { uid } from '../lib/format'
-import type { AppState, LatLng, MetodoPago, Notificacion, NurseDetail, Servicio, User } from '../types'
-import { actions, isActive, tick } from './sim'
+import { errorMsg, supabase } from '../lib/supabase'
+import type { AppState, AprobacionEstado, Estado, LatLng, MetodoPago, Notificacion, NurseDetail, Role, Servicio, User } from '../types'
 
-const KEY = 'enfermeraya-v2'
-const MAX_NOTIFS = 100
-const MAX_TERMINAL = 50
+// ponytail: polling cada 3 s (pausado con la pestaña oculta); pasar a Supabase Realtime si la carga o la latencia lo piden.
+const POLL_MS = 3000
+const EMPTY: AppState = { users: [], nurses: {}, servicios: [], notifs: [], sessionId: null }
+const ACTIVOS: Estado[] = ['aceptado', 'en_camino', 'en_atencion']
 
-function load(): AppState {
-  try {
-    const raw = localStorage.getItem(KEY)
-    if (raw) return prune(JSON.parse(raw) as AppState)
-  } catch {
-    /* ignore */
-  }
-  return seedState()
+// ---------- Filas tal como llegan de Supabase ----------
+interface ProfileRow { id: string; rol: Role; nombre: string; telefono: string; direccion: string; lat: number | null; lng: number | null; calificacion: number; color: string }
+interface NurseRow { usuario_id: string; especialidad: string; documentos: string[]; aprobado: AprobacionEstado; ganancias: number; online: boolean; servicios: number; experiencia: number; bio: string }
+interface ServicioRow {
+  id: string; paciente_id: string; enfermero_id: string | null; candidato: string | null; servicio_id: string; estado: Estado
+  lat: number; lng: number; direccion: string; inmediato: boolean; fecha_hora: string | null; notas: string; total: number
+  metodo_pago: MetodoPago; calificacion: number | null; resena: string; llego: boolean; rechazados: string[]
+  oferta_inicio: string | null; creado: string; estado_ts: string
 }
+interface NotifRow { id: string; user_id: string; titulo: string; cuerpo: string; tipo: Notificacion['tipo']; leida: boolean; creado: string }
+interface ContactoRow { id: string; nombre: string; color: string; calificacion: number; telefono: string | null; especialidad: string | null; servicios: number | null; lat: number | null; lng: number | null }
+interface CercaRow { id: string; nombre: string; color: string; calificacion: number; especialidad: string; servicios: number; lat: number; lng: number }
+interface OfertaRow { id: string; servicio_id: string; lat_aprox: number; lng_aprox: number; inmediato: boolean; fecha_hora: string | null; notas: string; total: number; oferta_inicio: string }
 
-/** Acota notifs y servicios terminados para que localStorage no crezca sin límite. Devuelve el mismo objeto si no hay nada que podar. */
-function prune(s: AppState): AppState {
-  const terminal = s.servicios.filter((x) => !isActive(x))
-  const notifsOver = s.notifs.length > MAX_NOTIFS
-  const termOver = terminal.length > MAX_TERMINAL
-  if (!notifsOver && !termOver) return s
-  const keep = new Set(terminal.slice(0, MAX_TERMINAL).map((x) => x.id))
+const ms = (t: string | null) => (t ? Date.parse(t) : 0)
+
+async function fetchState(session: Session): Promise<AppState> {
+  const meId = session.user.id
+  const [profiles, nurses, servicios, notifs, contactos, ofertas] = await Promise.all([
+    supabase.from('profiles').select('*'), // RLS: el propio, o todos si es admin
+    supabase.from('nurse_details').select('*'),
+    supabase.from('servicios').select('*').order('creado', { ascending: false }).limit(100),
+    supabase.from('notificaciones').select('*').order('creado', { ascending: false }).limit(50),
+    supabase.rpc('mis_contactos'),
+    supabase.rpc('mis_ofertas'),
+  ])
+  const failed = [profiles, nurses, servicios, notifs, contactos, ofertas].find((r) => r.error)
+  if (failed?.error) throw failed.error
+
+  const meRow = (profiles.data as ProfileRow[]).find((p) => p.id === meId)
+  if (!meRow) throw new Error('sin_perfil')
+  const cerca: CercaRow[] =
+    meRow.rol === 'paciente' && meRow.lat !== null
+      ? ((await supabase.rpc('enfermeras_cerca', { p_lat: meRow.lat, p_lng: meRow.lng, p_radio: 10 })).data ?? [])
+      : []
+
+  const users = new Map<string, User>()
+  const pos = new Map<string, LatLng>() // posición real conocida (no el CENTER de relleno)
+  const nurseMap: Record<string, NurseDetail> = {}
+  const nurse = (id: string, p: Partial<NurseDetail>) => {
+    nurseMap[id] = {
+      ...(nurseMap[id] ?? {
+        usuario_id: id, especialidad: '', documentos_url: [], aprobado_por_admin: 'aprobado', ganancias: 0,
+        online: false, servicios: 0, experiencia: 0, bio: '',
+      }),
+      ...p,
+    }
+  }
+  const user = (u: Omit<User, 'email' | 'direccion'> & Partial<User>) =>
+    users.set(u.id, { email: '', direccion: '', ...u, calificacion: Number(u.calificacion) })
+
+  for (const c of (contactos.data ?? []) as ContactoRow[]) {
+    const loc = c.lat !== null && c.lng !== null ? { lat: c.lat, lng: c.lng } : null
+    if (loc) pos.set(c.id, loc)
+    user({ id: c.id, rol: c.especialidad ? 'enfermero' : 'paciente', nombre: c.nombre, telefono: c.telefono ?? '', ubicacion: loc ?? CENTER, calificacion: c.calificacion, color: c.color })
+    if (c.especialidad) nurse(c.id, { especialidad: c.especialidad, servicios: c.servicios ?? 0 })
+  }
+  for (const c of cerca) {
+    user({ id: c.id, rol: 'enfermero', nombre: c.nombre, telefono: '', ubicacion: { lat: c.lat, lng: c.lng }, calificacion: c.calificacion, color: c.color })
+    nurse(c.id, { especialidad: c.especialidad, servicios: c.servicios, online: true })
+  }
+  for (const p of profiles.data as ProfileRow[]) {
+    const loc = p.lat !== null && p.lng !== null ? { lat: p.lat, lng: p.lng } : null
+    if (loc) pos.set(p.id, loc)
+    user({ id: p.id, rol: p.rol, nombre: p.nombre, telefono: p.telefono, direccion: p.direccion, ubicacion: loc ?? CENTER, calificacion: p.calificacion, color: p.color, email: p.id === meId ? session.user.email ?? '' : '' })
+  }
+  for (const d of nurses.data as NurseRow[]) {
+    nurse(d.usuario_id, {
+      especialidad: d.especialidad, documentos_url: d.documentos, aprobado_por_admin: d.aprobado, ganancias: d.ganancias,
+      online: d.online, servicios: d.servicios, experiencia: d.experiencia, bio: d.bio,
+    })
+  }
+
+  const base = { llego_ts: 0, manual: true, rechazados: [] as string[] }
+  const svcs: Servicio[] = (servicios.data as ServicioRow[]).map((r) => {
+    const pac = { lat: r.lat, lng: r.lng }
+    const activo = ACTIVOS.includes(r.estado) && r.enfermero_id !== null
+    return {
+      ...base, id: r.id, paciente_id: r.paciente_id, enfermero_id: r.enfermero_id, servicio_id: r.servicio_id, estado: r.estado,
+      ubicacion_paciente: pac, direccion: r.direccion, inmediato: r.inmediato, fecha_hora: r.fecha_hora, notas: r.notas,
+      total: r.total, metodo_pago: r.metodo_pago, calificacion: r.calificacion, resena: r.resena, creado: ms(r.creado),
+      estado_ts: ms(r.estado_ts), nursePos: !activo ? null : r.llego ? pac : pos.get(r.enfermero_id!) ?? null,
+      llego: r.llego, candidato: r.candidato, oferta_inicio: ms(r.oferta_inicio), rechazados: r.rechazados,
+    }
+  })
+  // Ofertas: no están en `servicios` (RLS) y la ubicación es aproximada hasta aceptar.
+  for (const o of (ofertas.data ?? []) as OfertaRow[]) {
+    svcs.unshift({
+      ...base, id: o.id, paciente_id: '', enfermero_id: null, servicio_id: o.servicio_id, estado: 'solicitado',
+      ubicacion_paciente: { lat: o.lat_aprox, lng: o.lng_aprox }, direccion: 'Dirección exacta al aceptar',
+      inmediato: o.inmediato, fecha_hora: o.fecha_hora, notas: o.notas, total: o.total, metodo_pago: 'efectivo',
+      calificacion: null, resena: '', creado: ms(o.oferta_inicio), estado_ts: ms(o.oferta_inicio), nursePos: null,
+      llego: false, candidato: meId, oferta_inicio: ms(o.oferta_inicio),
+    })
+  }
+
   return {
-    ...s,
-    notifs: s.notifs.slice(0, MAX_NOTIFS),
-    servicios: s.servicios.filter((x) => isActive(x) || keep.has(x.id)),
+    sessionId: meId,
+    users: [...users.values()],
+    nurses: nurseMap,
+    servicios: svcs,
+    notifs: (notifs.data as NotifRow[]).map((n) => ({ id: n.id, userId: n.user_id, titulo: n.titulo, cuerpo: n.cuerpo, ts: ms(n.creado), leida: n.leida, tipo: n.tipo })),
   }
 }
 
@@ -38,9 +121,19 @@ export interface Draft {
   fecha_hora: string | null
   notas: string
   metodo_pago: MetodoPago
-  total: number
   direccion: string
   ubicacion: LatLng
+}
+
+export interface Quote { base: number; recargo: number; desplazamiento: number; total: number }
+
+export interface Registro {
+  rol: 'paciente' | 'enfermero'
+  nombre: string
+  email: string
+  telefono: string
+  password: string
+  especialidad?: string
 }
 
 interface Ctx {
@@ -49,81 +142,110 @@ interface Ctx {
   myNurse: NurseDetail | null
   toasts: Notificacion[]
   dismissToast: (id: string) => void
-  login: (userId: string) => void
-  logout: () => void
-  registerPatient: (p: { nombre: string; email: string; telefono: string }) => void
-  registerNurse: (p: { nombre: string; email: string; telefono: string; especialidad: string; docs: string[] }) => void
-  setLocation: (pos: LatLng, direccion: string) => void
-  toggleOnline: () => void
-  requestService: (d: Draft) => string
-  accept: (id: string) => void
-  reject: (id: string) => void
-  advance: (id: string) => void
-  cancel: (id: string) => void
-  rate: (id: string, stars: number, resena: string) => void
-  approve: (nurseId: string, ok: boolean) => void
-  demoRequest: () => void
-  markAllRead: () => void
-  reset: () => void
+  /** Devuelve el mensaje de error, o null si entró. */
+  login: (email: string, password: string) => Promise<string | null>
+  logout: () => Promise<void>
+  /** needsConfirm: Supabase pide confirmar el correo antes de dar sesión. */
+  register: (r: Registro) => Promise<{ error: string | null; needsConfirm: boolean }>
+  setLocation: (pos: LatLng, direccion: string) => Promise<void>
+  toggleOnline: () => Promise<void>
+  cotizar: (servicio: string, inmediato: boolean, pos: LatLng) => Promise<Quote | null>
+  /** Devuelve el id del servicio creado, o null si falló (ya se mostró el error). */
+  requestService: (d: Draft) => Promise<string | null>
+  accept: (id: string) => Promise<void>
+  reject: (id: string) => Promise<void>
+  advance: (id: string) => Promise<void>
+  cancel: (id: string) => Promise<void>
+  rate: (id: string, stars: number, resena: string) => Promise<void>
+  approve: (nurseId: string, ok: boolean) => Promise<void>
+  uploadDocs: (files: File[]) => Promise<boolean>
+  openDoc: (path: string) => Promise<void>
+  markAllRead: () => Promise<void>
 }
 
 type Actions = Omit<Ctx, 'state' | 'me' | 'myNurse' | 'toasts'>
 type StateValue = Pick<Ctx, 'state' | 'me' | 'myNurse' | 'toasts'>
 
-// Dos contextos: quien solo dispara acciones no se re-renderiza en cada tick de simulación.
+// Dos contextos: quien solo dispara acciones no se re-renderiza con cada actualización.
 const StateCtx = createContext<StateValue | null>(null)
 const ActionsCtx = createContext<Actions | null>(null)
 
-const PERSIST_MS = 3000
-
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AppState>(load)
-  const ref = useRef(state)
-  ref.current = state
+  const [session, setSession] = useState<Session | null>(null)
+  const [authReady, setAuthReady] = useState(false)
+  const [loadedFor, setLoadedFor] = useState<string | null>(null)
+  const [state, setState] = useState<AppState>(EMPTY)
   const [toasts, setToasts] = useState<Notificacion[]>([])
-  const seen = useRef(new Set(state.notifs.map((n) => n.id)))
+  const sessionRef = useRef(session)
+  sessionRef.current = session
+  const stateRef = useRef(state)
+  stateRef.current = state
+  // null = primera carga de la sesión: las notificaciones viejas no salen como toast
+  const seen = useRef<Set<string> | null>(null)
 
-  // Persistencia con throttle: como máximo una escritura cada PERSIST_MS, y al ocultar o cerrar la pestaña.
-  const pending = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const writeNow = () => {
+  const toast = useCallback((cuerpo: string, titulo = 'No se pudo completar') => {
+    setToasts((t) => [{ id: uid('t'), userId: '', titulo, cuerpo, ts: Date.now(), leida: true, tipo: 'alerta' as const }, ...t].slice(0, 3))
+  }, [])
+
+  const refresh = useCallback(async () => {
+    const s = sessionRef.current
+    if (!s) return
     try {
-      localStorage.setItem(KEY, JSON.stringify(ref.current))
-    } catch {
-      // cuota llena o storage bloqueado (modo privado): la sesión sigue en memoria
+      const next = await fetchState(s)
+      if (sessionRef.current?.user.id !== s.user.id) return // cerró sesión mientras cargaba
+      // Sin cambios no hay re-render (evita reiniciar animaciones cada 3 s).
+      setState((prev) => (JSON.stringify(prev) === JSON.stringify(next) ? prev : next))
+    } catch (e) {
+      if (e instanceof Error && e.message === 'sin_perfil') {
+        toast('Tu cuenta no tiene perfil. Escríbenos a soporte.')
+        await supabase.auth.signOut()
+      } else {
+        console.error(e) // red caída: se conserva el último estado y se reintenta en el próximo ciclo
+      }
+    } finally {
+      setLoadedFor(s.user.id)
     }
-  }
+  }, [toast])
+
   useEffect(() => {
-    if (pending.current) return
-    pending.current = setTimeout(() => {
-      pending.current = null
-      writeNow()
-    }, PERSIST_MS)
-  }, [state])
+    const { data } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s)
+      setAuthReady(true)
+    })
+    return () => data.subscription.unsubscribe()
+  }, [])
+
+  const userId = session?.user.id ?? null
   useEffect(() => {
-    const onHide = () => {
-      if (document.visibilityState === 'hidden') writeNow()
+    seen.current = null
+    setToasts([])
+    setState(EMPTY)
+    if (!userId) {
+      setLoadedFor(null) // si vuelve a entrar el mismo usuario, se espera su carga de nuevo
+      return
     }
-    document.addEventListener('visibilitychange', onHide)
-    window.addEventListener('pagehide', writeNow)
+    // Diferido: onAuthStateChange no debe esperar llamadas a Supabase dentro del mismo ciclo.
+    const first = setTimeout(refresh, 0)
+    const t = setInterval(() => {
+      if (!document.hidden) refresh()
+    }, POLL_MS)
     return () => {
-      document.removeEventListener('visibilitychange', onHide)
-      window.removeEventListener('pagehide', writeNow)
+      clearTimeout(first)
+      clearInterval(t)
     }
-  }, [])
+  }, [userId, refresh])
 
-  // Simulación en tiempo real (1 paso por segundo)
+  // Toasts para notificaciones nuevas
   useEffect(() => {
-    const t = setInterval(() => setState((s) => prune(tick(s, Date.now()))), 1000)
-    return () => clearInterval(t)
-  }, [])
-
-  // Toasts para notificaciones nuevas del usuario activo
-  useEffect(() => {
-    const fresh = state.notifs.filter((n) => !seen.current.has(n.id))
+    if (!state.sessionId) return
+    if (!seen.current) {
+      seen.current = new Set(state.notifs.map((n) => n.id))
+      return
+    }
+    const fresh = state.notifs.filter((n) => !seen.current!.has(n.id))
     if (!fresh.length) return
-    fresh.forEach((n) => seen.current.add(n.id))
-    const mine = fresh.filter((n) => n.userId === state.sessionId)
-    if (mine.length) setToasts((t) => [...mine.reverse(), ...t].slice(0, 3))
+    fresh.forEach((n) => seen.current!.add(n.id))
+    setToasts((t) => [...fresh.reverse(), ...t].slice(0, 3))
   }, [state.notifs, state.sessionId])
 
   const dismissToast = useCallback((id: string) => setToasts((t) => t.filter((x) => x.id !== id)), [])
@@ -131,86 +253,126 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const me = state.users.find((u) => u.id === state.sessionId) ?? null
   const myNurse = me && me.rol === 'enfermero' ? state.nurses[me.id] ?? null : null
 
-  // Acciones estables: no dependen del estado, así que su identidad no cambia entre ticks
+  // Acciones estables: leen el estado por ref, así su identidad no cambia entre actualizaciones.
   const api = useMemo<Actions>(() => {
-    const up = (fn: (s: AppState) => AppState) => setState(fn)
-    const sid = () => ref.current.sessionId!
+    /** Llama una RPC; si falla muestra el error. Siempre refresca después. */
+    const call = async (fn: string, args?: Record<string, unknown>) => {
+      const { error } = await supabase.rpc(fn, args)
+      if (error) toast(errorMsg(error))
+      await refresh()
+      return !error
+    }
+    const meId = () => sessionRef.current!.user.id
     return {
       dismissToast,
-      login: (userId) => up((s) => ({ ...s, sessionId: userId })),
-      logout: () => {
-        setToasts([])
-        up((s) => ({ ...s, sessionId: null }))
+      login: async (email, password) => {
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        return error ? errorMsg(error) : null
       },
-      registerPatient: ({ nombre, email, telefono }) =>
-        up((s) => {
-          const id = uid('p')
-          const u: User = { id, rol: 'paciente', nombre, email, telefono, ubicacion: { lat: 4.7143, lng: -74.0645 }, direccion: 'Cra 15 #93-40, Chapinero', calificacion: 5, color: '#1d6fe8' }
-          return { ...s, users: [...s.users, u], sessionId: id }
-        }),
-      registerNurse: ({ nombre, email, telefono, especialidad, docs }) =>
-        up((s) => {
-          const id = uid('n')
-          const u: User = { id, rol: 'enfermero', nombre, email, telefono, ubicacion: { lat: 4.7143 + (Math.random() - 0.5) * 0.02, lng: -74.0645 + (Math.random() - 0.5) * 0.02 }, direccion: '', calificacion: 5, color: '#0ea5a4' }
-          const d: NurseDetail = { usuario_id: id, especialidad, documentos_url: docs, aprobado_por_admin: 'pendiente', ganancias: 0, online: false, servicios: 0, experiencia: 0, bio: 'Nuevo profesional en EnfermeraYa.' }
-          const notifs = [...s.notifs]
-          notifs.unshift({ id: uid('nt'), userId: 'a1', titulo: 'Nuevo perfil por validar', cuerpo: `${nombre} envió su documentación.`, ts: Date.now(), leida: false, tipo: 'info' })
-          return { ...s, users: [...s.users, u], nurses: { ...s.nurses, [id]: d }, notifs, sessionId: id }
-        }),
-      setLocation: (pos, direccion) =>
-        up((s) => ({ ...s, users: s.users.map((u) => (u.id === s.sessionId ? { ...u, ubicacion: pos, direccion } : u)) })),
-      toggleOnline: () => {
-        const id = sid()
-        const goingOnline = !ref.current.nurses[id]?.online
-        up((s) => ({ ...s, nurses: { ...s.nurses, [id]: { ...s.nurses[id], online: !s.nurses[id].online } } }))
-        if (goingOnline) {
-          setTimeout(() => {
-            const s = ref.current
-            const busy = s.servicios.some((x) => x.candidato === id && isActive(x))
-            if (s.sessionId === id && s.nurses[id]?.online && !busy)
-              up((st) => actions.demoRequest(st, id, uid('s'), Date.now()))
-          }, 5000)
+      logout: async () => {
+        await supabase.auth.signOut()
+      },
+      register: async ({ rol, nombre, email, telefono, password, especialidad }) => {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { rol, nombre, telefono, especialidad }, emailRedirectTo: window.location.origin },
+        })
+        return { error: error ? errorMsg(error) : null, needsConfirm: !error && !data.session }
+      },
+      setLocation: async (p, direccion) => {
+        const [a, b] = await Promise.all([
+          supabase.rpc('set_ubicacion', { p_lat: p.lat, p_lng: p.lng }),
+          supabase.from('profiles').update({ direccion: direccion.slice(0, 200) }).eq('id', meId()),
+        ])
+        const error = a.error ?? b.error
+        if (error) toast(errorMsg(error))
+        await refresh()
+      },
+      toggleOnline: async () => {
+        await call('set_online', { p_online: !stateRef.current.nurses[meId()]?.online })
+      },
+      cotizar: async (servicio, inmediato, p) => {
+        const { data, error } = await supabase.rpc('cotizar', { p_servicio: servicio, p_inmediato: inmediato, p_lat: p.lat, p_lng: p.lng })
+        if (error) {
+          toast(errorMsg(error))
+          return null
         }
+        return (data as Quote[])[0] ?? null
       },
-      requestService: (d) => {
-        const id = uid('s')
-        const now = Date.now()
-        const s: Servicio = {
-          id, paciente_id: sid(), enfermero_id: null, servicio_id: d.servicio_id, estado: 'solicitado',
-          ubicacion_paciente: d.ubicacion, direccion: d.direccion, inmediato: d.inmediato, fecha_hora: d.fecha_hora,
-          notas: d.notas, total: d.total, metodo_pago: d.metodo_pago, calificacion: null, resena: '', creado: now,
-          estado_ts: now, nursePos: null, llego: false, llego_ts: 0, manual: false, candidato: null, oferta_inicio: now, rechazados: [],
+      requestService: async (d) => {
+        const { data, error } = await supabase.rpc('solicitar_servicio', {
+          p_servicio: d.servicio_id, p_inmediato: d.inmediato,
+          // datetime-local no trae zona: se interpreta en la hora local del dispositivo
+          p_fecha: d.fecha_hora ? new Date(d.fecha_hora).toISOString() : null,
+          p_notas: d.notas, p_metodo: d.metodo_pago, p_lat: d.ubicacion.lat, p_lng: d.ubicacion.lng, p_direccion: d.direccion,
+        })
+        if (error) {
+          toast(errorMsg(error))
+          return null
         }
-        up((st) => actions.create(st, s))
-        return id
+        await refresh()
+        return data as string
       },
-      accept: (id) => up((s) => actions.accept(s, id, sid(), true, Date.now())),
-      reject: (id) => up((s) => actions.reject(s, id, Date.now())),
-      advance: (id) => up((s) => actions.advance(s, id, Date.now())),
-      cancel: (id) => up((s) => actions.cancel(s, id, Date.now())),
-      rate: (id, stars, resena) => up((s) => actions.rate(s, id, stars, resena, Date.now())),
-      approve: (nurseId, ok) =>
-        up((s) => {
-          const notifs = [...s.notifs]
-          notifs.unshift({
-            id: uid('nt'), userId: nurseId, ts: Date.now(), leida: false, tipo: ok ? 'exito' : 'alerta',
-            titulo: ok ? '¡Perfil aprobado!' : 'Documentación rechazada',
-            cuerpo: ok ? 'Ya puedes conectarte y recibir servicios.' : 'Revisa tus documentos y vuelve a enviarlos.',
-          })
-          return { ...s, notifs, nurses: { ...s.nurses, [nurseId]: { ...s.nurses[nurseId], aprobado_por_admin: ok ? 'aprobado' : 'rechazado' } } }
-        }),
-      demoRequest: () => up((s) => actions.demoRequest(s, sid(), uid('s'), Date.now())),
-      markAllRead: () =>
-        up((s) => ({ ...s, notifs: s.notifs.map((n) => (n.userId === s.sessionId ? { ...n, leida: true } : n)) })),
-      reset: () => {
-        seen.current = new Set()
-        setToasts([])
-        setState(seedState())
+      accept: async (id) => {
+        await call('aceptar_oferta', { p_id: id })
+      },
+      reject: async (id) => {
+        await call('rechazar_oferta', { p_id: id })
+      },
+      advance: async (id) => {
+        await call('avanzar_servicio', { p_id: id })
+      },
+      cancel: async (id) => {
+        await call('cancelar_servicio', { p_id: id })
+      },
+      rate: async (id, stars, resena) => {
+        await call('calificar_servicio', { p_id: id, p_estrellas: stars, p_resena: resena })
+      },
+      approve: async (nurseId, ok) => {
+        await call('aprobar_enfermero', { p_id: nurseId, p_ok: ok })
+      },
+      uploadDocs: async (files) => {
+        const paths: string[] = []
+        for (const f of files) {
+          // Storage no acepta cualquier carácter en la ruta: nombre saneado y prefijo de tiempo para no pisar archivos.
+          const path = `${meId()}/${Date.now()}-${f.name.replace(/[^\w.-]+/g, '_')}`
+          const { error } = await supabase.storage.from('documentos').upload(path, f)
+          if (error) {
+            toast(errorMsg(error))
+            return false
+          }
+          paths.push(path)
+        }
+        return call('set_documentos', { p_paths: paths })
+      },
+      openDoc: async (path) => {
+        // Se abre la pestaña antes del await: Safari bloquea window.open fuera del gesto del usuario.
+        const w = window.open('', '_blank')
+        const { data, error } = await supabase.storage.from('documentos').createSignedUrl(path, 60)
+        if (error || !data) {
+          w?.close()
+          toast(errorMsg(error ?? { message: 'No se pudo abrir el documento.' }))
+          return
+        }
+        if (w) w.location.href = data.signedUrl
+      },
+      markAllRead: async () => {
+        await supabase.from('notificaciones').update({ leida: true }).eq('user_id', meId()).eq('leida', false)
+        await refresh()
       },
     }
-  }, [dismissToast])
+  }, [dismissToast, refresh, toast])
 
   const stateValue = useMemo<StateValue>(() => ({ state, me, myNurse, toasts }), [state, me, myNurse, toasts])
+
+  const ready = authReady && (userId === null || loadedFor === userId)
+  if (!ready)
+    return (
+      <div className="app-shell flex items-center justify-center" role="status" aria-label="Cargando">
+        <span className="spin h-10 w-10 rounded-full border-4 border-brand-100 border-t-brand-600" />
+      </div>
+    )
 
   return (
     <StateCtx.Provider value={stateValue}>
@@ -219,7 +381,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 }
 
-/** Estado completo; se re-renderiza en cada cambio de simulación. */
+/** Estado completo; se re-renderiza con cada actualización. */
 export function useApp(): Ctx {
   const s = useContext(StateCtx)
   const a = useContext(ActionsCtx)
@@ -227,7 +389,7 @@ export function useApp(): Ctx {
   return { ...s, ...a }
 }
 
-/** Solo acciones: no se re-renderiza con los ticks de simulación. */
+/** Solo acciones: no se re-renderiza con las actualizaciones. */
 export function useAppActions(): Actions {
   const a = useContext(ActionsCtx)
   if (!a) throw new Error('useAppActions fuera de AppProvider')

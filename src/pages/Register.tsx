@@ -1,53 +1,56 @@
-import { ArrowLeft, Check, FileText, Upload } from 'lucide-react'
+import { ArrowLeft, MailCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Field, inputCls } from '../components/ui'
 import { useAppActions } from '../store/AppContext'
-import { AuthShell, Segmented, homeOf } from './Login'
+import { AuthShell, Segmented } from './Login'
 
 type Kind = 'paciente' | 'enfermero'
 const ESPECIALIDADES = ['Enfermera/o profesional', 'Inyectología y terapia IV', 'Curaciones', 'Postoperatorio', 'Cuidado de adulto mayor', 'Toma de muestras']
 
-function DocSlot({ label, file, onPick }: { label: string; file: string | null; onPick: (f: string) => void }) {
-  return (
-    <label className={`press flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed p-3 transition-colors duration-200 ${file ? 'border-mint-400 bg-mint-50' : 'border-slate-300 bg-white'}`}>
-      <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${file ? 'bg-mint-500 text-white' : 'bg-slate-100 text-mute'}`}>
-        {file ? <Check size={20} /> : <Upload size={20} />}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[14px] font-semibold">{label}</span>
-        <span className="block truncate text-[13px] text-mute">{file ?? 'Toca para adjuntar PDF o foto'}</span>
-      </span>
-      <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && onPick(e.target.files[0].name)} />
-    </label>
-  )
-}
-
 export default function Register() {
   const nav = useNavigate()
-  const { registerPatient, registerNurse } = useAppActions()
+  const { register } = useAppActions()
   const [kind, setKind] = useState<Kind>('paciente')
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
+  const [password, setPassword] = useState('')
   const [esp, setEsp] = useState(ESPECIALIDADES[0])
-  const [tp, setTp] = useState<string | null>(null)
-  const [dip, setDip] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [sentTo, setSentTo] = useState<string | null>(null)
 
-  const valid = nombre.trim().length > 2 && /\S+@\S+\.\S+/.test(email) && telefono.length >= 7 && (kind === 'paciente' || (tp && dip))
+  // Mismos límites que los CHECK de la tabla profiles (nombre 3-80, teléfono 7-20).
+  const tel = telefono.replace(/[^\d+]/g, '')
+  const valid = nombre.trim().length >= 3 && /\S+@\S+\.\S+/.test(email) && tel.length >= 7 && tel.length <= 20 && password.length >= 8
 
-  const submit = (e: React.FormEvent) => {
+  // Con sesión, App redirige a la home del rol en cuanto carga el perfil.
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!valid) return
     setBusy(true)
-    setTimeout(() => {
-      const base = { nombre: nombre.trim(), email: email.trim().toLowerCase(), telefono }
-      if (kind === 'paciente') registerPatient(base)
-      else registerNurse({ ...base, especialidad: esp, docs: [tp!, dip!] })
-      nav(homeOf(kind), { replace: true })
-    }, 700)
+    const mail = email.trim().toLowerCase()
+    const { error, needsConfirm } = await register({
+      rol: kind, nombre: nombre.trim().slice(0, 80), email: mail, telefono: tel, password,
+      especialidad: kind === 'enfermero' ? esp : undefined,
+    })
+    setBusy(false)
+    setErr(error ?? '')
+    if (needsConfirm) setSentTo(mail)
   }
+
+  if (sentTo)
+    return (
+      <AuthShell>
+        <div className="flex flex-col items-center gap-3 pt-2 text-center">
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-mint-50 text-mint-600"><MailCheck size={30} /></span>
+          <h2 className="text-2xl font-extrabold">Revisa tu correo</h2>
+          <p className="max-w-[280px] text-mute">Te enviamos un enlace a <b className="text-ink">{sentTo}</b>. Confírmalo y luego entra con tu contraseña.</p>
+          <Button block className="mt-2" onClick={() => nav('/login', { replace: true })}>Ir a entrar</Button>
+        </div>
+      </AuthShell>
+    )
 
   return (
     <AuthShell>
@@ -59,13 +62,16 @@ export default function Register() {
       <Segmented value={kind} onChange={setKind} options={[{ id: 'paciente', label: 'Soy paciente' }, { id: 'enfermero', label: 'Soy profesional' }]} />
       <form onSubmit={submit} className="mt-5 space-y-3">
         <Field label="Nombre completo">
-          <input className={inputCls} autoComplete="name" enterKeyHint="next" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ana Martínez" />
+          <input className={inputCls} autoComplete="name" enterKeyHint="next" maxLength={80} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ana Martínez" />
         </Field>
         <Field label="Correo">
           <input className={inputCls} type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" enterKeyHint="next" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" />
         </Field>
         <Field label="Teléfono">
-          <input className={inputCls} type="tel" inputMode="tel" enterKeyHint="done" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="300 123 4567" />
+          <input className={inputCls} type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="next" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="300 123 4567" />
+        </Field>
+        <Field label="Contraseña">
+          <input className={inputCls} type="password" autoComplete="new-password" enterKeyHint="done" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 8 caracteres" />
         </Field>
 
         {kind === 'enfermero' && (
@@ -75,15 +81,13 @@ export default function Register() {
                 {ESPECIALIDADES.map((x) => (<option key={x}>{x}</option>))}
               </select>
             </Field>
-            <p className="flex items-center gap-2 pt-1 text-[13px] font-bold text-mute"><FileText size={15} /> Documentos de validación</p>
-            <DocSlot label="Tarjeta profesional" file={tp} onPick={setTp} />
-            <DocSlot label="Diploma o título" file={dip} onPick={setDip} />
-            <p className="rounded-2xl bg-amber-50 p-3 text-[13px] text-amber-700">Un administrador revisará tu perfil. Quedará <b>pendiente de aprobación</b> antes de recibir servicios.</p>
+            <p className="rounded-2xl bg-amber-50 p-3 text-[13px] text-amber-700">Después de crear tu cuenta subirás tu tarjeta profesional y diploma. Un administrador los revisará antes de que recibas servicios.</p>
           </div>
         )}
 
+        {err && <p role="alert" className="text-[13px] font-semibold text-red-600">{err}</p>}
         <Button type="submit" block loading={busy} disabled={!valid} className="mt-2">
-          {kind === 'paciente' ? 'Crear cuenta' : 'Enviar para aprobación'}
+          {kind === 'paciente' ? 'Crear cuenta' : 'Crear cuenta profesional'}
         </Button>
       </form>
     </AuthShell>

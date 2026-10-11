@@ -82,9 +82,8 @@ begin
   select total into tot from public.servicios where id = s1;
   if tot <> 44000 then raise exception 'FAIL total servicio=% (esperado 44000)', tot; end if;
 
-  -- ===== 3. Despacho: candidato = enfermera mas cercana =====
+  -- ===== 3. Despacho inmediato al solicitar (0003): candidato = enfermera mas cercana =====
   perform pg_temp.as_reset();
-  if public.despachar_pendientes() <> 1 then raise exception 'FAIL despachar: no asigno 1 oferta'; end if;
   select candidato into cand from public.servicios where id = s1;
   if cand <> n1 then raise exception 'FAIL candidato=% (esperado n1)', cand; end if;
 
@@ -172,6 +171,55 @@ begin
   perform pg_temp.as_user(p);
   select count(*) into cnt from public.servicios where id = s1;
   if cnt <> 1 then raise exception 'FAIL paciente no ve su servicio: %', cnt; end if;
+
+  -- ===== 14. Contactos: solo personas ligadas a mis servicios (0003) =====
+  perform pg_temp.as_user(p);
+  select count(*) into cnt from public.mis_contactos() where id = n1 and telefono is not null;
+  if cnt <> 1 then raise exception 'FAIL paciente no ve contacto de n1: %', cnt; end if;
+  select count(*) into cnt from public.mis_contactos() where id = n3;
+  if cnt <> 0 then raise exception 'FAIL paciente ve a n3 sin servicio: %', cnt; end if;
+  -- servicio completado: sin posicion de la enfermera
+  select count(*) into cnt from public.mis_contactos() where id = n1 and lat is not null;
+  if cnt <> 0 then raise exception 'FAIL posicion de n1 expuesta sin servicio activo'; end if;
+  perform pg_temp.as_user(n1);
+  select count(*) into cnt from public.mis_contactos() where id = p;
+  if cnt <> 1 then raise exception 'FAIL n1 no ve a su paciente: %', cnt; end if;
+
+  -- ===== 15. Rechazar pasa la oferta a otra enfermera (0003) =====
+  perform pg_temp.as_user(p);
+  s2 := public.solicitar_servicio('cura', true, null, '', 'efectivo', 4.7143, -74.0645, 'Cra 15 bis');
+  perform pg_temp.as_reset();
+  select candidato into cand from public.servicios where id = s2;
+  if cand is null then raise exception 'FAIL sin candidato tras solicitar'; end if;
+  perform pg_temp.as_user(cand);
+  perform public.rechazar_oferta(s2);
+  perform pg_temp.as_reset();
+  select candidato, estado into r from public.servicios where id = s2;
+  if r.candidato is null or r.candidato = cand then raise exception 'FAIL tras rechazar candidato=% (antes %)', r.candidato, cand; end if;
+
+  -- ===== 16. Enfermeras cerca: excluye a la que tiene oferta pendiente =====
+  perform pg_temp.as_user(p);
+  select count(*) into cnt from public.enfermeras_cerca(4.7143, -74.0645, 10) where id = r.candidato;
+  if cnt <> 0 then raise exception 'FAIL enfermeras_cerca incluye candidata con oferta'; end if;
+
+  -- ===== 17. Documentos: solo rutas propias y solo si no esta aprobado =====
+  perform pg_temp.as_user(n1);
+  perform pg_temp.expect_err(format('select public.set_documentos(array[%L])', 'otro/x.pdf'), 'ruta_invalida');
+  perform pg_temp.expect_err(format('select public.set_documentos(array[%L])', n1::text || '/x.pdf'), 'no_editable');
+
+  -- ===== 18. Trigger de registro: perfil desde metadatos; nunca admin =====
+  perform pg_temp.as_reset();
+  a := gen_random_uuid();
+  insert into auth.users (id, email, aud, role, raw_user_meta_data) values
+    (a, 'nuevo@test.co', 'authenticated', 'authenticated',
+     '{"rol":"enfermero","nombre":"Nuevo Nurse","telefono":"3005555555","especialidad":"Curaciones"}');
+  select aprobado into ap from public.nurse_details where usuario_id = a;
+  if ap is distinct from 'pendiente' then raise exception 'FAIL trigger enfermero aprobado=%', ap; end if;
+  a := gen_random_uuid();
+  insert into auth.users (id, email, aud, role, raw_user_meta_data) values
+    (a, 'malo@test.co', 'authenticated', 'authenticated', '{"rol":"admin","nombre":"Malo","telefono":"3006666666"}');
+  select count(*) into cnt from public.profiles where id = a;
+  if cnt <> 0 then raise exception 'FAIL trigger creo perfil admin'; end if;
 
   raise exception 'ALL RPC TESTS PASSED (transaccion revertida, nada persistido)';
 end $$;

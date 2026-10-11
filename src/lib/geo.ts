@@ -16,15 +16,5 @@ export function haversine(a: LatLng, b: LatLng): number {
 export const KM_PER_DEG_LAT = 111.32
 export const kmPerDegLng = (lat: number) => 111.32 * Math.cos(rad(lat))
 
-/** Mueve `from` una fracción hacia `to`, con paso mínimo en km */
-export function stepToward(from: LatLng, to: LatLng, fraction: number, minKm: number): LatLng {
-  const d = haversine(from, to)
-  if (d < 0.05) return to
-  const stepKm = Math.max(d * fraction, minKm)
-  if (stepKm >= d) return to
-  const t = stepKm / d
-  return { lat: from.lat + (to.lat - from.lat) * t, lng: from.lng + (to.lng - from.lng) * t }
-}
-
 export const formatKm = (km: number) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`)
 export const etaMinutes = (km: number) => Math.max(1, Math.round(km * 3))
