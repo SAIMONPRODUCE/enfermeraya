@@ -1,4 +1,4 @@
-import { ArrowRight, HeartPulse, Phone, ShieldCheck, Stethoscope, UserRound } from 'lucide-react'
+import { ArrowRight, HeartPulse, ShieldCheck, Stethoscope, UserRound } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Field, inputCls } from '../components/ui'
@@ -62,6 +62,7 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
+  const [err, setErr] = useState('')
 
   const enter = (userId: string, key: string) => {
     setBusy(key)
@@ -72,10 +73,17 @@ export default function Login() {
     }, 600)
   }
 
+  // Sin fallback: si no hay cuenta para ese correo y rol, no se entra.
+  // TODO(Fase 5): verificar la contraseña en el backend; hoy solo se busca el correo.
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     const found = state.users.find((u) => u.email === email.trim().toLowerCase() && u.rol === role)
-    enter(found?.id ?? ROLES.find((r) => r.id === role)!.demo, 'form')
+    if (!found) {
+      setErr('No encontramos una cuenta de este tipo con ese correo.')
+      return
+    }
+    setErr('')
+    enter(found.id, 'form')
   }
 
   return (
@@ -95,39 +103,29 @@ export default function Login() {
           <Field label="Contraseña">
             <input className={inputCls} type="password" enterKeyHint="go" placeholder="••••••••" value={pass} onChange={(e) => setPass(e.target.value)} />
           </Field>
+          {err && <p role="alert" className="text-[13px] font-semibold text-red-600">{err}</p>}
           <Button type="submit" block loading={busy === 'form'}>
             Entrar <ArrowRight size={18} />
           </Button>
         </form>
 
-        <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-slate-400" style={{ ['--i' as string]: 3 }}>
-          <span className="h-px flex-1 bg-slate-200" /> o continúa con <span className="h-px flex-1 bg-slate-200" />
-        </div>
-        <div className="grid grid-cols-2 gap-3" style={{ ['--i' as string]: 4 }}>
-          <Button variant="ghost" loading={false} onClick={() => enter('p1', 'g')}>
-            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
-            Google
-          </Button>
-          <Button variant="ghost" onClick={() => enter('p1', 'tel')}>
-            <Phone size={18} /> Teléfono
-          </Button>
-        </div>
-
         <button onClick={() => nav('/registro')} className="press w-full rounded-2xl py-3 text-[15px] font-semibold text-brand-700" style={{ ['--i' as string]: 5 }}>
           ¿Nuevo aquí? <span className="underline underline-offset-4">Crear cuenta</span>
         </button>
 
-        <div className="rounded-3xl border border-dashed border-brand-200 bg-brand-50/60 p-4" style={{ ['--i' as string]: 6 }}>
-          <p className="mb-3 text-[13px] font-bold text-brand-800">⚡ Modo demo · entra sin registrarte</p>
-          <div className="grid grid-cols-3 gap-2">
-            {ROLES.map((r) => (
-              <button key={r.id} onClick={() => enter(r.demo, r.id)} className="press flex flex-col items-center gap-1.5 rounded-2xl bg-white py-3 text-[13px] font-semibold shadow-sm">
-                {busy === r.id ? <span className="spin h-5 w-5 rounded-full border-2 border-brand-200 border-t-brand-600" /> : <r.icon size={20} className="text-brand-600" />}
-                {r.label}
-              </button>
-            ))}
+        {import.meta.env.DEV && (
+          <div className="rounded-3xl border border-dashed border-brand-200 bg-brand-50/60 p-4" style={{ ['--i' as string]: 6 }}>
+            <p className="mb-3 text-[13px] font-bold text-brand-800">⚡ Modo demo (solo desarrollo)</p>
+            <div className="grid grid-cols-3 gap-2">
+              {ROLES.map((r) => (
+                <button key={r.id} onClick={() => enter(r.demo, r.id)} className="press flex flex-col items-center gap-1.5 rounded-2xl bg-white py-3 text-[13px] font-semibold shadow-sm">
+                  {busy === r.id ? <span className="spin h-5 w-5 rounded-full border-2 border-brand-200 border-t-brand-600" /> : <r.icon size={20} className="text-brand-600" />}
+                  {r.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </AuthShell>
   )

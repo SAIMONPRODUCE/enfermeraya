@@ -29,3 +29,10 @@ export function formatDate(ts: number): string {
 }
 
 export const uid = (p: string) => p + Math.random().toString(36).slice(2, 9)
+
+/** true si `ts` cae en el mismo día calendario (hora local) que `ref` */
+export function isSameDay(ts: number, ref = Date.now()): boolean {
+  const a = new Date(ts)
+  const b = new Date(ref)
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+}

@@ -1,4 +1,4 @@
-import { ChevronDown, MapPin, Search, ShieldCheck, Zap } from 'lucide-react'
+import { ChevronDown, MapPin, Search, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LocationSheet } from '../../components/LocationSheet'
@@ -116,8 +116,7 @@ export default function PatientHome() {
 
         <div className="flex items-center gap-3 rounded-3xl bg-mint-50 p-4 text-mint-600" style={{ ['--i' as string]: 5 }}>
           <ShieldCheck size={26} className="shrink-0" />
-          <p className="text-[13px] font-semibold leading-snug text-ink/80">Todos los profesionales validan su tarjeta profesional y diploma antes de atender.</p>
-          <Zap size={0} />
+          <p className="text-[13px] font-semibold leading-snug text-ink/80">Cada profesional debe ser aprobado por un administrador antes de recibir servicios.</p>
         </div>
       </div>
       <LocationSheet open={loc} onClose={() => setLoc(false)} />

@@ -1,6 +1,6 @@
 import { Star, TrendingUp } from 'lucide-react'
 import { Card, ServiceIcon } from '../../components/ui'
-import { formatDate, money } from '../../lib/format'
+import { formatDate, isSameDay, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { serviceOf } from '../../store/sim'
 
@@ -12,12 +12,12 @@ export default function Earnings() {
   const done = state.servicios.filter((s) => s.enfermero_id === me.id && s.estado === 'completado')
   const rated = done.filter((s) => s.calificacion !== null)
 
-  // Histórico demostrativo determinista + hoy real
-  const today = done.filter((s) => Date.now() - s.estado_ts < 864e5).reduce((a, s) => a + s.total * 0.85, 0)
-  const seedNum = me.id.charCodeAt(1)
+  // Solo datos reales: suma de servicios completados por día calendario (últimos 7 días)
+  const net = (s: { total: number }) => s.total * 0.85
+  const today = done.filter((s) => isSameDay(s.estado_ts)).reduce((a, s) => a + net(s), 0)
   const bars = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(Date.now() - (6 - i) * 864e5)
-    const v = i === 6 ? today : 60000 + ((seedNum * (i + 3) * 7919) % 190000)
+    const v = done.filter((s) => isSameDay(s.estado_ts, d.getTime())).reduce((a, s) => a + net(s), 0)
     return { label: DAYS[d.getDay()], v }
   })
   const max = Math.max(...bars.map((b) => b.v), 1)

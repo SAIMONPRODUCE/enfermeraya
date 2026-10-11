@@ -4,7 +4,7 @@ import { MapView } from '../../components/MapView'
 import { Sheet } from '../../components/Sheet'
 import { Avatar, Button, Card, ServiceIcon, Stars, Switch } from '../../components/ui'
 import { formatKm, haversine } from '../../lib/geo'
-import { money } from '../../lib/format'
+import { isSameDay, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { OFFER_TTL, isActive, serviceOf } from '../../store/sim'
 import type { Servicio } from '../../types'
@@ -97,7 +97,8 @@ export default function NurseHome() {
   const offer = state.servicios.find((s) => s.estado === 'solicitado' && s.candidato === me.id)
   const active = state.servicios.find((s) => s.enfermero_id === me.id && isActive(s))
   const done = state.servicios.filter((s) => s.enfermero_id === me.id && s.estado === 'completado')
-  const today = done.filter((s) => Date.now() - s.estado_ts < 864e5).reduce((a, s) => a + s.total * 0.85, 0)
+  const doneToday = done.filter((s) => isSameDay(s.estado_ts))
+  const today = doneToday.reduce((a, s) => a + s.total * 0.85, 0)
 
   const btn = active
     ? active.estado === 'aceptado' ? { label: 'Salir hacia el paciente', icon: Navigation }
@@ -153,11 +154,11 @@ export default function NurseHome() {
           </Card>
         )}
 
-        {done.length > 0 && (
+        {doneToday.length > 0 && (
           <section>
             <h2 className="mb-2 flex items-center gap-2 text-[17px] font-extrabold"><Wallet size={18} /> Completados hoy</h2>
             <div className="space-y-2">
-              {done.slice(0, 3).map((s) => (
+              {doneToday.slice(0, 3).map((s) => (
                 <Card key={s.id} className="flex items-center gap-3 !p-3">
                   <Avatar name={state.users.find((u) => u.id === s.paciente_id)?.nombre ?? 'P'} color="#1d6fe8" size={38} />
                   <span className="flex-1 truncate font-semibold">{serviceOf(s.servicio_id).nombre}</span>
