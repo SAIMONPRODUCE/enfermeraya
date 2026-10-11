@@ -867,7 +867,7 @@
       "file_type": "code",
       "norm_label": "useapp()",
       "source_file": "src/store/AppContext.tsx",
-      "source_location": "L385"
+      "source_location": "L414"
     },
     {
       "id": "src_components_errorboundary_errorboundary_componentdidcatch",
@@ -1143,7 +1143,7 @@
       "file_type": "code",
       "norm_label": "useappactions()",
       "source_file": "src/store/AppContext.tsx",
-      "source_location": "L393"
+      "source_location": "L422"
     },
     {
       "id": "src_components_layout_layout",
@@ -4404,7 +4404,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/store/AppContext.tsx",
-      "source_location": "L261",
+      "source_location": "L290",
       "weight": 1.0
     },
     {
@@ -10187,7 +10187,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/store/AppContext.tsx",
-      "source_location": "L385",
+      "source_location": "L414",
       "weight": 1.0
     },
     {
@@ -10198,7 +10198,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/store/AppContext.tsx",
-      "source_location": "L393",
+      "source_location": "L422",
       "weight": 1.0
     },
     {
@@ -10643,5 +10643,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "384578b9e2a1996e913a02603f48f1d167b55043"
+  "built_at_commit": "9677c9f7b21fe85ee9b3d5f257ceee910e701024"
 }

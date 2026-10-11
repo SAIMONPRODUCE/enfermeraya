@@ -1,7 +1,7 @@
-# Graph Report - enfermeraya  (2026-10-10)
+# Graph Report - enfermeraya  (2026-10-11)
 
 ## Corpus Check
-- 38 files · ~19,748 words
+- 40 files · ~20,868 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 3 file(s) not represented in the graph (top: (none) 1, .webmanifest 1, .css 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cf12a7e0`
+- Built from commit: `384578b9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
