@@ -8,6 +8,7 @@ import { Segmented } from '../Login'
 import { CATALOGO } from '../../data/seed'
 import { etaMinutes, formatKm } from '../../lib/geo'
 import { money } from '../../lib/format'
+import { supabase } from '../../lib/supabase'
 import { useApp, type Quote } from '../../store/AppContext'
 import { availableNurses } from '../../store/sim'
 import type { MetodoPago } from '../../types'
@@ -65,6 +66,21 @@ export default function Request() {
     })
     if (!id) {
       setPhase('idle') // el error ya salió como toast
+      return
+    }
+    if (pago === 'tarjeta') {
+      // Wompi cobra y vuelve a la pantalla de seguimiento; el servicio se despacha al confirmar el webhook.
+      // Wompi rechaza redirect-url con http://localhost (403): en dev se regresa a la version publicada (https).
+      // ponytail: en dev el seguimiento se ve en GitHub Pages (hay que iniciar sesion ahi); upgrade: URL https de tunel.
+      const base = location.hostname === 'localhost' ? 'https://saimonproduce.github.io/enfermeraya/' : `${location.origin}${import.meta.env.BASE_URL}`
+      const { data, error } = await supabase.functions.invoke<{ url: string }>('wompi-checkout', {
+        body: { servicio_id: id, redirect_url: `${base}p/seguimiento/${id}` },
+      })
+      if (error || !data?.url) {
+        nav(`/p/seguimiento/${id}`, { replace: true })
+        return
+      }
+      location.href = data.url
       return
     }
     setPhase('ok')
