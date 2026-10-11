@@ -69,7 +69,7 @@ export default function Tracking() {
   return (
     <div className="absolute inset-0">
       <MapView
-        className="absolute inset-0"
+        className="h-full w-full"
         fit
         radiusKm={undefined}
         markers={markers}
