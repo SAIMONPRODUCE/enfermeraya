@@ -54,6 +54,7 @@ export default function PatientHome() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             enterKeyHint="search"
+            aria-label="Buscar servicio"
             placeholder="Buscar servicio: inyección, curación…"
             className="h-12 w-full rounded-2xl border border-transparent bg-white pl-11 pr-4 shadow-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-brand-500 focus:shadow-[0_0_0_4px_rgba(42,116,238,0.12)]"
           />

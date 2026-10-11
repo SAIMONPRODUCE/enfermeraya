@@ -30,7 +30,7 @@ export function Stepper({ estado }: { estado: Estado }) {
             <span className={`flex h-6 w-6 items-center justify-center rounded-full border-2 border-white text-white transition-[background-color,transform] duration-300 ${i <= idx ? 'bg-brand-600' : 'bg-slate-200'} ${i === idx && estado !== 'completado' ? 'scale-110 ring-4 ring-brand-200' : ''}`}>
               {i < idx || estado === 'completado' ? <Check size={13} strokeWidth={3.5} /> : null}
             </span>
-            <span className={`text-[11px] font-semibold transition-colors duration-300 ${i <= idx ? 'text-ink' : 'text-slate-400'}`}>{s.label}</span>
+            <span className={`text-[11px] font-semibold transition-colors duration-300 ${i <= idx ? 'text-ink' : 'text-mute'}`}>{s.label}</span>
           </div>
         ))}
       </div>

@@ -75,7 +75,7 @@ export function Layout({ tabs, badge }: { tabs: Tab[]; badge: string }) {
                   key={t.to}
                   onClick={() => nav(t.to)}
                   aria-current={on ? 'page' : undefined}
-                  className={`press flex flex-col items-center gap-0.5 rounded-xl py-2 text-[11px] font-semibold ${on ? 'text-brand-600' : 'text-slate-400'}`}
+                  className={`press flex flex-col items-center gap-0.5 rounded-xl py-2 text-[11px] font-semibold ${on ? 'text-brand-600' : 'text-mute'}`}
                 >
                   <I size={22} strokeWidth={on ? 2.4 : 2} />
                   {t.label}

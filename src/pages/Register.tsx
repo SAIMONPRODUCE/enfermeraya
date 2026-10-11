@@ -62,7 +62,7 @@ export default function Register() {
           <input className={inputCls} autoComplete="name" enterKeyHint="next" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ana Martínez" />
         </Field>
         <Field label="Correo">
-          <input className={inputCls} type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" enterKeyHint="next" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" />
+          <input className={inputCls} type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" enterKeyHint="next" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" />
         </Field>
         <Field label="Teléfono">
           <input className={inputCls} type="tel" inputMode="tel" enterKeyHint="done" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="300 123 4567" />

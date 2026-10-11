@@ -98,10 +98,10 @@ export default function Login() {
         </div>
         <form onSubmit={submit} className="space-y-3" style={{ ['--i' as string]: 2 }}>
           <Field label="Correo">
-            <input className={inputCls} type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" enterKeyHint="next" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input className={inputCls} type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" enterKeyHint="next" autoComplete="email" placeholder="tu@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           </Field>
           <Field label="Contraseña">
-            <input className={inputCls} type="password" enterKeyHint="go" placeholder="••••••••" value={pass} onChange={(e) => setPass(e.target.value)} />
+            <input className={inputCls} type="password" enterKeyHint="go" autoComplete="current-password" placeholder="••••••••" value={pass} onChange={(e) => setPass(e.target.value)} />
           </Field>
           {err && <p role="alert" className="text-[13px] font-semibold text-red-600">{err}</p>}
           <Button type="submit" block loading={busy === 'form'}>
