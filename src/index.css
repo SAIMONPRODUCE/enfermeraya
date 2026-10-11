@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  --color-brand-50: #eef5ff;
+  --color-brand-100: #d9e8ff;
+  --color-brand-200: #b6d2ff;
+  --color-brand-300: #84b3ff;
+  --color-brand-400: #4b8ef8;
+  --color-brand-500: #2a74ee;
+  --color-brand-600: #1d6fe8;
+  --color-brand-700: #1858c0;
+  --color-brand-800: #17499a;
+  --color-brand-900: #14305f;
+  --color-mint-50: #ecfdf5;
+  --color-mint-100: #d1fae5;
+  --color-mint-400: #34d399;
+  --color-mint-500: #10b981;
+  --color-mint-600: #0c9a6b;
+  --color-ink: #0f1f3d;
+  --color-mute: #64748b;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ---------- Baseline móvil ---------- */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+  background: #dbe7f5;
+}
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+input, textarea, select { font-size: 16px; font-family: inherit; }
+button, a, [role="button"] {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 2px; }
+
+/* ---------- Shell: teléfono centrado en escritorio ---------- */
+.app-shell {
+  position: relative;
+  height: 100dvh;
+  max-width: 460px;
+  margin: 0 auto;
+  background: #f6f9fd;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 520px) {
+  .app-shell {
+    height: min(100dvh - 32px, 900px);
+    margin-top: 16px;
+    border-radius: 36px;
+    box-shadow: 0 30px 80px -20px rgba(20, 48, 95, 0.35), 0 0 0 8px #0f1f3d;
+  }
+}
+.scroll-y { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.scroll-y::-webkit-scrollbar { display: none; }
+.safe-top { padding-top: max(env(safe-area-inset-top, 0px), 12px); }
+.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px); }
+
+/* ---------- Press feedback (todo lo tocable) ---------- */
+.press {
+  transition: transform 140ms var(--ease-out), background-color 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
+}
+.press:active { transform: scale(0.97); }
+.press:disabled { opacity: 0.5; pointer-events: none; }
+@media (hover: hover) and (pointer: fine) {
+  .lift:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(20, 48, 95, 0.3); }
+  .btn-primary:hover { background: var(--color-brand-700); }
+}
+
+/* ---------- Entradas ---------- */
+@keyframes enter-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes enter-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes enter-pop {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+.page-enter { animation: enter-up 260ms var(--ease-out) both; }
+.step-enter { animation: enter-up 220ms var(--ease-out) both; }
+.pop-enter { animation: enter-pop 220ms var(--ease-out) both; }
+.stagger > * {
+  animation: enter-up 300ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+.fade-enter { animation: enter-fade 200ms ease both; }
+
+/* ---------- Sheet ---------- */
+.sheet-backdrop { background: rgba(15, 31, 61, 0.4); opacity: 0; transition: opacity 220ms ease; }
+.sheet-backdrop[data-open="true"] { opacity: 1; }
+.sheet-panel { transform: translateY(100%); transition: transform 320ms var(--ease-drawer); }
+.sheet-panel[data-open="true"] { transform: translateY(0); }
+.sheet-panel[data-drag="true"] { transition: none; }
+.sheet-backdrop[data-open="false"] { transition-duration: 180ms; }
+.sheet-panel[data-open="false"] { transition-duration: 220ms; }
+
+/* ---------- Toast ---------- */
+.toast {
+  opacity: 0;
+  transform: translateY(-16px) scale(0.97);
+  transition: opacity 260ms var(--ease-out), transform 320ms var(--ease-out);
+}
+.toast[data-in="true"] { opacity: 1; transform: none; }
+
+/* ---------- Switch ---------- */
+.switch-knob { transition: transform 260ms var(--ease-out); }
+
+/* ---------- Radar / pulsos ---------- */
+@keyframes radar {
+  0% { transform: scale(0.35); opacity: 0.55; }
+  100% { transform: scale(1); opacity: 0; }
+}
+.radar-ring { animation: radar 2.4s var(--ease-out) infinite; }
+@keyframes pulse-dot {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.pulse-dot::after {
+  content: ""; position: absolute; inset: 0; border-radius: 9999px; background: inherit;
+  animation: pulse-dot 1.8s var(--ease-out) infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.7s linear infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.shimmer {
+  background: linear-gradient(90deg, #e8eef6 25%, #f5f8fc 50%, #e8eef6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* ---------- Check de éxito (momento de deleite: raro) ---------- */
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes ring-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.success-ring { animation: ring-pop 420ms var(--ease-out) both; }
+.success-check { stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw 360ms var(--ease-out) 240ms forwards; }
+@keyframes confetti-fall {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  100% { transform: translate(var(--dx), 220px) rotate(var(--rot)); opacity: 0; }
+}
+.confetti { animation: confetti-fall 1.4s var(--ease-out) forwards; }
+
+/* ---------- Progreso lineal ---------- */
+.progress-fill { transition: transform 1000ms linear; transform-origin: left; }
+.timeline-fill { transition: transform 500ms var(--ease-in-out); transform-origin: top; }
+
+/* ---------- Mapa ---------- */
+.map-marker { transition: transform 600ms var(--ease-in-out); will-change: transform; }
+.map-marker.moving { transition: transform 1000ms linear; }
+.map-line { transition: transform 1000ms linear; transform-origin: 0 50%; }
+
+/* ---------- Movimiento reducido: menos y más suave, no cero ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .page-enter, .step-enter, .pop-enter, .stagger > * { animation: enter-fade 200ms ease both; animation-delay: 0ms; }
+  .sheet-panel, .toast { transform: none; }
+  .sheet-panel:not([data-open="true"]) { opacity: 0; }
+  .sheet-panel { transition: opacity 200ms ease; }
+  .radar-ring, .confetti, .pulse-dot::after { animation: none; }
+  .map-marker, .map-marker.moving, .map-line { transition-duration: 0ms; }
+}
