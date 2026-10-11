@@ -65,8 +65,9 @@ export default function Tracking() {
     : s.estado === 'en_atencion' ? 'Atención en curso'
     : ''
 
+  // absolute inset-0 (no h-full): llena <main> aunque el alto en % no se resuelva al cargar la URL directo
   return (
-    <div className="relative h-full">
+    <div className="absolute inset-0">
       <MapView
         className="absolute inset-0"
         fit

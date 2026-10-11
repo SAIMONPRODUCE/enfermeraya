@@ -221,5 +221,14 @@ begin
   select count(*) into cnt from public.profiles where id = a;
   if cnt <> 0 then raise exception 'FAIL trigger creo perfil admin'; end if;
 
+  -- ===== 19. Avisos al profesional (0006): ganancia y oferta vencida =====
+  select count(*) into cnt from public.notificaciones where user_id = n1 and titulo = 'Ganancia registrada' and cuerpo = '+ $ 37.400';
+  if cnt <> 1 then raise exception 'FAIL aviso ganancia: %', cnt; end if;
+  cand := r.candidato; -- candidata actual de s2 (bloque 15)
+  update public.servicios set oferta_inicio = now() - interval '30 seconds' where id = s2;
+  perform public.despachar_pendientes();
+  select count(*) into cnt from public.notificaciones where user_id = cand and titulo = 'Solicitud expirada';
+  if cnt <> 1 then raise exception 'FAIL aviso expirada: %', cnt; end if;
+
   raise exception 'ALL RPC TESTS PASSED (transaccion revertida, nada persistido)';
 end $$;
