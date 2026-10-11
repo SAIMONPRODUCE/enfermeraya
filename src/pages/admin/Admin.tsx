@@ -77,7 +77,7 @@ export function Operations() {
         <Card className="!p-3 text-center"><p className="text-[12px] text-mute">Conectados</p><p className="text-2xl font-extrabold text-mint-600">{online}</p></Card>
         <Card className="!p-3 text-center"><p className="text-[12px] text-mute">Total</p><p className="text-2xl font-extrabold">{state.servicios.length}</p></Card>
       </div>
-      <MapView className="h-64 rounded-3xl" kmAcross={22} center={{ lat: 4.69, lng: -74.07 }}
+      <MapView className="h-64 rounded-3xl" kmAcross={22} fit
         markers={[
           ...nurses.map((u) => ({ id: u.id, pos: state.servicios.find((s) => s.enfermero_id === u.id && isActive(s))?.nursePos ?? u.ubicacion, kind: 'nurse' as const, label: u.nombre, color: u.color, offline: !state.nurses[u.id].online })),
           ...active.map((s) => ({ id: s.id, pos: s.ubicacion_paciente, kind: 'request' as const })),
