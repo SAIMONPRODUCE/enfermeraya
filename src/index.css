@@ -54,7 +54,8 @@ button { font-family: inherit; cursor: pointer; }
   height: 100dvh;
   max-width: 460px;
   margin: 0 auto;
-  background: #f6f9fd;
+  isolation: isolate;
+  background: linear-gradient(160deg, #eef5ff 0%, #e6f7f2 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -177,4 +178,15 @@ button { font-family: inherit; cursor: pointer; }
   .sheet-panel { transition: opacity 200ms ease; }
   .radar-ring, .confetti, .pulse-dot::after { animation: none; }
   .map-marker, .map-marker.moving, .map-line { transition-duration: 0ms; }
+}
+
+/* Marca de agua: corazon del logo, baja opacidad, detras de todo el contenido */
+.app-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M256 408s-120-72-120-166c0-44 34-76 74-76 24 0 38 12 46 26 8-14 22-26 46-26 40 0 74 32 74 76 0 94-120 166-120 166z' fill='%231d6fe8'/%3E%3C/svg%3E") center 72% / 58% no-repeat;
+  opacity: 0.08;
 }
