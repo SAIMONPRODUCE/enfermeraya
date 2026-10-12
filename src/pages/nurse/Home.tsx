@@ -194,7 +194,7 @@ export default function NurseHome() {
           </Card>
         ) : (
           <Card className="space-y-3">
-            <MapView className="h-52 rounded-2xl" center={me.ubicacion} kmAcross={22} radiusKm={5} markers={[{ id: 'me', pos: me.ubicacion, kind: 'me' }]} />
+            <MapView className="h-52 rounded-2xl" center={me.ubicacion} kmAcross={16} radiusKm={5} markers={[{ id: 'me', pos: me.ubicacion, kind: 'me' }]} />
             {myNurse.online ? (
               <div className="flex items-center gap-3">
                 <span className="relative h-3 w-3 shrink-0"><span className="pulse-dot relative block h-3 w-3 rounded-full bg-mint-500" /></span>

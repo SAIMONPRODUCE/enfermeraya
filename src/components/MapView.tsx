@@ -1,6 +1,5 @@
-import { Home, MapPin } from 'lucide-react'
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
-import { KM_PER_DEG_LAT, kmPerDegLng } from '../lib/geo'
+import { useEffect, useRef } from 'react'
+import type * as Leaflet from 'leaflet'
 import { initials } from '../lib/format'
 import type { LatLng } from '../types'
 
@@ -28,172 +27,147 @@ interface Props {
   className?: string
 }
 
-/** Mapa interactivo ligero (SVG + marcadores HTML) sin dependencias de tiles: funciona offline. */
+// ponytail: mosaicos de OpenStreetMap, solo para desarrollo y pruebas (su política no admite tráfico de producción).
+// Antes de publicar: definir VITE_TILE_URL (y VITE_TILE_ATTRIBUTION) con un proveedor con llave: MapTiler, Stadia, Mapbox.
+const TILE_URL = import.meta.env.VITE_TILE_URL ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+const TILE_ATTRIBUTION = import.meta.env.VITE_TILE_ATTRIBUTION ?? '© OpenStreetMap'
+const DEFAULT_CENTER: LatLng = { lat: 4.711, lng: -74.0721 }
+
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
+
+// Iconos de lucide (Home, MapPin) en línea: el marcador es HTML de Leaflet, no un árbol de React.
+const HOME_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'
+const PIN_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>'
+
+/** HTML + ancla de cada tipo de marcador. */
+function pinOf(m: MapMarker): { html: string; size: [number, number]; anchor: [number, number] } {
+  if (m.kind === 'me')
+    return { html: '<span class="pulse-dot relative block h-4 w-4 rounded-full border-[3px] border-white bg-brand-600 shadow"></span>', size: [16, 16], anchor: [8, 8] }
+  if (m.kind === 'patient')
+    return {
+      html: `<span class="flex flex-col items-center"><span class="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-white bg-ink text-white shadow-lg">${HOME_SVG}</span><span class="-mt-1 h-2 w-2 rotate-45 bg-ink"></span></span>`,
+      size: [40, 50], anchor: [20, 50],
+    }
+  if (m.kind === 'request')
+    return { html: `<span class="flex h-9 w-9 items-center justify-center rounded-full border-[3px] border-white bg-amber-500 text-white shadow-lg">${PIN_SVG}</span>`, size: [36, 36], anchor: [18, 36] }
+  const d = m.highlight ? 44 : 32
+  return {
+    html: `<span class="flex items-center justify-center rounded-full border-[3px] border-white text-[12px] font-bold text-white shadow-md ${m.highlight ? 'ring-4 ring-mint-400/40' : ''} ${m.offline ? 'opacity-50 grayscale' : ''}" style="width:${d}px;height:${d}px;background:${esc(m.color ?? '#0ea5a4')}">${esc(initials(m.label ?? 'E'))}</span>`,
+    size: [d, d], anchor: [d / 2, d / 2],
+  }
+}
+
+/** Zoom que deja `km` visibles a lo ancho de `px` píxeles a la latitud dada. */
+const zoomFor = (km: number, px: number, lat: number) => Math.log2((156543.03392 * Math.cos((lat * Math.PI) / 180) * px) / (km * 1000))
+
+interface Live {
+  L: typeof Leaflet
+  map: Leaflet.Map
+  pins: Map<string, { marker: Leaflet.Marker; key: string }>
+  layer: Leaflet.LayerGroup
+  /** Huella de la última vista aplicada: la vista solo se anima cuando cambia lo que la determina. */
+  view: string
+}
+
+/** Mapa de calles reales (Leaflet, cargado bajo demanda). Marcadores, radio y ruta se sincronizan con las props. */
 export function MapView({ markers, center, kmAcross = 10, fit, radiusKm, routes = [], onPick, className = '' }: Props) {
   const box = useRef<HTMLDivElement>(null)
-  const [size, setSize] = useState({ w: 360, h: 280 })
+  const live = useRef<Live | null>(null)
+  const latest = useRef({ markers, center, kmAcross, fit, radiusKm, routes, onPick })
+  latest.current = { markers, center, kmAcross, fit, radiusKm, routes, onPick }
+
+  // Pinta marcadores, radio y rutas y encuadra la vista a partir de las props más recientes.
+  const sync = useRef(() => {})
+  sync.current = () => {
+    const lv = live.current
+    if (!lv) return
+    const { L, map, pins, layer } = lv
+    const { markers: ms, center: c, kmAcross: km, fit: doFit, radiusKm: rKm, routes: rs } = latest.current
+
+    // Marcadores: se reutilizan por id; moverlos anima con CSS (clase ey-glide) para un desplazamiento continuo.
+    const seen = new Set<string>()
+    for (const m of ms) {
+      seen.add(m.id)
+      const key = `${m.kind}|${m.color}|${m.offline}|${m.highlight}|${m.label}`
+      const cur = pins.get(m.id)
+      const z = m.kind === 'patient' ? 300 : m.highlight ? 400 : 200
+      if (!cur) {
+        const p = pinOf(m)
+        const marker = L.marker([m.pos.lat, m.pos.lng], {
+          icon: L.divIcon({ html: p.html, className: `ey-pin${m.moving ? ' ey-glide' : ''}`, iconSize: p.size, iconAnchor: p.anchor }),
+          interactive: false, keyboard: false, zIndexOffset: z,
+        }).addTo(map)
+        pins.set(m.id, { marker, key })
+      } else {
+        cur.marker.setLatLng([m.pos.lat, m.pos.lng])
+        if (cur.key !== key) {
+          const p = pinOf(m)
+          cur.marker.setIcon(L.divIcon({ html: p.html, className: `ey-pin${m.moving ? ' ey-glide' : ''}`, iconSize: p.size, iconAnchor: p.anchor }))
+          cur.key = key
+        }
+        const el = cur.marker.getElement()
+        if (el) el.classList.toggle('ey-glide', !!m.moving)
+      }
+    }
+    for (const [id, p] of pins) if (!seen.has(id)) { p.marker.remove(); pins.delete(id) }
+
+    // Radio y rutas se redibujan: son pocos elementos.
+    layer.clearLayers()
+    const anchor = ms.find((m) => m.kind === 'me' || m.kind === 'patient')
+    if (rKm !== undefined && anchor)
+      L.circle([anchor.pos.lat, anchor.pos.lng], { radius: rKm * 1000, color: '#2a74ee', weight: 1, opacity: 0.5, fillColor: '#2a74ee', fillOpacity: 0.07, interactive: false }).addTo(layer)
+    for (const r of rs)
+      L.polyline([[r.from.lat, r.from.lng], [r.to.lat, r.to.lng]], { color: '#2a74ee', weight: 4, opacity: 0.7, lineCap: 'round', interactive: false }).addTo(layer)
+
+    // Vista: con `fit` encuadra todos los puntos; si no, centro y escala por km a lo ancho.
+    const pts = [...ms.map((m) => m.pos), ...rs.flatMap((r) => [r.from, r.to])]
+    const round = (p: LatLng) => `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`
+    const view = doFit && pts.length ? `fit|${pts.map(round).join(';')}` : `set|${round(c ?? pts[0] ?? DEFAULT_CENTER)}|${km}`
+    if (view === lv.view) return
+    lv.view = view
+    if (doFit && pts.length) {
+      map.fitBounds(L.latLngBounds(pts.map((p) => [p.lat, p.lng] as [number, number])), { padding: [56, 56], maxZoom: 17, animate: true, duration: 0.6 })
+    } else {
+      const ctr = c ?? pts[0] ?? DEFAULT_CENTER
+      map.setView([ctr.lat, ctr.lng], Math.round(zoomFor(km, map.getSize().x || 360, ctr.lat)), { animate: true, duration: 0.6 }) // zoom entero: mosaicos nítidos, sin líneas entre ellos
+    }
+  }
 
   useEffect(() => {
     const el = box.current
     if (!el) return
-    const ro = new ResizeObserver(() => setSize({ w: el.clientWidth || 360, h: el.clientHeight || 280 }))
-    ro.observe(el)
-    return () => ro.disconnect()
+    let dead = false
+    let ro: ResizeObserver | undefined
+    Promise.all([import('leaflet'), import('leaflet/dist/leaflet.css')]).then(([mod]) => {
+      if (dead) return
+      const L = (mod as unknown as { default?: typeof Leaflet }).default ?? (mod as unknown as typeof Leaflet)
+      // Sin gestos: el mapa acompaña la pantalla (el scroll de la página sigue funcionando). Solo se toca para elegir un punto.
+      const map = L.map(el, {
+        zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+        boxZoom: false, keyboard: false, touchZoom: false, center: [DEFAULT_CENTER.lat, DEFAULT_CENTER.lng], zoom: 13,
+      })
+      L.tileLayer(TILE_URL, { maxZoom: 19 }).addTo(map)
+      L.control.attribution({ position: 'topright', prefix: false }).addAttribution(TILE_ATTRIBUTION).addTo(map)
+      map.on('click', (e: Leaflet.LeafletMouseEvent) => latest.current.onPick?.({ lat: e.latlng.lat, lng: e.latlng.lng }))
+      live.current = { L, map, pins: new Map(), layer: L.layerGroup().addTo(map), view: '' }
+      ro = new ResizeObserver(() => {
+        map.invalidateSize()
+        if (live.current) live.current.view = '' // el tamaño cambió: reencuadrar
+        sync.current()
+      })
+      ro.observe(el)
+      sync.current()
+    })
+    return () => {
+      dead = true
+      ro?.disconnect()
+      live.current?.map.remove()
+      live.current = null
+    }
   }, [])
 
-  const view = useMemo(() => {
-    const pts = [...markers.map((m) => m.pos), ...routes.flatMap((r) => [r.from, r.to])]
-    let c = center ?? pts[0] ?? { lat: 4.711, lng: -74.0721 }
-    let across = kmAcross
-    if (fit && pts.length) {
-      const lats = pts.map((p) => p.lat)
-      const lngs = pts.map((p) => p.lng)
-      c = { lat: (Math.min(...lats) + Math.max(...lats)) / 2, lng: (Math.min(...lngs) + Math.max(...lngs)) / 2 }
-      const spanX = (Math.max(...lngs) - Math.min(...lngs)) * kmPerDegLng(c.lat)
-      const spanY = (Math.max(...lats) - Math.min(...lats)) * KM_PER_DEG_LAT
-      across = Math.max(1.4, Math.max(spanX, (spanY * size.w) / size.h) * 1.55)
-    }
-    const pxPerKm = size.w / across
-    const project = (p: LatLng) => ({
-      x: size.w / 2 + (p.lng - c.lng) * kmPerDegLng(c.lat) * pxPerKm,
-      y: size.h / 2 - (p.lat - c.lat) * KM_PER_DEG_LAT * pxPerKm,
-    })
-    const unproject = (x: number, y: number): LatLng => ({
-      lng: c.lng + (x - size.w / 2) / pxPerKm / kmPerDegLng(c.lat),
-      lat: c.lat - (y - size.h / 2) / pxPerKm / KM_PER_DEG_LAT,
-    })
-    return { c, pxPerKm, project, unproject }
-  }, [markers, routes, center, kmAcross, fit, size])
+  // Cada cambio de props vuelve a sincronizar (no-op mientras Leaflet carga).
+  useEffect(() => sync.current())
 
-  const handle = (e: React.MouseEvent) => {
-    if (!onPick || !box.current) return
-    const r = box.current.getBoundingClientRect()
-    onPick(view.unproject(e.clientX - r.left, e.clientY - r.top))
-  }
-
-  const ctr = view.project(view.c)
-  return (
-    <div
-      ref={box}
-      onClick={handle}
-      className={`relative overflow-hidden bg-[#e7f0f6] ${onPick ? 'cursor-crosshair' : ''} ${className}`}
-    >
-      <MapBackground ox={ctr.x - size.w / 2} oy={ctr.y - size.h / 2} />
-
-      {radiusKm !== undefined && markers.find((m) => m.kind === 'me' || m.kind === 'patient') && (() => {
-        const anchor = markers.find((m) => m.kind === 'me' || m.kind === 'patient')!
-        const p = view.project(anchor.pos)
-        const r = radiusKm * view.pxPerKm
-        return (
-          <div
-            className="pointer-events-none absolute rounded-full border border-brand-400/50 bg-brand-500/[0.07]"
-            style={{ width: r * 2, height: r * 2, left: 0, top: 0, transform: `translate(${p.x - r}px, ${p.y - r}px)`, transition: 'transform 600ms var(--ease-in-out)' }}
-          />
-        )
-      })()}
-
-      {routes.map((r, i) => {
-        const a = view.project(r.from)
-        const b = view.project(r.to)
-        const len = Math.hypot(b.x - a.x, b.y - a.y)
-        const ang = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI
-        return (
-          <div
-            key={i}
-            className="map-line pointer-events-none absolute left-0 top-0 h-1 rounded-full bg-brand-500/70"
-            style={{ width: 1, transform: `translate(${a.x}px, ${a.y - 2}px) rotate(${ang}deg) scaleX(${Math.max(len, 1)})` }}
-          />
-        )
-      })}
-
-      {markers.map((m) => {
-        const p = view.project(m.pos)
-        return (
-          <div
-            key={m.id}
-            className={`map-marker pointer-events-none absolute left-0 top-0 ${m.moving ? 'moving' : ''}`}
-            style={{ transform: `translate(${p.x}px, ${p.y}px)`, zIndex: m.kind === 'patient' ? 3 : m.highlight ? 4 : 2 }}
-          >
-            <Pin m={m} />
-          </div>
-        )
-      })}
-    </div>
-  )
+  return <div ref={box} className={`relative overflow-hidden bg-[#e7f0f6] ${onPick ? 'cursor-crosshair' : ''} ${className}`} />
 }
-
-function Pin({ m }: { m: MapMarker }) {
-  if (m.kind === 'me')
-    return (
-      <span className="relative block -translate-x-1/2 -translate-y-1/2">
-        <span className="pulse-dot relative block h-4 w-4 rounded-full border-[3px] border-white bg-brand-600 shadow" />
-      </span>
-    )
-  if (m.kind === 'patient')
-    return (
-      <span className="absolute -translate-x-1/2 -translate-y-full">
-        <span className="flex flex-col items-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-white bg-ink text-white shadow-lg">
-            <Home size={18} />
-          </span>
-          <span className="-mt-1 h-2 w-2 rotate-45 bg-ink" />
-        </span>
-      </span>
-    )
-  if (m.kind === 'request')
-    return (
-      <span className="absolute -translate-x-1/2 -translate-y-full">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full border-[3px] border-white bg-amber-500 text-white shadow-lg">
-          <MapPin size={16} />
-        </span>
-      </span>
-    )
-  return (
-    <span className="absolute -translate-x-1/2 -translate-y-1/2">
-      <span
-        className={`flex items-center justify-center rounded-full border-[3px] border-white text-[11px] font-bold text-white shadow-md transition-[width,height] duration-200 ${m.highlight ? 'h-11 w-11 ring-4 ring-mint-400/40' : 'h-8 w-8'} ${m.offline ? 'opacity-50 grayscale' : ''}`}
-        style={{ background: m.color ?? '#0ea5a4' }}
-      >
-        {initials(m.label ?? 'E')}
-      </span>
-    </span>
-  )
-}
-
-function MapBackground({ ox, oy }: { ox: number; oy: number }) {
-  // Calles/parques/río deterministas; se desplazan con el centro para dar sensación de mapa.
-  // Solo cambia el transform del contenedor: el SVG estático (Streets) no se vuelve a renderizar.
-  return (
-    <div
-      className="pointer-events-none absolute left-1/2 top-1/2 h-[900px] w-[900px] max-w-none"
-      style={{ transform: `translate(calc(-50% - ${ox * 0.5}px), calc(-50% - ${oy * 0.5}px))`, transition: 'transform 600ms var(--ease-in-out)' }}
-      aria-hidden
-    >
-      <Streets />
-    </div>
-  )
-}
-
-const Streets = memo(function Streets() {
-  return (
-    <svg className="block h-full w-full" viewBox="0 0 900 900">
-      <rect width="900" height="900" fill="#e9f1f5" />
-      <path d="M-20 640 C 180 560, 260 700, 430 600 S 720 420, 930 470 L930 540 C 740 500, 560 640, 430 690 S 160 640, -20 720 Z" fill="#bcdcf1" />
-      <ellipse cx="220" cy="220" rx="110" ry="80" fill="#cfe9d4" />
-      <ellipse cx="660" cy="250" rx="90" ry="120" fill="#cfe9d4" />
-      <ellipse cx="640" cy="760" rx="80" ry="55" fill="#cfe9d4" />
-      <g stroke="#fff" strokeLinecap="round" fill="none">
-        <g strokeWidth="2">
-          {[60, 140, 230, 310, 380, 470, 560, 640, 720, 800, 860].map((x) => (<line key={'v' + x} x1={x} y1="0" x2={x + 40} y2="900" />))}
-          {[40, 110, 190, 270, 350, 420, 520, 610, 700, 780, 850].map((y) => (<line key={'h' + y} x1="0" y1={y} x2="900" y2={y - 30} />))}
-        </g>
-        <g strokeWidth="9">
-          <line x1="140" y1="0" x2="300" y2="900" />
-          <line x1="0" y1="420" x2="900" y2="360" />
-          <line x1="560" y1="0" x2="470" y2="900" />
-          <line x1="0" y1="190" x2="900" y2="250" />
-        </g>
-      </g>
-    </svg>
-  )
-})
