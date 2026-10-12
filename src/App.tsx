@@ -5,6 +5,7 @@ import { useApp } from './store/AppContext'
 import type { Role } from './types'
 import { Operations, Validations } from './pages/admin/Admin'
 import Login, { homeOf } from './pages/Login'
+import { Recover, ResetPassword } from './pages/Recover'
 import Earnings from './pages/nurse/Earnings'
 import NurseHome from './pages/nurse/Home'
 import Activity from './pages/patient/Activity'
@@ -43,6 +44,9 @@ export default function App() {
     <Routes>
       <Route path="/login" element={me ? <Navigate to={homeOf(me.rol)} replace /> : <Login />} />
       <Route path="/registro" element={me ? <Navigate to={homeOf(me.rol)} replace /> : <Register />} />
+      <Route path="/recuperar" element={me ? <Navigate to={homeOf(me.rol)} replace /> : <Recover />} />
+      {/* El enlace del correo abre una sesión de recuperación: no redirigir aunque `me` exista. */}
+      <Route path="/restablecer" element={<ResetPassword />} />
 
       <Route path="/p" element={<Guard role="paciente"><Layout tabs={patientTabs} badge="Paciente" /></Guard>}>
         <Route index element={<PatientHome />} />

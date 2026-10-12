@@ -144,6 +144,10 @@ interface Ctx {
   dismissToast: (id: string) => void
   /** Devuelve el mensaje de error, o null si entró. */
   login: (email: string, password: string) => Promise<string | null>
+  /** Envía el correo de recuperación. Devuelve el mensaje de error, o null si salió. */
+  requestReset: (email: string) => Promise<string | null>
+  /** Cambia la contraseña de la sesión de recuperación. Devuelve el error, o null. */
+  setPassword: (password: string) => Promise<string | null>
   logout: () => Promise<void>
   /** needsConfirm: Supabase pide confirmar el correo antes de dar sesión. */
   register: (r: Registro) => Promise<{ error: string | null; needsConfirm: boolean }>
@@ -296,6 +300,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dismissToast,
       login: async (email, password) => {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
+        return error ? errorMsg(error) : null
+      },
+      requestReset: async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}restablecer`,
+        })
+        return error ? errorMsg(error) : null
+      },
+      setPassword: async (password) => {
+        const { error } = await supabase.auth.updateUser({ password })
         return error ? errorMsg(error) : null
       },
       logout: async () => {

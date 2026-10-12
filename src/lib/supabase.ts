@@ -5,6 +5,8 @@ export const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.m
 // Códigos que lanzan las RPC (raise exception) y Auth, en español para el usuario.
 const ERRORES: Record<string, string> = {
   solo_pacientes: 'Solo los pacientes pueden solicitar servicios.',
+  sin_ubicacion: 'Elige tu ubicación antes de pedir un servicio.',
+  ubicacion_invalida: 'La ubicación no es válida.',
   fecha_invalida: 'Elige una fecha y hora futuras.',
   servicio_desconocido: 'Ese servicio no existe.',
   no_cancelable: 'Este servicio ya no se puede cancelar.',

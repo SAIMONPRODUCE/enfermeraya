@@ -53,9 +53,14 @@ export default function Request() {
       alive = false
     }
   }, [step, sid, inmediato, lat, lng, cotizar])
+  // Sin ubicación guardada no se puede pedir: se abre el selector al entrar.
+  const sinUbicacion = me !== null && me.direccion === ''
+  useEffect(() => {
+    if (sinUbicacion) setLoc(true)
+  }, [sinUbicacion])
   if (!me) return null
 
-  const canNext = step === 0 ? inmediato || (fecha !== '' && new Date(fecha).getTime() > Date.now()) : step === 1 ? near.length > 0 : true
+  const canNext = step === 0 ? inmediato || (fecha !== '' && new Date(fecha).getTime() > Date.now()) : step === 1 ? near.length > 0 && !sinUbicacion : true
   const back = () => (step === 0 ? nav(-1) : setStep(step - 1))
 
   const confirm = async () => {
@@ -136,7 +141,7 @@ export default function Request() {
             <button onClick={() => setLoc(true)} className="press w-full text-left">
               <Card className="flex items-center gap-3 !p-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-ink text-white"><MapPin size={20} /></span>
-                <span className="min-w-0 flex-1"><span className="block truncate font-bold">{me.direccion}</span><span className="text-[13px] font-semibold text-brand-600">Cambiar</span></span>
+                <span className="min-w-0 flex-1"><span className="block truncate font-bold">{me.direccion || 'Elige tu ubicación'}</span><span className="text-[13px] font-semibold text-brand-600">{me.direccion ? 'Cambiar' : 'Elegir'}</span></span>
               </Card>
             </button>
             <Segmented value={radio} onChange={setRadio} options={[{ id: '5', label: 'Radio 5 km' }, { id: '10', label: 'Radio 10 km' }]} />

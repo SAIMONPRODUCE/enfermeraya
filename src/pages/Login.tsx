@@ -86,6 +86,10 @@ export default function Login() {
           </Button>
         </form>
 
+        <button onClick={() => nav('/recuperar')} className="press -mt-2 w-full py-2 text-[14px] font-semibold text-mute" style={{ ['--i' as string]: 2 }}>
+          ¿Olvidaste tu contraseña?
+        </button>
+
         <button onClick={() => nav('/registro')} className="press w-full rounded-2xl py-3 text-[15px] font-semibold text-brand-700" style={{ ['--i' as string]: 2 }}>
           ¿Nuevo aquí? <span className="underline underline-offset-4">Crear cuenta</span>
         </button>
