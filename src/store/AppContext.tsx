@@ -12,7 +12,7 @@ const ACTIVOS: Estado[] = ['aceptado', 'en_camino', 'en_atencion']
 
 // ---------- Filas tal como llegan de Supabase ----------
 interface ProfileRow { id: string; rol: Role; nombre: string; telefono: string; direccion: string; lat: number | null; lng: number | null; calificacion: number; color: string }
-interface NurseRow { usuario_id: string; especialidad: string; documentos: string[]; aprobado: AprobacionEstado; ganancias: number; online: boolean; servicios: number; experiencia: number; bio: string }
+interface NurseRow { usuario_id: string; especialidad: string; documentos: string[]; aprobado: AprobacionEstado; ganancias: number; online: boolean; visto: string; servicios: number; experiencia: number; bio: string }
 interface ServicioRow {
   id: string; paciente_id: string; enfermero_id: string | null; candidato: string | null; servicio_id: string; estado: Estado
   lat: number; lng: number; direccion: string; inmediato: boolean; fecha_hora: string | null; notas: string; total: number
@@ -79,7 +79,8 @@ async function fetchState(session: Session): Promise<AppState> {
   for (const d of nurses.data as NurseRow[]) {
     nurse(d.usuario_id, {
       especialidad: d.especialidad, documentos_url: d.documentos, aprobado_por_admin: d.aprobado, ganancias: d.ganancias,
-      online: d.online, servicios: d.servicios, experiencia: d.experiencia, bio: d.bio,
+      // El servidor solo ofrece servicios a quien reportó actividad hace menos de 2 min; aquí se refleja igual para los demás usuarios.
+      online: d.online && (d.usuario_id === meId || Date.now() - new Date(d.visto).getTime() < 120_000), servicios: d.servicios, experiencia: d.experiencia, bio: d.bio,
     })
   }
 
@@ -285,6 +286,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     )
     return () => navigator.geolocation.clearWatch(id)
   }, [sendingLocation, toast])
+
+  // Latido de presencia: el servidor solo manda ofertas a quien reportó actividad en los últimos 2 minutos.
+  // Con la pestaña oculta no se envía (el navegador congela el temporizador): ese profesional deja de recibir ofertas, como corresponde.
+  useEffect(() => {
+    if (!sendingLocation) return
+    const beat = () => {
+      if (document.visibilityState === 'visible') void supabase.rpc('latido')
+    }
+    beat()
+    const t = setInterval(beat, 30_000)
+    document.addEventListener('visibilitychange', beat)
+    return () => {
+      clearInterval(t)
+      document.removeEventListener('visibilitychange', beat)
+    }
+  }, [sendingLocation])
 
   // Acciones estables: leen el estado por ref, así su identidad no cambia entre actualizaciones.
   const api = useMemo<Actions>(() => {
