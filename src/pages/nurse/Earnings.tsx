@@ -38,8 +38,8 @@ export default function Earnings() {
           <h2 className="mb-4 font-extrabold">Últimos 7 días</h2>
           <div className="flex h-32 items-end gap-2">
             {bars.map((b, i) => (
-              <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
-                <div className="flex h-full w-full items-end">
+              <div key={i} className="flex h-full flex-1 flex-col items-center gap-1.5">
+                <div className="flex min-h-0 w-full flex-1 items-end">
                   <div className={`w-full origin-bottom rounded-lg ${i === 6 ? 'bg-brand-600' : 'bg-brand-200'}`} style={{ height: `${Math.max(6, (b.v / max) * 100)}%`, animation: `enter-up 400ms var(--ease-out) ${i * 40}ms both` }} />
                 </div>
                 <span className="text-[12px] font-semibold text-mute">{b.label}</span>
