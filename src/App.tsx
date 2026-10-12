@@ -1,19 +1,23 @@
 import { Activity as ActivityIcon, ClipboardList, Home, LayoutDashboard, ShieldCheck, User, Wallet } from 'lucide-react'
+import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { useApp } from './store/AppContext'
 import type { Role } from './types'
-import { Operations, Validations } from './pages/admin/Admin'
 import Login, { homeOf } from './pages/Login'
 import { Recover, ResetPassword } from './pages/Recover'
-import Earnings from './pages/nurse/Earnings'
-import NurseHome from './pages/nurse/Home'
 import Activity from './pages/patient/Activity'
 import PatientHome from './pages/patient/Home'
-import Request from './pages/patient/Request'
-import Tracking from './pages/patient/Tracking'
 import Profile from './pages/Profile'
 import Register from './pages/Register'
+
+// Rutas por rol y flujos pesados (mapa, pago) se cargan al entrar: el inicio de paciente y el login quedan ligeros.
+const Operations = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.Operations })))
+const Validations = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.Validations })))
+const Earnings = lazy(() => import('./pages/nurse/Earnings'))
+const NurseHome = lazy(() => import('./pages/nurse/Home'))
+const Request = lazy(() => import('./pages/patient/Request'))
+const Tracking = lazy(() => import('./pages/patient/Tracking'))
 
 function Guard({ role, children }: { role: Role; children: React.ReactNode }) {
   const { me } = useApp()

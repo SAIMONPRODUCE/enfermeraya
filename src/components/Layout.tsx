@@ -1,5 +1,5 @@
 import { Bell, HeartPulse, type LucideIcon } from 'lucide-react'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { timeAgo } from '../lib/format'
 import { useApp } from '../store/AppContext'
@@ -57,7 +57,9 @@ export function Layout({ tabs, badge }: { tabs: Tab[]; badge: string }) {
       </header>
 
       <main key={pathname} className="page-enter relative min-h-0 flex-1">
-        <Outlet />
+        <Suspense fallback={<div className="flex h-full items-center justify-center" role="status" aria-label="Cargando"><span className="spin h-8 w-8 rounded-full border-4 border-brand-100 border-t-brand-600" /></div>}>
+          <Outlet />
+        </Suspense>
       </main>
 
       {!hideTabs && (
