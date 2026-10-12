@@ -163,7 +163,9 @@ export default function Tracking() {
         {(s.estado === 'cancelado' || s.estado === 'sin_cobertura') && (
           <div className="space-y-4 pb-4 text-center">
             <h2 className="text-xl font-extrabold">{s.estado === 'cancelado' ? 'Solicitud cancelada' : 'Sin enfermeros disponibles'}</h2>
-            <p className="text-[14px] text-mute">{s.estado === 'cancelado' ? 'No se hizo ningún cobro.' : 'Ahora mismo no hay profesionales cerca. Intenta de nuevo en unos minutos.'}</p>
+            <p className="text-[14px] text-mute">{s.estado === 'cancelado'
+              ? (s.metodo_pago === 'efectivo' ? 'No se hizo ningún cobro.' : 'Si ya habías pagado, te devolvemos el pago a tu medio original.')
+              : `Ahora mismo no hay profesionales cerca. Intenta de nuevo en unos minutos.${s.metodo_pago === 'efectivo' ? '' : ' Si ya pagaste, te devolvemos el pago.'}`}</p>
             <Button block onClick={() => nav('/p', { replace: true })}>Volver al inicio</Button>
           </div>
         )}
