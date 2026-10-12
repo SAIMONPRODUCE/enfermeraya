@@ -73,8 +73,8 @@ export default function Request() {
       setPhase('idle') // el error ya salió como toast
       return
     }
-    if (pago === 'tarjeta') {
-      // Wompi cobra y vuelve a la pantalla de seguimiento; el servicio se despacha al confirmar el webhook.
+    if (pago !== 'efectivo') {
+      // Tarjeta y transferencia (Nequi/PSE) las cobra Wompi y vuelve a la pantalla de seguimiento; el servicio se despacha al confirmar el webhook.
       // Wompi rechaza redirect-url con http://localhost (403): en dev se regresa a la version publicada (https).
       // ponytail: en dev el seguimiento se ve en GitHub Pages (hay que iniciar sesion ahi); upgrade: URL https de tunel.
       const base = location.hostname === 'localhost' ? 'https://saimonproduce.github.io/enfermeraya/' : `${location.origin}${import.meta.env.BASE_URL}`
