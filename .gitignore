@@ -3,3 +3,7 @@ dist
 *.log
 *.tsbuildinfo
 .env.local
+
+# CLI de Supabase y macOS
+supabase/.temp/
+.DS_Store

@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
   if (event.event !== 'transaction.updated' || !estado) return new Response('ignorado', { status: 200 })
 
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
-  const { error } = await db.rpc('confirmar_pago', { p_referencia: tx.reference, p_estado: estado, p_wompi_id: tx.id })
+  const { error } = await db.rpc('confirmar_pago', { p_referencia: tx.reference, p_estado: estado, p_wompi_id: tx.id, p_monto: tx.amount_in_cents })
   if (error) return new Response('error', { status: 500 })
   return new Response('ok', { status: 200 })
 })

@@ -2,6 +2,9 @@
 // Secrets: WOMPI_PUBLIC_KEY, WOMPI_INTEGRITY_SECRET (llaves de sandbox mientras se pruebe).
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
+// ponytail: dominio fijo; si se agrega dominio propio, ampliar la lista.
+const REDIRECT_PERMITIDO = 'https://saimonproduce.github.io/enfermeraya/'
+
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -19,6 +22,7 @@ Deno.serve(async (req) => {
 
   const { servicio_id, redirect_url } = await req.json().catch(() => ({}))
   if (typeof servicio_id !== 'string' || typeof redirect_url !== 'string') return json({ error: 'datos_invalidos' }, 400)
+  if (!redirect_url.startsWith(REDIRECT_PERMITIDO)) return json({ error: 'redirect_no_permitido' }, 400)
 
   // Cliente con el JWT del paciente: la RLS de `pagos` decide qué fila ve.
   const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
