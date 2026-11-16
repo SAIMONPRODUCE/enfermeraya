@@ -44,8 +44,8 @@ export default function Register() {
     return (
       <AuthShell>
         <div className="flex flex-col items-center gap-3 pt-2 text-center">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-mint-50 text-mint-600"><MailCheck size={30} /></span>
-          <h2 className="text-2xl font-extrabold">Revisa tu correo</h2>
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-mint-50 text-mint-700"><MailCheck size={30} /></span>
+          <h2 className="text-[26px] font-extrabold leading-tight tracking-tight">Revisa tu correo</h2>
           <p className="max-w-[280px] text-mute">Te enviamos un enlace a <b className="text-ink">{sentTo}</b>. Confírmalo y luego entra con tu contraseña.</p>
           <Button block className="mt-2" onClick={() => nav('/login', { replace: true })}>Ir a entrar</Button>
         </div>
@@ -57,7 +57,7 @@ export default function Register() {
       <button onClick={() => nav('/login')} className="press -ml-2 mb-3 flex items-center gap-1 rounded-xl px-2 py-1.5 text-[14px] font-semibold text-mute">
         <ArrowLeft size={18} /> Volver
       </button>
-      <h2 className="text-2xl font-extrabold">Crea tu cuenta</h2>
+      <h2 className="text-[26px] font-extrabold leading-tight tracking-tight">Crea tu cuenta</h2>
       <p className="mb-5 text-mute">Toma menos de un minuto.</p>
       <Segmented value={kind} onChange={setKind} options={[{ id: 'paciente', label: 'Soy paciente' }, { id: 'enfermero', label: 'Soy profesional' }]} />
       <form onSubmit={submit} className="mt-5 space-y-3">

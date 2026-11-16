@@ -21,7 +21,7 @@ function Toast({ n, onDone }: { n: Notificacion; onDone: () => void }) {
     }
   }, [])
   const Icon = n.tipo === 'exito' ? CheckCircle2 : n.tipo === 'alerta' ? TriangleAlert : Info
-  const tone = n.tipo === 'exito' ? 'bg-mint-50 text-mint-600' : n.tipo === 'alerta' ? 'bg-amber-50 text-amber-600' : 'bg-brand-50 text-brand-600'
+  const tone = n.tipo === 'exito' ? 'bg-mint-50 text-mint-700' : n.tipo === 'alerta' ? 'bg-amber-50 text-amber-600' : 'bg-brand-50 text-brand-600'
   return (
     <button
       onClick={onDone}

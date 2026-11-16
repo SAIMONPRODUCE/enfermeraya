@@ -10,8 +10,8 @@ export const homeOf = (r: Role) => (r === 'paciente' ? '/p' : r === 'enfermero' 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-shell">
-      <div className="scroll-y h-full">
-        <div className="relative overflow-hidden bg-gradient-to-br from-brand-600 via-brand-500 to-mint-500 px-6 pb-14 pt-[max(env(safe-area-inset-top,0px),40px)] text-white">
+      <div className="scroll-y flex h-full flex-col">
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-800 via-brand-600 to-mint-500 px-6 pb-14 pt-[max(env(safe-area-inset-top,0px),40px)] text-white">
           <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
           <div className="absolute -bottom-16 left-10 h-40 w-40 rounded-full bg-white/10" />
           <div className="page-enter relative">
@@ -22,7 +22,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             <p className="mt-1 max-w-[260px] text-[15px] text-white/85">Enfermería profesional en tu casa, en minutos.</p>
           </div>
         </div>
-        <div className="relative -mt-8 rounded-t-[32px] bg-[#f6f9fd] px-6 pb-10 pt-7">{children}</div>
+        <div className="relative -mt-8 flex-1 rounded-t-[32px] bg-gradient-to-b from-[#e2ecfc] to-[#d6efe6] px-6 pb-10 pt-7">{children}</div>
       </div>
     </div>
   )
@@ -70,7 +70,7 @@ export default function Login() {
     <AuthShell>
       <div className="stagger space-y-5">
         <div style={{ ['--i' as string]: 0 }}>
-          <h2 className="text-2xl font-extrabold">Bienvenido 👋</h2>
+          <h2 className="text-[26px] font-extrabold leading-tight tracking-tight">Bienvenido</h2>
           <p className="text-mute">Entra con tu correo y contraseña.</p>
         </div>
         <form onSubmit={submit} className="space-y-3" style={{ ['--i' as string]: 1 }}>

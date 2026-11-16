@@ -2,7 +2,7 @@ import { Check, Clock, FileCheck2, MapPin, Navigation, Upload, Wallet, X, Zap } 
 import { useEffect, useState } from 'react'
 import { MapView } from '../../components/MapView'
 import { Sheet } from '../../components/Sheet'
-import { Avatar, Button, Card, ServiceIcon, Stars, Switch } from '../../components/ui'
+import { Avatar, Button, Card, ServiceTile, Stars, Switch } from '../../components/ui'
 import { formatKm, haversine } from '../../lib/geo'
 import { docName, isSameDay, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
@@ -62,12 +62,12 @@ function Pending() {
   const docs = myNurse?.documentos_url ?? []
   if (!docs.length || rejected)
     return (
-      <div className="scroll-y h-full px-5 pb-6">
+      <div className="scroll-y h-full px-5 pb-8">
         <div className="stagger flex flex-col items-center gap-4 pt-6 text-center">
           <span style={{ ['--i' as string]: 0 }} className={`flex h-20 w-20 items-center justify-center rounded-full ${rejected ? 'bg-red-50 text-red-500' : 'bg-brand-50 text-brand-600'}`}>
             {rejected ? <X size={38} /> : <Upload size={38} />}
           </span>
-          <h1 style={{ ['--i' as string]: 1 }} className="text-2xl font-extrabold">{rejected ? 'Documentación rechazada' : 'Sube tus documentos'}</h1>
+          <h1 style={{ ['--i' as string]: 1 }} className="text-[26px] font-extrabold leading-tight tracking-tight">{rejected ? 'Documentación rechazada' : 'Sube tus documentos'}</h1>
           <p style={{ ['--i' as string]: 2 }} className="max-w-[300px] text-mute">
             {rejected ? 'Vuelve a enviar tu tarjeta profesional y diploma para una nueva revisión.' : `Hola ${me?.nombre.split(' ')[0]}, para validar tu perfil necesitamos tu tarjeta profesional y tu diploma.`}
           </p>
@@ -76,12 +76,12 @@ function Pending() {
       </div>
     )
   return (
-    <div className="scroll-y h-full px-5 pb-6">
+    <div className="scroll-y h-full px-5 pb-8">
       <div className="stagger flex flex-col items-center gap-4 pt-8 text-center">
         <span style={{ ['--i' as string]: 0 }} className="flex h-24 w-24 items-center justify-center rounded-full bg-amber-50 text-amber-500">
           <Clock size={44} />
         </span>
-        <h1 style={{ ['--i' as string]: 1 }} className="text-2xl font-extrabold">Perfil en revisión</h1>
+        <h1 style={{ ['--i' as string]: 1 }} className="text-[26px] font-extrabold leading-tight tracking-tight">Perfil en revisión</h1>
         <p style={{ ['--i' as string]: 2 }} className="max-w-[300px] text-mute">
           {`Hola ${me?.nombre.split(' ')[0]}, un administrador está validando tu tarjeta profesional y diploma. Te avisaremos apenas esté listo.`}
         </p>
@@ -125,7 +125,7 @@ function OfferSheet({ s }: { s: Servicio }) {
         <MapView className="h-36 rounded-3xl" fit markers={[{ id: 'me', pos: me!.ubicacion, kind: 'me' }, { id: 'p', pos: s.ubicacion_paciente, kind: 'patient' }]} routes={[{ from: me!.ubicacion, to: s.ubicacion_paciente }]} />
         <div className="grid grid-cols-3 gap-2 text-center">
           <Card className="!p-3"><p className="text-[12px] text-mute">Distancia</p><p className="font-extrabold">{formatKm(dist)}</p></Card>
-          <Card className="!p-3"><p className="text-[12px] text-mute">Pago</p><p className="font-extrabold text-mint-600">{money(s.total * 0.85)}</p></Card>
+          <Card className="!p-3"><p className="text-[12px] text-mute">Pago</p><p className="font-extrabold text-mint-700">{money(s.total * 0.85)}</p></Card>
           <Card className="!p-3"><p className="text-[12px] text-mute">Cuándo</p><p className="font-extrabold">{s.inmediato ? 'Ahora' : 'Prog.'}</p></Card>
         </div>
         <div className="text-[14px]">
@@ -161,12 +161,11 @@ export default function NurseHome() {
     : null
 
   return (
-    <div className="scroll-y h-full px-5 pb-6">
+    <div className="scroll-y h-full px-5 pb-8">
       <div className="stagger space-y-4">
         <Card className={`flex items-center gap-4 transition-colors duration-300 ${myNurse.online ? '!bg-mint-50 !ring-1 !ring-mint-500/40' : ''}`} >
           <div className="flex-1">
-            <p className={`text-[13px] font-semibold ${myNurse.online ? 'text-mint-700' : 'text-mute'}`}>Estás</p>
-            <p className={`text-2xl font-extrabold ${myNurse.online ? 'text-mint-700' : ''}`}>{myNurse.online ? 'Conectado' : 'Desconectado'}</p>
+            <p className={`text-[26px] font-extrabold leading-tight tracking-tight ${myNurse.online ? 'text-mint-700' : ''}`}>{myNurse.online ? 'Conectado' : 'Desconectado'}</p>
             <p className={`text-[13px] ${myNurse.online ? 'text-mint-700/80' : 'text-mute'}`}>{myNurse.online ? 'Recibiendo solicitudes cercanas' : 'Conéctate para recibir servicios'}</p>
           </div>
           <Switch on={myNurse.online} onChange={toggleOnline} label="Conectado" />
@@ -181,9 +180,9 @@ export default function NurseHome() {
         {active ? (
           <Card key={active.estado + active.llego} className="pop-enter space-y-3">
             <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><ServiceIcon name={serviceOf(active.servicio_id).icon} /></span>
+              <ServiceTile id={active.servicio_id} icon={serviceOf(active.servicio_id).icon} size={44} />
               <div className="min-w-0 flex-1"><p className="text-[12px] font-bold uppercase text-brand-600">Servicio activo</p><p className="truncate font-extrabold">{serviceOf(active.servicio_id).nombre}</p></div>
-              <span className="font-extrabold text-mint-600">{money(active.total * 0.85)}</span>
+              <span className="font-extrabold text-mint-700">{money(active.total * 0.85)}</span>
             </div>
             <MapView className="h-44 rounded-2xl" fit
               markers={[{ id: 'me', pos: active.nursePos ?? me.ubicacion, kind: 'me', moving: true }, { id: 'p', pos: active.ubicacion_paciente, kind: 'patient' }]}
@@ -208,13 +207,13 @@ export default function NurseHome() {
 
         {doneToday.length > 0 && (
           <section>
-            <h2 className="mb-2 flex items-center gap-2 text-[17px] font-extrabold"><Wallet size={18} /> Completados hoy</h2>
+            <h2 className="mb-2 flex items-center gap-2 text-[18px] font-extrabold tracking-tight"><Wallet size={18} /> Completados hoy</h2>
             <div className="space-y-2">
               {doneToday.slice(0, 3).map((s) => (
                 <Card key={s.id} className="flex items-center gap-3 !p-3">
                   <Avatar name={state.users.find((u) => u.id === s.paciente_id)?.nombre ?? 'P'} color="#1d6fe8" size={38} />
                   <span className="flex-1 truncate font-semibold">{serviceOf(s.servicio_id).nombre}</span>
-                  <span className="font-extrabold text-mint-600">+{money(s.total * 0.85)}</span>
+                  <span className="font-extrabold text-mint-700">+{money(s.total * 0.85)}</span>
                 </Card>
               ))}
             </div>

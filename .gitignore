@@ -7,3 +7,4 @@ dist
 # CLI de Supabase y macOS
 supabase/.temp/
 .DS_Store
+.impeccable/

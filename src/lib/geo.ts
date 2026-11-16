@@ -16,5 +16,5 @@ export function haversine(a: LatLng, b: LatLng): number {
 export const KM_PER_DEG_LAT = 111.32
 export const kmPerDegLng = (lat: number) => 111.32 * Math.cos(rad(lat))
 
-export const formatKm = (km: number) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`)
+export const formatKm = (km: number) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km`)
 export const etaMinutes = (km: number) => Math.max(1, Math.round(km * 3))

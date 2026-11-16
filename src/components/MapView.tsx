@@ -90,7 +90,7 @@ export function MapView({ markers, center, kmAcross = 10, fit, radiusKm, routes 
       seen.add(m.id)
       const key = `${m.kind}|${m.color}|${m.offline}|${m.highlight}|${m.label}`
       const cur = pins.get(m.id)
-      const z = m.kind === 'patient' ? 300 : m.highlight ? 400 : 200
+      const z = m.kind === 'patient' || m.kind === 'me' ? 500 : m.highlight ? 400 : 200 // la casa y "tú" nunca quedan tapados
       if (!cur) {
         const p = pinOf(m)
         const marker = L.marker([m.pos.lat, m.pos.lng], {
@@ -126,7 +126,8 @@ export function MapView({ markers, center, kmAcross = 10, fit, radiusKm, routes 
     if (view === lv.view) return
     lv.view = view
     if (doFit && pts.length) {
-      map.fitBounds(L.latLngBounds(pts.map((p) => [p.lat, p.lng] as [number, number])), { padding: [56, 56], maxZoom: 17, animate: true, duration: 0.6 })
+      const pad = Math.min(56, Math.round(map.getSize().y / 4)) // mapas bajos: menos margen
+      map.fitBounds(L.latLngBounds(pts.map((p) => [p.lat, p.lng] as [number, number])), { padding: [pad, pad], maxZoom: 17, animate: true, duration: 0.6 })
     } else {
       const ctr = c ?? pts[0] ?? DEFAULT_CENTER
       map.setView([ctr.lat, ctr.lng], Math.round(zoomFor(km, map.getSize().x || 360, ctr.lat)), { animate: true, duration: 0.6 }) // zoom entero: mosaicos nítidos, sin líneas entre ellos

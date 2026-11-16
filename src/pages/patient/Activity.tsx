@@ -2,7 +2,7 @@ import { Receipt, Star } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sheet } from '../../components/Sheet'
-import { Avatar, Button, Card, ServiceIcon, StatusPill } from '../../components/ui'
+import { Avatar, Button, Card, ServiceTile, StatusPill } from '../../components/ui'
 import { formatDate, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { isActive, serviceOf } from '../../store/sim'
@@ -18,11 +18,11 @@ export default function Activity() {
   const nurseOf = (s: Servicio) => state.users.find((u) => u.id === s.enfermero_id)
 
   return (
-    <div className="scroll-y h-full px-5 pb-6">
-      <h1 className="text-2xl font-extrabold">Tu actividad</h1>
+    <div className="scroll-y h-full px-5 pb-8">
+      <h1 className="text-[26px] font-extrabold leading-tight tracking-tight">Tu actividad</h1>
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <Card><p className="text-[13px] text-mute">Completados</p><p className="text-2xl font-extrabold">{mine.filter((s) => s.estado === 'completado').length}</p></Card>
-        <Card><p className="text-[13px] text-mute">Total pagado</p><p className="text-2xl font-extrabold text-brand-700">{money(spent)}</p></Card>
+        <Card><p className="text-[13px] text-mute">Completados</p><p className="text-[26px] font-extrabold leading-tight tracking-tight">{mine.filter((s) => s.estado === 'completado').length}</p></Card>
+        <Card><p className="text-[13px] text-mute">Total pagado</p><p className="text-[26px] font-extrabold leading-tight tracking-tight text-brand-700">{money(spent)}</p></Card>
       </div>
 
       {mine.length === 0 ? (
@@ -41,10 +41,10 @@ export default function Activity() {
               <li key={s.id} style={{ ['--i' as string]: Math.min(i, 8) }}>
                 <button onClick={() => (isActive(s) ? nav(`/p/seguimiento/${s.id}`) : setSel(s))} className="press w-full text-left">
                   <Card className="flex items-center gap-3 !p-3.5">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><ServiceIcon name={svc.icon} /></span>
+                    <ServiceTile id={svc.id} icon={svc.icon} size={44} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-bold">{svc.nombre}</span>
-                      <span className="block truncate text-[12px] text-mute">{formatDate(s.creado)}{n ? ` · ${n.nombre}` : ''}</span>
+                      <span className="block truncate text-[12px] text-mute">{new Date(s.creado).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}{n ? ` · ${n.nombre}` : ''}</span>
                     </span>
                     <span className="flex flex-col items-end gap-1"><span className="font-extrabold">{money(s.total)}</span><StatusPill estado={s.estado} /></span>
                   </Card>

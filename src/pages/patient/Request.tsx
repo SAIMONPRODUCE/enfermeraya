@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LocationSheet } from '../../components/LocationSheet'
 import { MapView } from '../../components/MapView'
-import { Avatar, Button, Card, Field, ServiceIcon, Stars, SuccessMark, inputCls } from '../../components/ui'
+import { Avatar, Button, Card, Field, ServiceTile, Stars, SuccessMark, inputCls } from '../../components/ui'
 import { Segmented } from '../Login'
 import { CATALOGO } from '../../data/seed'
 import { etaMinutes, formatKm } from '../../lib/geo'
@@ -14,7 +14,7 @@ import { availableNurses } from '../../store/sim'
 import type { MetodoPago } from '../../types'
 
 const PAGOS: { id: MetodoPago; label: string; sub: string; icon: typeof CreditCard }[] = [
-  { id: 'tarjeta', label: 'Tarjeta de crédito', sub: 'Visa •••• 4242', icon: CreditCard },
+  { id: 'tarjeta', label: 'Tarjeta de crédito', sub: 'Pago seguro con Wompi', icon: CreditCard },
   { id: 'efectivo', label: 'Efectivo', sub: 'Paga al terminar el servicio', icon: Banknote },
   { id: 'transferencia', label: 'Transferencia', sub: 'Nequi / PSE', icon: Landmark },
 ]
@@ -106,24 +106,24 @@ export default function Request() {
         <span className="w-10 text-right text-[13px] font-bold text-mute">{step + 1}/3</span>
       </div>
 
-      <div className="scroll-y min-h-0 flex-1 px-5 pb-4">
+      <div key={step} className="scroll-y min-h-0 flex-1 px-5 pb-4">
         {step === 0 && (
           <div key="s0" className="step-enter space-y-5">
-            <h1 className="text-2xl font-extrabold">¿Qué servicio necesitas?</h1>
+            <h1 className="text-[26px] font-extrabold leading-tight tracking-tight">¿Qué servicio necesitas?</h1>
             <div className="grid grid-cols-2 gap-2.5">
               {CATALOGO.map((c) => (
                 <button key={c.id} onClick={() => setSid(c.id)} aria-pressed={sid === c.id}
                   className={`press rounded-2xl border-2 p-3 text-left transition-[border-color,background-color] duration-200 ${sid === c.id ? 'border-brand-600 bg-brand-50' : 'border-transparent bg-white shadow-sm'}`}>
-                  <span className={`mb-2 flex h-9 w-9 items-center justify-center rounded-xl transition-colors duration-200 ${sid === c.id ? 'bg-brand-600 text-white' : 'bg-brand-50 text-brand-600'}`}><ServiceIcon name={c.icon} size={18} /></span>
+                  <span className="mb-2.5 block"><ServiceTile id={c.id} icon={c.icon} size={40} /></span>
                   <span className="block text-[14px] font-bold leading-tight">{c.nombre}</span>
-                  <span className="text-[12px] text-mute">{money(c.precio_base)} · {c.duracion}</span>
+                  <span className="text-[12px] text-mute">Desde {money(c.precio_base)} · {c.duracion}</span>
                 </button>
               ))}
             </div>
             <p className="rounded-2xl bg-white p-3 text-[13px] text-mute shadow-sm">{svc.descripcion}</p>
 
             <div className="space-y-3">
-              <h2 className="text-[17px] font-extrabold">¿Cuándo?</h2>
+              <h2 className="text-[18px] font-extrabold tracking-tight">¿Cuándo?</h2>
               <Segmented value={inmediato ? 'now' : 'later'} onChange={(v) => setInmediato(v === 'now')} options={[{ id: 'now', label: 'Ahora', icon: Zap }, { id: 'later', label: 'Programar', icon: Calendar }]} />
               {!inmediato && (
                 <div className="step-enter"><input className={inputCls} type="datetime-local" value={fecha} onChange={(e) => setFecha(e.target.value)} /></div>
@@ -137,7 +137,7 @@ export default function Request() {
 
         {step === 1 && (
           <div key="s1" className="step-enter space-y-4">
-            <h1 className="text-2xl font-extrabold">¿Dónde te atendemos?</h1>
+            <h1 className="text-[26px] font-extrabold leading-tight tracking-tight">¿Dónde te atendemos?</h1>
             <button onClick={() => setLoc(true)} className="press w-full text-left">
               <Card className="flex items-center gap-3 !p-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-ink text-white"><MapPin size={20} /></span>
@@ -151,7 +151,10 @@ export default function Request() {
               <p className="rounded-2xl bg-amber-50 p-4 text-center text-[14px] font-semibold text-amber-700">No hay enfermeros conectados en {radio} km. Prueba ampliar el radio.</p>
             ) : (
               <div className="space-y-2">
-                <p className="text-[14px] font-bold text-mint-600">{near.length} disponibles · llega en ~{etaMinutes(near[0].dist)} min</p>
+                <div className="flex items-center gap-3.5 rounded-2xl bg-mint-50 p-3.5 text-mint-700">
+                  <span className="shrink-0 text-[30px] font-extrabold leading-none tabular-nums">~{etaMinutes(near[0].dist)}<span className="text-[15px]"> min</span></span>
+                  <span className="text-[13px] font-semibold leading-snug">{near.length} {near.length === 1 ? 'disponible' : 'disponibles'} cerca, con tarjeta profesional y diploma validados.</span>
+                </div>
                 <div className="stagger space-y-2">
                   {near.slice(0, 4).map((c, i) => (
                     <Card key={c.user.id} className="flex items-center gap-3 !p-3" >
@@ -169,14 +172,14 @@ export default function Request() {
 
         {step === 2 && (
           <div key="s2" className="step-enter space-y-5">
-            <h1 className="text-2xl font-extrabold">Pago y confirmación</h1>
+            <h1 className="text-[26px] font-extrabold leading-tight tracking-tight">Pago y confirmación</h1>
             <div className="space-y-2.5">
               {PAGOS.map((p) => (
                 <button key={p.id} onClick={() => setPago(p.id)} aria-pressed={pago === p.id}
                   className={`press flex w-full items-center gap-3 rounded-2xl border-2 p-3.5 text-left transition-[border-color,background-color] duration-200 ${pago === p.id ? 'border-brand-600 bg-brand-50' : 'border-transparent bg-white shadow-sm'}`}>
                   <span className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors duration-200 ${pago === p.id ? 'bg-brand-600 text-white' : 'bg-slate-100 text-mute'}`}><p.icon size={20} /></span>
                   <span className="flex-1"><span className="block font-bold">{p.label}</span><span className="text-[13px] text-mute">{p.sub}</span></span>
-                  <span className={`h-5 w-5 rounded-full border-2 transition-all duration-200 ${pago === p.id ? 'border-brand-600 bg-brand-600 shadow-[inset_0_0_0_3px_white]' : 'border-slate-300'}`} />
+                  <span className={`h-5 w-5 rounded-full border-2 transition-[border-color,background-color,box-shadow] duration-200 ${pago === p.id ? 'border-brand-600 bg-brand-600 shadow-[inset_0_0_0_3px_white]' : 'border-slate-300'}`} />
                 </button>
               ))}
             </div>
@@ -212,7 +215,7 @@ export default function Request() {
           {phase === 'paying' ? (
             <>
               <span className="spin h-14 w-14 rounded-full border-4 border-brand-100 border-t-brand-600" />
-              <p className="font-bold">{pago === 'efectivo' ? 'Confirmando solicitud…' : 'Procesando pago…'}</p>
+              <p className="font-bold">{pago === 'efectivo' ? 'Confirmando solicitud…' : 'Abriendo el pago seguro…'}</p>
             </>
           ) : (
             <>

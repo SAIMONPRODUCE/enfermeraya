@@ -1,5 +1,5 @@
 import { Star, TrendingUp } from 'lucide-react'
-import { Card, ServiceIcon } from '../../components/ui'
+import { Card, ServiceTile } from '../../components/ui'
 import { formatDate, isSameDay, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { serviceOf } from '../../store/sim'
@@ -23,7 +23,7 @@ export default function Earnings() {
   const max = Math.max(...bars.map((b) => b.v), 1)
 
   return (
-    <div className="scroll-y h-full px-5 pb-6">
+    <div className="scroll-y h-full px-5 pb-8">
       <div className="stagger space-y-4">
         <Card className="!bg-gradient-to-br !from-brand-600 !to-mint-500 !text-white" >
           <p className="text-[13px] font-semibold text-white/80">Ganancias totales</p>
@@ -31,8 +31,8 @@ export default function Earnings() {
           <p className="mt-1 flex items-center gap-1.5 text-[13px] text-white/85"><TrendingUp size={15} /> Recibes el 85% de cada servicio</p>
         </Card>
         <div className="grid grid-cols-2 gap-3">
-          <Card><p className="text-[13px] text-mute">Servicios</p><p className="text-2xl font-extrabold">{myNurse.servicios}</p></Card>
-          <Card><p className="text-[13px] text-mute">Calificación</p><p className="flex items-center gap-1 text-2xl font-extrabold"><Star size={22} fill="#f59e0b" strokeWidth={0} />{me.calificacion.toFixed(1)}</p></Card>
+          <Card><p className="text-[13px] text-mute">Servicios</p><p className="text-[26px] font-extrabold leading-tight tracking-tight">{myNurse.servicios}</p></Card>
+          <Card><p className="text-[13px] text-mute">Calificación</p><p className="flex items-center gap-1 text-[26px] font-extrabold leading-tight tracking-tight"><Star size={22} fill="#f59e0b" strokeWidth={0} />{me.calificacion.toFixed(1)}</p></Card>
         </div>
         <Card>
           <h2 className="mb-4 font-extrabold">Últimos 7 días</h2>
@@ -40,7 +40,7 @@ export default function Earnings() {
             {bars.map((b, i) => (
               <div key={i} className="flex h-full flex-1 flex-col items-center gap-1.5">
                 <div className="flex min-h-0 w-full flex-1 items-end">
-                  <div className={`w-full origin-bottom rounded-lg ${i === 6 ? 'bg-brand-600' : 'bg-brand-200'}`} style={{ height: `${Math.max(6, (b.v / max) * 100)}%`, animation: `enter-up 400ms var(--ease-out) ${i * 40}ms both` }} />
+                  <div className={`bar-enter w-full rounded-lg ${i === 6 ? 'bg-brand-600' : 'bg-brand-200'}`} style={{ height: `${Math.max(6, (b.v / max) * 100)}%`, animationDelay: `${i * 40}ms` }} />
                 </div>
                 <span className="text-[12px] font-semibold text-mute">{b.label}</span>
               </div>
@@ -55,14 +55,14 @@ export default function Earnings() {
             <div className="space-y-2">
               {done.map((s) => (
                 <Card key={s.id} className="flex items-center gap-3 !p-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><ServiceIcon name={serviceOf(s.servicio_id).icon} size={18} /></span>
-                  <span className="min-w-0 flex-1"><span className="block truncate font-bold">{serviceOf(s.servicio_id).nombre}</span><span className="text-[12px] text-mute">{formatDate(s.estado_ts)}{s.calificacion ? ` · ${'★'.repeat(s.calificacion)}` : ''}</span></span>
-                  <span className="font-extrabold text-mint-600">+{money(s.total * 0.85)}</span>
+                  <ServiceTile id={s.servicio_id} icon={serviceOf(s.servicio_id).icon} size={40} />
+                  <span className="min-w-0 flex-1"><span className="block truncate font-bold">{serviceOf(s.servicio_id).nombre}</span><span className="text-[12px] text-mute">{formatDate(s.estado_ts)}{s.calificacion ? ` · ${s.calificacion} de 5` : ''}</span></span>
+                  <span className="font-extrabold text-mint-700">+{money(s.total * 0.85)}</span>
                 </Card>
               ))}
             </div>
           )}
-          {rated.length > 0 && <p className="mt-3 text-center text-[13px] text-mute">{rated.length} reseña(s) recibidas</p>}
+          {rated.length > 0 && <p className="mt-3 text-center text-[13px] text-mute">{rated.length} {rated.length === 1 ? 'reseña recibida' : 'reseñas recibidas'}</p>}
         </section>
       </div>
     </div>

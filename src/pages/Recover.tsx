@@ -28,7 +28,7 @@ export function Recover() {
     <AuthShell>
       <div className="stagger space-y-5">
         <div style={{ ['--i' as string]: 0 }}>
-          <h2 className="text-2xl font-extrabold">Recupera tu contraseña</h2>
+          <h2 className="text-[26px] font-extrabold leading-tight tracking-tight">Recupera tu contraseña</h2>
           <p className="text-mute">Te enviamos un enlace para crear una nueva.</p>
         </div>
         {sent ? (
@@ -84,7 +84,7 @@ export function ResetPassword() {
     <AuthShell>
       <div className="stagger space-y-5">
         <div style={{ ['--i' as string]: 0 }}>
-          <h2 className="text-2xl font-extrabold">Nueva contraseña</h2>
+          <h2 className="text-[26px] font-extrabold leading-tight tracking-tight">Nueva contraseña</h2>
           <p className="text-mute">Elige una contraseña que no uses en otro sitio.</p>
         </div>
         {link === 'espera' ? null : link === 'ok' ? (

@@ -1,5 +1,5 @@
 import {
-  Baby, Bandage, Droplet, FlaskConical, HeartPulse, Star, Syringe, Users, type LucideIcon,
+  Baby, Bandage, Droplet, FlaskConical, HeartPulse, ShieldCheck, Star, Syringe, Users, type LucideIcon,
 } from 'lucide-react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { initials } from '../lib/format'
@@ -21,7 +21,7 @@ type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button({ variant = 'primary', loading, block, className = '', children, disabled, ...p }: BtnProps) {
   const v = {
     primary: 'btn-primary bg-brand-600 text-white shadow-[0_8px_20px_-8px_rgba(29,111,232,0.7)]',
-    mint: 'bg-mint-500 text-white shadow-[0_8px_20px_-8px_rgba(16,185,129,0.7)]',
+    mint: 'bg-mint-700 text-white shadow-[0_8px_20px_-8px_rgba(8,115,79,0.6)]',
     soft: 'bg-brand-50 text-brand-700',
     ghost: 'bg-white text-ink border border-slate-200',
     danger: 'bg-red-50 text-red-600',
@@ -53,7 +53,7 @@ export function Stars({ value, size = 14 }: { value: number; size?: number }) {
   return (
     <span className="inline-flex items-center gap-0.5 font-semibold text-amber-500" style={{ fontSize: size }}>
       <Star size={size} fill="currentColor" strokeWidth={0} />
-      {value.toFixed(1)}
+      {value.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
     </span>
   )
 }
@@ -85,8 +85,8 @@ const ESTADO_STYLE: Record<Estado, string> = {
   solicitado: 'bg-amber-50 text-amber-700',
   aceptado: 'bg-brand-50 text-brand-700',
   en_camino: 'bg-brand-50 text-brand-700',
-  en_atencion: 'bg-mint-50 text-mint-600',
-  completado: 'bg-mint-50 text-mint-600',
+  en_atencion: 'bg-mint-50 text-mint-700',
+  completado: 'bg-mint-50 text-mint-700',
   cancelado: 'bg-slate-100 text-slate-500',
   sin_cobertura: 'bg-red-50 text-red-600',
 }
@@ -95,7 +95,7 @@ export const StatusPill = ({ estado }: { estado: Estado }) => (
 )
 
 export const Card = ({ children, className = '' }: { children: ReactNode; className?: string }) => (
-  <div className={`rounded-3xl bg-white p-4 shadow-[0_1px_2px_rgba(15,31,61,0.04),0_8px_24px_-12px_rgba(15,31,61,0.12)] ${className}`}>{children}</div>
+  <div className={`rounded-3xl bg-white p-4 shadow-[0_1px_2px_rgba(15,31,61,0.06),0_16px_32px_-14px_rgba(20,48,95,0.3)] ${className}`}>{children}</div>
 )
 
 export const Field = ({ label, children }: { label: string; children: ReactNode }) => (
@@ -117,22 +117,22 @@ export function SuccessMark({ size = 88 }: { size?: number }) {
   )
 }
 
-export function Confetti() {
-  const colors = ['#1d6fe8', '#10b981', '#f59e0b', '#ec4899', '#6366f1']
-  return (
-    <div className="pointer-events-none absolute left-1/2 top-1/2" aria-hidden>
-      {Array.from({ length: 16 }).map((_, i) => (
-        <span
-          key={i}
-          className="confetti absolute h-2 w-1.5 rounded-sm"
-          style={{
-            background: colors[i % colors.length],
-            ['--dx' as string]: `${(i - 8) * 14}px`,
-            ['--rot' as string]: `${(i % 2 ? 1 : -1) * (180 + i * 20)}deg`,
-            animationDelay: `${(i % 4) * 40}ms`,
-          }}
-        />
-      ))}
-    </div>
-  )
+
+/** Tono suave por cuidado: fondo claro e icono del mismo matiz. */
+const TONE: Record<string, string> = {
+  inyect: 'bg-brand-50 text-brand-600', cura: 'bg-mint-50 text-mint-700', posop: 'bg-rose-50 text-rose-600',
+  adulto: 'bg-amber-50 text-amber-700', muestras: 'bg-violet-50 text-violet-600', suero: 'bg-cyan-50 text-cyan-700',
 }
+export const ServiceTile = ({ id, icon, size = 52 }: { id: string; icon: string; size?: number }) => (
+  <span className={`flex shrink-0 items-center justify-center rounded-2xl ${TONE[id] ?? TONE.inyect}`} style={{ width: size, height: size }}>
+    <ServiceIcon name={icon} size={Math.round(size * 0.5)} />
+  </span>
+)
+
+/** La promesa del producto junto al profesional: documentos validados por un administrador. */
+export const Validated = () => (
+  <p className="flex items-center gap-2 bg-mint-50 px-4 py-2.5 text-[13px] font-semibold text-mint-700">
+    <ShieldCheck size={16} className="shrink-0" aria-hidden />
+    Tarjeta profesional y diploma validados
+  </p>
+)

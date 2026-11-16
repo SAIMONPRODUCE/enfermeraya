@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   --color-brand-50: #eef5ff;
   --color-brand-100: #d9e8ff;
   --color-brand-200: #b6d2ff;
@@ -17,8 +17,9 @@
   --color-mint-400: #34d399;
   --color-mint-500: #10b981;
   --color-mint-600: #0c9a6b;
+  --color-mint-700: #08734f;
   --color-ink: #0f1f3d;
-  --color-mute: #64748b;
+  --color-mute: #475569;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
@@ -55,7 +56,12 @@ button { font-family: inherit; cursor: pointer; }
   max-width: 460px;
   margin: 0 auto;
   isolation: isolate;
-  background: linear-gradient(160deg, #eef5ff 0%, #e6f7f2 100%);
+  /* Fondo en capas: luz azul arriba, menta al costado y un resplandor al pie; da profundidad sin competir con las tarjetas */
+  background:
+    radial-gradient(120% 55% at 0% 0%, rgba(29, 111, 232, 0.5) 0%, transparent 62%),
+    radial-gradient(90% 48% at 100% 24%, rgba(16, 185, 129, 0.42) 0%, transparent 64%),
+    radial-gradient(110% 52% at 40% 108%, rgba(29, 111, 232, 0.42) 0%, transparent 62%),
+    linear-gradient(170deg, #cfe1ff 0%, #d9e8fb 45%, #c6ecdf 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -97,11 +103,24 @@ button { font-family: inherit; cursor: pointer; }
 .page-enter { animation: enter-up 260ms var(--ease-out) both; }
 .step-enter { animation: enter-up 220ms var(--ease-out) both; }
 .pop-enter { animation: enter-pop 220ms var(--ease-out) both; }
+/* Cascada: solo al cargar la pantalla, 40 ms por elemento y tope en el quinto */
 .stagger > * {
-  animation: enter-up 300ms var(--ease-out) both;
-  animation-delay: calc(var(--i, 0) * 50ms);
+  animation: enter-up 240ms var(--ease-out) both;
+  animation-delay: calc(min(var(--i, 0), 5) * 40ms);
 }
+.stagger > :nth-child(2) { --i: 1; }
+.stagger > :nth-child(3) { --i: 2; }
+.stagger > :nth-child(4) { --i: 3; }
+.stagger > :nth-child(5) { --i: 4; }
+.stagger > :nth-child(n + 6) { --i: 5; }
 .fade-enter { animation: enter-fade 200ms ease both; }
+/* Cambio de pestaña: es la acción más repetida, solo un fundido corto */
+.tab-enter { animation: enter-fade 140ms ease both; }
+/* Panel anclado abajo: entra desde su borde, no desde el centro */
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+.sheet-enter { animation: sheet-up 320ms var(--ease-drawer) both; }
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: none; } }
+.bar-enter { transform-origin: bottom; animation: grow-y 400ms var(--ease-out) both; }
 
 /* ---------- Sheet ---------- */
 .sheet-backdrop { background: rgba(15, 31, 61, 0.4); opacity: 0; transition: opacity 220ms ease; }
@@ -155,29 +174,20 @@ button { font-family: inherit; cursor: pointer; }
 }
 .success-ring { animation: ring-pop 420ms var(--ease-out) both; }
 .success-check { stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw 360ms var(--ease-out) 240ms forwards; }
-@keyframes confetti-fall {
-  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
-  100% { transform: translate(var(--dx), 220px) rotate(var(--rot)); opacity: 0; }
-}
-.confetti { animation: confetti-fall 1.4s var(--ease-out) forwards; }
 
 /* ---------- Progreso lineal ---------- */
 .progress-fill { transition: transform 1000ms linear; transform-origin: left; }
-.timeline-fill { transition: transform 500ms var(--ease-in-out); transform-origin: top; }
 
-/* ---------- Mapa ---------- */
-.map-marker { transition: transform 600ms var(--ease-in-out); will-change: transform; }
-.map-marker.moving { transition: transform 1000ms linear; }
-.map-line { transition: transform 1000ms linear; transform-origin: 0 50%; }
 
 /* ---------- Movimiento reducido: menos y más suave, no cero ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .page-enter, .step-enter, .pop-enter, .stagger > * { animation: enter-fade 200ms ease both; animation-delay: 0ms; }
+  .page-enter, .step-enter, .pop-enter, .sheet-enter, .stagger > * { animation: enter-fade 200ms ease both; animation-delay: 0ms; }
+  .bar-enter { animation: none; }
+  .ey-glide { transition-duration: 0ms; }
   .sheet-panel, .toast { transform: none; }
   .sheet-panel:not([data-open="true"]) { opacity: 0; }
   .sheet-panel { transition: opacity 200ms ease; }
-  .radar-ring, .confetti, .pulse-dot::after { animation: none; }
-  .map-marker, .map-marker.moving, .map-line { transition-duration: 0ms; }
+  .radar-ring, .pulse-dot::after { animation: none; }
 }
 
 /* Marca de agua: corazon del logo, baja opacidad, detras de todo el contenido */
@@ -196,3 +206,17 @@ button { font-family: inherit; cursor: pointer; }
 .ey-glide { transition: transform 8s linear; }
 .leaflet-container { font-family: inherit; z-index: 0; }
 .leaflet-control-attribution { font-size: 10px; background: rgba(255, 255, 255, 0.75); }
+
+/* Orbes de luz detrás del contenido: una segunda capa que separa el fondo de las tarjetas */
+.app-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 88% 9%, rgba(255, 255, 255, 0.34) 0 84px, transparent 85px),
+    radial-gradient(circle at 88% 9%, transparent 0 128px, rgba(255, 255, 255, 0.45) 129px 131px, transparent 132px),
+    radial-gradient(circle at 6% 58%, rgba(255, 255, 255, 0.26) 0 110px, transparent 111px),
+    radial-gradient(circle at 96% 92%, rgba(255, 255, 255, 0.28) 0 70px, transparent 71px);
+}

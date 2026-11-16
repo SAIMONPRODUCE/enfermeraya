@@ -30,13 +30,25 @@ export function LocationSheet({ open, onClose }: { open: boolean; onClose: () =>
 
   const near = availableNurses(state, pos, [], 10)
 
+  // Ubicación real del dispositivo; si el permiso falla, el mapa y las direcciones siguen sirviendo.
+  const [geoErr, setGeoErr] = useState('')
   const locate = () => {
+    if (!navigator.geolocation) return setGeoErr('Este dispositivo no comparte su ubicación. Toca el mapa o escribe la dirección.')
     setLocating(true)
-    setTimeout(() => {
-      setPos(PRESETS[0].pos)
-      setAddr(PRESETS[0].name)
-      setLocating(false)
-    }, 900)
+    setGeoErr('')
+    navigator.geolocation.getCurrentPosition(
+      (g) => {
+        const p = { lat: g.coords.latitude, lng: g.coords.longitude }
+        setPos(p)
+        setAddr(`Punto en el mapa (${p.lat.toFixed(4)}, ${p.lng.toFixed(4)})`)
+        setLocating(false)
+      },
+      () => {
+        setGeoErr('No pudimos leer tu ubicación. Revisa el permiso del navegador, toca el mapa o escribe la dirección.')
+        setLocating(false)
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    )
   }
 
   return (
@@ -64,7 +76,8 @@ export function LocationSheet({ open, onClose }: { open: boolean; onClose: () =>
           Mi ubicación
         </button>
       </div>
-      <p className="mt-2 text-center text-[13px] font-semibold text-mint-600">{near.length} enfermeros disponibles en 10 km</p>
+      {geoErr && <p role="alert" className="mt-2 text-[13px] font-semibold text-red-600">{geoErr}</p>}
+      <p className="mt-2 text-center text-[13px] font-semibold text-mint-700">{near.length} enfermeros disponibles en 10 km</p>
 
       <div className="relative mt-3">
         <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />

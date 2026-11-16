@@ -9,11 +9,11 @@ export default function Profile() {
   const nav = useNavigate()
   if (!me) return null
   return (
-    <div className="scroll-y h-full px-5 pb-6">
+    <div className="scroll-y h-full px-5 pb-8">
       <div className="stagger space-y-4">
         <div className="flex flex-col items-center gap-2 pt-2 text-center" style={{ ['--i' as string]: 0 }}>
           <Avatar name={me.nombre} color={me.color} size={84} />
-          <h1 className="text-2xl font-extrabold">{me.nombre}</h1>
+          <h1 className="text-[26px] font-extrabold leading-tight tracking-tight">{me.nombre}</h1>
           <p className="flex items-center gap-1 text-[14px] capitalize text-mute">
             {me.rol} {me.rol === 'enfermero' && <><span>·</span><Star size={14} fill="#f59e0b" strokeWidth={0} /> {me.calificacion.toFixed(1)}</>}
           </p>

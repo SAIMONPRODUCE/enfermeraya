@@ -2,7 +2,7 @@ import { ArrowLeft, Check, MessageCircle, Phone, Star } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MapView, type MapMarker } from '../../components/MapView'
-import { Avatar, Button, Card, Confetti, Stars, SuccessMark, inputCls } from '../../components/ui'
+import { Avatar, Button, Stars, SuccessMark, Validated, inputCls } from '../../components/ui'
 import { etaMinutes, formatKm, haversine } from '../../lib/geo'
 import { money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
@@ -55,7 +55,7 @@ export default function Tracking() {
   const dist = s.nursePos ? haversine(s.nursePos, s.ubicacion_paciente) : 0
 
   const markers: MapMarker[] = [{ id: 'p', pos: s.ubicacion_paciente, kind: 'patient' }]
-  if (nurse && s.nursePos && s.estado !== 'cancelado')
+  if (nurse && s.nursePos && (s.estado === 'aceptado' || (s.estado === 'en_camino' && !s.llego)))
     markers.push({ id: nurse.id, pos: s.nursePos, kind: 'nurse', label: nurse.nombre, color: nurse.color, moving: s.estado === 'en_camino', highlight: true })
   const showRoute = s.nursePos && s.estado === 'en_camino' && !s.llego
 
@@ -86,7 +86,7 @@ export default function Tracking() {
       )}
       <button onClick={() => nav('/p', { replace: true })} aria-label="Volver al inicio" className="press absolute left-4 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg"><ArrowLeft size={20} /></button>
 
-      <div className="safe-bottom pop-enter absolute inset-x-0 bottom-0 z-10 max-h-[75%] overflow-y-auto rounded-t-[28px] bg-white px-5 pt-5 shadow-[0_-12px_40px_-12px_rgba(15,31,61,0.3)] scroll-y">
+      <div className="safe-bottom sheet-enter absolute inset-x-0 bottom-0 z-10 max-h-[75%] overflow-y-auto rounded-t-[28px] bg-white px-5 pt-5 shadow-[0_-12px_40px_-12px_rgba(15,31,61,0.3)] scroll-y">
         {searching && (
           <div className="space-y-4 pb-4">
             <div>
@@ -108,16 +108,16 @@ export default function Tracking() {
               {s.estado === 'en_camino' && !s.llego && <span className="rounded-full bg-brand-50 px-3 py-1 text-[13px] font-bold text-brand-700">{formatKm(dist)}</span>}
             </div>
             <Stepper estado={s.estado} />
-            <Card className="flex items-center gap-3 !bg-slate-50 !p-3 !shadow-none">
+            <div className="overflow-hidden rounded-3xl bg-slate-50"><div className="flex items-center gap-3 p-3">
               <Avatar name={nurse.nombre} color={nurse.color} size={52} online />
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-bold">{nurse.nombre}</span>
                 <span className="block truncate text-[13px] text-mute">{detail.especialidad}</span>
                 <span className="text-[13px]"><Stars value={nurse.calificacion} /> <span className="text-mute">· {detail.servicios} servicios</span></span>
               </span>
-              <a href={`tel:${nurse.telefono}`} aria-label="Llamar" className="press flex h-11 w-11 items-center justify-center rounded-full bg-mint-500 text-white"><Phone size={18} /></a>
+              <a href={`tel:${nurse.telefono}`} aria-label="Llamar" className="press flex h-11 w-11 items-center justify-center rounded-full bg-mint-700 text-white"><Phone size={18} /></a>
               <a href={`sms:${nurse.telefono}`} aria-label="Mensaje" className="press flex h-11 w-11 items-center justify-center rounded-full bg-brand-600 text-white"><MessageCircle size={18} /></a>
-            </Card>
+            </div><Validated /></div>
             <div className="flex items-center justify-between text-[14px]">
               <span className="text-mute">{svc.nombre} · {s.direccion}</span>
               <span className="font-extrabold">{money(s.total)}</span>
@@ -128,7 +128,7 @@ export default function Tracking() {
 
         {s.estado === 'completado' && (
           <div className="relative space-y-4 pb-4 text-center">
-            <div className="relative flex justify-center pt-1">{s.calificacion === null && <Confetti />}<SuccessMark size={72} /></div>
+            <div className="relative flex justify-center pt-1"><SuccessMark size={72} /></div>
             <div>
               <h2 className="text-xl font-extrabold">¡Servicio completado!</h2>
               <p className="text-[14px] text-mute">{svc.nombre} · {money(s.total)}</p>
@@ -153,7 +153,7 @@ export default function Tracking() {
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="font-bold text-mint-600">¡Gracias por calificar! {'★'.repeat(s.calificacion)}</p>
+                <p className="font-bold text-mint-700">¡Gracias por calificar!</p>
                 <Button block onClick={() => nav('/p', { replace: true })}>Volver al inicio</Button>
               </div>
             )}
