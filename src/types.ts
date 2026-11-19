@@ -87,10 +87,37 @@ export interface Notificacion {
   tipo: 'info' | 'exito' | 'alerta'
 }
 
+export type RetiroEstado = 'pendiente' | 'pagado' | 'rechazado'
+export type MetodoCobro = 'nequi' | 'daviplata' | 'banco'
+
+/** Cuenta donde el profesional recibe sus retiros. */
+export interface CuentaCobro {
+  metodo: MetodoCobro
+  banco: string
+  tipo_cuenta: '' | 'ahorros' | 'corriente'
+  numero: string
+  titular: string
+}
+
+export interface Retiro extends CuentaCobro {
+  id: string
+  usuario_id: string
+  monto: number
+  estado: RetiroEstado
+  referencia: string
+  nota: string
+  creado: number
+  resuelto_ts: number
+}
+
 export interface AppState {
   users: User[]
   nurses: Record<string, NurseDetail>
   servicios: Servicio[]
   notifs: Notificacion[]
+  /** Retiros: los propios, o todos si es admin. */
+  retiros: Retiro[]
+  /** Cuenta de cobro del profesional que tiene la sesión. */
+  cuenta: CuentaCobro | null
   sessionId: string | null
 }

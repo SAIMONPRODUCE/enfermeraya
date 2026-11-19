@@ -45,3 +45,23 @@ export function formatTelefono(t: string): string {
   const m = t.replace(/\D/g, '').match(/^(\d{2})(\d{3})(\d{3})(\d{4})$/)
   return m ? `+${m[1]} ${m[2]} ${m[3]} ${m[4]}` : t
 }
+
+/** Retiro mínimo de ganancias (el servidor lo vuelve a validar en solicitar_retiro). */
+export const RETIRO_MINIMO = 50000
+
+/** Días entre un retiro y el siguiente (el servidor lo vuelve a validar). */
+export const RETIRO_CADA_DIAS = 3
+
+/** Cuándo puede volver a retirar: 3 días después de su último retiro no rechazado, o null si ya puede. */
+export function proximoRetiro(retiros: { estado: string; creado: number }[], now = Date.now()): number | null {
+  const ultimo = Math.max(0, ...retiros.filter((r) => r.estado !== 'rechazado').map((r) => r.creado))
+  const next = ultimo + RETIRO_CADA_DIAS * 864e5
+  return ultimo && next > now ? next : null
+}
+
+/** Saldo disponible: ganancias menos los retiros pendientes o pagados. Espejo de saldo_disponible() para mostrarlo. */
+export const saldoDisponible = (ganancias: number, retiros: { estado: string; monto: number }[]) =>
+  ganancias - retiros.filter((r) => r.estado !== 'rechazado').reduce((a, r) => a + r.monto, 0)
+
+/** "•••• 4567" */
+export const enmascarar = (numero: string) => `•••• ${numero.slice(-4)}`

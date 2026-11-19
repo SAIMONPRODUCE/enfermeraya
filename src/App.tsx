@@ -1,4 +1,4 @@
-import { Activity as ActivityIcon, ClipboardList, Home, LayoutDashboard, ShieldCheck, User, Wallet } from 'lucide-react'
+import { Activity as ActivityIcon, Banknote, ClipboardList, Home, LayoutDashboard, ShieldCheck, User, Wallet } from 'lucide-react'
 import { lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
@@ -14,6 +14,7 @@ import Register from './pages/Register'
 // Rutas por rol y flujos pesados (mapa, pago) se cargan al entrar: el inicio de paciente y el login quedan ligeros.
 const Operations = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.Operations })))
 const Validations = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.Validations })))
+const Withdrawals = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.Withdrawals })))
 const Earnings = lazy(() => import('./pages/nurse/Earnings'))
 const NurseHome = lazy(() => import('./pages/nurse/Home'))
 const Request = lazy(() => import('./pages/patient/Request'))
@@ -39,6 +40,7 @@ const nurseTabs = [
 const adminTabs = [
   { to: '/a', label: 'Validaciones', icon: ShieldCheck },
   { to: '/a/operaciones', label: 'Operaciones', icon: LayoutDashboard },
+  { to: '/a/retiros', label: 'Retiros', icon: Banknote },
   { to: '/a/perfil', label: 'Perfil', icon: User },
 ]
 
@@ -69,6 +71,7 @@ export default function App() {
       <Route path="/a" element={<Guard role="admin"><Layout tabs={adminTabs} badge="Admin" /></Guard>}>
         <Route index element={<Validations />} />
         <Route path="operaciones" element={<Operations />} />
+        <Route path="retiros" element={<Withdrawals />} />
         <Route path="perfil" element={<Profile />} />
       </Route>
 

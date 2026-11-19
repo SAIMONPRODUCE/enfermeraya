@@ -1,10 +1,13 @@
-import { Check, FileText, X } from 'lucide-react'
+import { Banknote, Check, Copy, FileText, X } from 'lucide-react'
 import { useState } from 'react'
 import { MapView } from '../../components/MapView'
-import { Avatar, Button, Card, StatusPill } from '../../components/ui'
+import { Sheet } from '../../components/Sheet'
+import { METODO_LABEL, RetiroPill } from '../../components/Withdraw'
+import { Avatar, Button, Card, Field, StatusPill, inputCls } from '../../components/ui'
 import { docName, formatDate, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { isActive, serviceOf } from '../../store/sim'
+import type { Retiro } from '../../types'
 
 export function Validations() {
   const { state, approve, openDoc } = useApp()
@@ -96,6 +99,119 @@ export function Operations() {
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+/** Retiros de los profesionales: el admin paga por fuera de la app y aquí lo marca pagado (con referencia) o rechazado (con motivo). */
+export function Withdrawals() {
+  const { state, resolveWithdrawal } = useApp()
+  const [sel, setSel] = useState<{ r: Retiro; pagado: boolean } | null>(null)
+  const [txt, setTxt] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [copied, setCopied] = useState('')
+  const pendientes = state.retiros.filter((r) => r.estado === 'pendiente')
+  const resueltos = state.retiros.filter((r) => r.estado !== 'pendiente')
+  const nameOf = (id: string) => state.users.find((u) => u.id === id)?.nombre ?? 'Profesional'
+
+  const copy = async (numero: string) => {
+    try {
+      await navigator.clipboard.writeText(numero)
+      setCopied(numero)
+      setTimeout(() => setCopied(''), 1500)
+    } catch {
+      /* sin permiso de portapapeles: el número queda visible para copiarlo a mano */
+    }
+  }
+  const open = (r: Retiro, pagado: boolean) => {
+    setTxt('')
+    setSel({ r, pagado })
+  }
+  const send = async () => {
+    if (!sel) return
+    setBusy(true)
+    const ok = await resolveWithdrawal(sel.r.id, sel.pagado, sel.pagado ? txt : '', sel.pagado ? '' : txt)
+    setBusy(false)
+    if (ok) setSel(null)
+  }
+
+  return (
+    <div className="scroll-y h-full px-5 pb-8">
+      <h1 className="text-[26px] font-extrabold leading-tight tracking-tight">Retiros</h1>
+      <p className="mb-4 text-[14px] text-mute">
+        {pendientes.length === 0 ? 'No hay retiros por pagar.' : <><b>{pendientes.length}</b> {pendientes.length === 1 ? 'retiro por pagar' : 'retiros por pagar'} por <b>{money(pendientes.reduce((a, r) => a + r.monto, 0))}</b></>}
+      </p>
+
+      <div className="space-y-3">
+        {pendientes.map((r) => (
+          <Card key={r.id} className="space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate font-extrabold">{nameOf(r.usuario_id)}</p>
+                <p className="text-[13px] text-mute">{formatDate(r.creado)}</p>
+              </div>
+              <p className="text-[22px] font-extrabold leading-tight tabular-nums text-brand-700">{money(r.monto)}</p>
+            </div>
+            <dl className="space-y-1.5 rounded-2xl bg-slate-50 p-3 text-[14px]">
+              <div className="flex justify-between gap-3"><dt className="text-mute">Medio</dt><dd className="font-semibold capitalize">{r.metodo === 'banco' ? `${r.banco} · ${r.tipo_cuenta}` : METODO_LABEL[r.metodo]}</dd></div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-mute">Número</dt>
+                <dd className="flex items-center gap-2 font-semibold tabular-nums">
+                  {r.numero}
+                  <button onClick={() => copy(r.numero)} aria-label="Copiar número" className="press flex h-9 w-9 items-center justify-center rounded-full bg-white text-brand-700">
+                    {copied === r.numero ? <Check size={16} strokeWidth={3} /> : <Copy size={16} />}
+                  </button>
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3"><dt className="text-mute">Titular</dt><dd className="text-right font-semibold">{r.titular}</dd></div>
+            </dl>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="danger" onClick={() => open(r, false)}><X size={18} /> Rechazar</Button>
+              <Button variant="mint" onClick={() => open(r, true)}><Banknote size={18} /> Ya pagué</Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {resueltos.length > 0 && (
+        <>
+          <h2 className="mb-2 mt-6 font-extrabold">Historial</h2>
+          <div className="space-y-2">
+            {resueltos.slice(0, 20).map((r) => (
+              <Card key={r.id} className="!p-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="min-w-0 truncate font-bold">{nameOf(r.usuario_id)}</span>
+                  <span className="font-extrabold tabular-nums">{money(r.monto)}</span>
+                </div>
+                <div className="mt-1 flex items-center justify-between gap-3 text-[13px] text-mute">
+                  <span className="min-w-0 truncate">{formatDate(r.resuelto_ts || r.creado)}</span>
+                  <RetiroPill estado={r.estado} />
+                </div>
+                {r.estado === 'pagado' && r.referencia && <p className="mt-1 text-[13px]">Referencia: <b>{r.referencia}</b></p>}
+                {r.estado === 'rechazado' && r.nota && <p className="mt-1 text-[13px] text-red-700">Motivo: {r.nota}</p>}
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+
+      <Sheet open={!!sel} onClose={() => setSel(null)} title={sel?.pagado ? 'Marcar pagado' : 'Rechazar retiro'}>
+        {sel && (
+          <div className="pb-2">
+            <h2 className="text-[22px] font-extrabold tracking-tight">{sel.pagado ? 'Confirmar pago' : 'Rechazar retiro'}</h2>
+            <p className="mb-4 mt-1 text-[14px] text-mute">
+              {money(sel.r.monto)} para <b className="text-ink">{nameOf(sel.r.usuario_id)}</b>.{' '}
+              {sel.pagado ? 'Confirma solo cuando ya hiciste la transferencia.' : 'El saldo vuelve a estar disponible para el profesional.'}
+            </p>
+            <Field label={sel.pagado ? 'Referencia del pago' : 'Motivo del rechazo'}>
+              <input className={inputCls} value={txt} maxLength={sel.pagado ? 80 : 300} onChange={(e) => setTxt(e.target.value)} placeholder={sel.pagado ? 'Número de comprobante' : 'Ej.: el titular no coincide'} />
+            </Field>
+            <Button block variant={sel.pagado ? 'mint' : 'danger'} className="mt-4" loading={busy} disabled={txt.trim() === ''} onClick={send}>
+              {sel.pagado ? 'Confirmar que ya pagué' : 'Rechazar retiro'}
+            </Button>
+          </div>
+        )}
+      </Sheet>
     </div>
   )
 }

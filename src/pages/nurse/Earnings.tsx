@@ -1,6 +1,7 @@
 import { Star, TrendingUp } from 'lucide-react'
 import { Card, ServiceTile } from '../../components/ui'
-import { formatDate, isSameDay, money } from '../../lib/format'
+import { RetirosProfesional } from '../../components/Withdraw'
+import { formatDate, isSameDay, money, saldoDisponible } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { serviceOf } from '../../store/sim'
 
@@ -30,6 +31,7 @@ export default function Earnings() {
           <p className="text-[34px] font-extrabold leading-tight tabular-nums">{money(myNurse.ganancias)}</p>
           <p className="mt-1 flex items-center gap-1.5 text-[13px] text-white/85"><TrendingUp size={15} /> Recibes el 85% de cada servicio</p>
         </Card>
+        <RetirosProfesional saldo={saldoDisponible(myNurse.ganancias, state.retiros)} />
         <div className="grid grid-cols-2 gap-3">
           <Card><p className="text-[13px] text-mute">Servicios</p><p className="text-[26px] font-extrabold leading-tight tracking-tight">{myNurse.servicios}</p></Card>
           <Card><p className="text-[13px] text-mute">Calificación</p><p className="flex items-center gap-1 text-[26px] font-extrabold leading-tight tracking-tight"><Star size={22} fill="#f59e0b" strokeWidth={0} />{me.calificacion.toFixed(1)}</p></Card>

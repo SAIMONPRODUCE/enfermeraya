@@ -3,11 +3,11 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { CENTER } from '../data/seed'
 import { uid } from '../lib/format'
 import { errorMsg, supabase } from '../lib/supabase'
-import type { AppState, AprobacionEstado, Estado, LatLng, MetodoPago, Notificacion, NurseDetail, Role, Servicio, User } from '../types'
+import type { AppState, AprobacionEstado, CuentaCobro, Estado, LatLng, MetodoCobro, MetodoPago, Notificacion, NurseDetail, Retiro, Role, Servicio, User } from '../types'
 
 // ponytail: Realtime avisa de cambios y se vuelve a consultar el estado; respaldo cada 30 s.
 const FALLBACK_MS = 30000
-const EMPTY: AppState = { users: [], nurses: {}, servicios: [], notifs: [], sessionId: null }
+const EMPTY: AppState = { users: [], nurses: {}, servicios: [], notifs: [], retiros: [], cuenta: null, sessionId: null }
 const ACTIVOS: Estado[] = ['aceptado', 'en_camino', 'en_atencion']
 
 // ---------- Filas tal como llegan de Supabase ----------
@@ -19,6 +19,7 @@ interface ServicioRow {
   metodo_pago: MetodoPago; calificacion: number | null; resena: string; llego: boolean; rechazados: string[]
   oferta_inicio: string | null; creado: string; estado_ts: string
 }
+interface RetiroRow { id: string; usuario_id: string; monto: number; estado: Retiro['estado']; metodo: MetodoCobro; banco: string; tipo_cuenta: CuentaCobro['tipo_cuenta']; numero: string; titular: string; referencia: string; nota: string; creado: string; resuelto_ts: string | null }
 interface NotifRow { id: string; user_id: string; titulo: string; cuerpo: string; tipo: Notificacion['tipo']; leida: boolean; creado: string }
 interface ContactoRow { id: string; nombre: string; color: string; calificacion: number; telefono: string | null; especialidad: string | null; servicios: number | null; lat: number | null; lng: number | null }
 interface CercaRow { id: string; nombre: string; color: string; calificacion: number; especialidad: string; servicios: number; lat: number; lng: number }
@@ -28,15 +29,17 @@ const ms = (t: string | null) => (t ? Date.parse(t) : 0)
 
 async function fetchState(session: Session): Promise<AppState> {
   const meId = session.user.id
-  const [profiles, nurses, servicios, notifs, contactos, ofertas] = await Promise.all([
+  const [profiles, nurses, servicios, notifs, contactos, ofertas, retiros, cuentas] = await Promise.all([
     supabase.from('profiles').select('*'), // RLS: el propio, o todos si es admin
     supabase.from('nurse_details').select('*'),
     supabase.from('servicios').select('*').order('creado', { ascending: false }).limit(100),
     supabase.from('notificaciones').select('*').order('creado', { ascending: false }).limit(50),
     supabase.rpc('mis_contactos'),
     supabase.rpc('mis_ofertas'),
+    supabase.from('retiros').select('*').order('creado', { ascending: false }).limit(100), // RLS: los propios, o todos si es admin
+    supabase.from('cuentas_cobro').select('*'),
   ])
-  const failed = [profiles, nurses, servicios, notifs, contactos, ofertas].find((r) => r.error)
+  const failed = [profiles, nurses, servicios, notifs, contactos, ofertas, retiros, cuentas].find((r) => r.error)
   if (failed?.error) throw failed.error
 
   const meRow = (profiles.data as ProfileRow[]).find((p) => p.id === meId)
@@ -112,6 +115,11 @@ async function fetchState(session: Session): Promise<AppState> {
     users: [...users.values()],
     nurses: nurseMap,
     servicios: svcs,
+    retiros: (retiros.data as RetiroRow[]).map((r) => ({
+      id: r.id, usuario_id: r.usuario_id, monto: r.monto, estado: r.estado, metodo: r.metodo, banco: r.banco, tipo_cuenta: r.tipo_cuenta,
+      numero: r.numero, titular: r.titular, referencia: r.referencia, nota: r.nota, creado: ms(r.creado), resuelto_ts: ms(r.resuelto_ts),
+    })),
+    cuenta: ((cuentas.data ?? []) as (CuentaCobro & { usuario_id: string })[]).find((c) => c.usuario_id === meId) ?? null,
     notifs: (notifs.data as NotifRow[]).map((n) => ({ id: n.id, userId: n.user_id, titulo: n.titulo, cuerpo: n.cuerpo, ts: ms(n.creado), leida: n.leida, tipo: n.tipo })),
   }
 }
@@ -163,6 +171,12 @@ interface Ctx {
   cancel: (id: string) => Promise<void>
   rate: (id: string, stars: number, resena: string) => Promise<void>
   approve: (nurseId: string, ok: boolean) => Promise<void>
+  /** Guarda la cuenta de cobro. Devuelve true si quedó guardada. */
+  saveCuenta: (c: CuentaCobro) => Promise<boolean>
+  /** Pide un retiro. Devuelve true si quedó pendiente. */
+  requestWithdrawal: (monto: number) => Promise<boolean>
+  /** Admin: marca un retiro como pagado (con referencia) o rechazado (con nota). */
+  resolveWithdrawal: (id: string, pagado: boolean, referencia: string, nota: string) => Promise<boolean>
   uploadDocs: (files: File[]) => Promise<boolean>
   openDoc: (path: string) => Promise<void>
   markAllRead: () => Promise<void>
@@ -237,6 +251,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'servicios' }, refresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notificaciones' }, refresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nurse_details' }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'retiros' }, refresh)
       .subscribe()
     // Respaldo por si se cae el socket: una consulta cada 30 s con la pestaña visible.
     const t = setInterval(() => {
@@ -391,6 +406,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       approve: async (nurseId, ok) => {
         await call('aprobar_enfermero', { p_id: nurseId, p_ok: ok })
+      },
+      saveCuenta: async (c) => {
+        return call('set_cuenta_cobro', { p_metodo: c.metodo, p_banco: c.banco, p_tipo: c.tipo_cuenta, p_numero: c.numero, p_titular: c.titular })
+      },
+      requestWithdrawal: async (monto) => {
+        return call('solicitar_retiro', { p_monto: monto })
+      },
+      resolveWithdrawal: async (id, pagado, referencia, nota) => {
+        return call('resolver_retiro', { p_id: id, p_pagado: pagado, p_referencia: referencia, p_nota: nota })
       },
       uploadDocs: async (files) => {
         const paths: string[] = []
