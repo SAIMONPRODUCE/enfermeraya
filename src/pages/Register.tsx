@@ -6,7 +6,7 @@ import { useAppActions } from '../store/AppContext'
 import { AuthShell, Segmented } from './Login'
 
 type Kind = 'paciente' | 'enfermero'
-const ESPECIALIDADES = ['Enfermera/o profesional', 'Inyectología y terapia IV', 'Curaciones', 'Postoperatorio', 'Cuidado de adulto mayor', 'Toma de muestras']
+const ESPECIALIDADES = ['Enfermera/o profesional', 'Inyectología y terapia IV', 'Curaciones', 'Postoperatorio', 'Cuidado de adulto mayor']
 
 export default function Register() {
   const nav = useNavigate()

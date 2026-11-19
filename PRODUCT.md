@@ -31,7 +31,7 @@ Pedir un profesional de enfermería verificado que llegue a la casa del paciente
 ## Capabilities and Constraints
 
 - PWA móvil primero: React 19, TypeScript, Vite, Tailwind v4, Supabase (Auth, Postgres con RLS, Realtime, Edge Functions), Leaflet, lucide-react. En escritorio se muestra dentro de un marco de teléfono.
-- Catálogo confirmado: Inyectología, Curaciones, Postoperatorio, Adulto mayor, Toma de muestras, Terapia IV, con precio base y duración.
+- Catálogo confirmado: Inyectología, Curaciones, Postoperatorio, Adulto mayor, Terapia IV, con precio base y duración. Toma de muestras se retiró (2026-11-18): no hay laboratorio aliado.
 - Estados del servicio: solicitado, aceptado, en_camino, en_atencion, completado, cancelado, sin_cobertura.
 - El total lo calcula el servidor (`cotizar`); la interfaz no inventa precios.
 - Solo tema claro hoy.

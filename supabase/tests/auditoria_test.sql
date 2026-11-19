@@ -62,6 +62,8 @@ begin
   end;
   update public.nurse_details set aprobado = 'pendiente' where usuario_id = enf;
   perform public.set_documentos(array[enf::text || '/1-diploma.pdf']);
+  -- set_documentos la deja pendiente y desconectada; sin esto D queda sin cobertura y 0014 reembolsa el pago.
+  update public.nurse_details set aprobado = 'aprobado', online = true, visto = now() where usuario_id = enf;
 
   -- D) el mismo id de Wompi no paga dos referencias
   perform public.confirmar_pago('EY-' || replace(s2::text, '-', ''), 'aprobado', 'WOMPI-TX-1',

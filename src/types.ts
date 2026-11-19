@@ -34,7 +34,12 @@ export interface NurseDetail {
 export interface ServiceCatalog {
   id: string
   nombre: string
+  /** Precio sugerido; cada profesional fija el suyo entre precio_min y precio_max. */
   precio_base: number
+  precio_min: number
+  precio_max: number
+  /** false = ya no se ofrece; se conserva para mostrar servicios viejos. */
+  activo?: boolean
   descripcion: string
   icon: string
   duracion: string
@@ -119,5 +124,7 @@ export interface AppState {
   retiros: Retiro[]
   /** Cuenta de cobro del profesional que tiene la sesión. */
   cuenta: CuentaCobro | null
+  /** Tarifa propia de cada profesional: tarifas[enfermeroId][servicioId]. Sin entrada = precio sugerido. */
+  tarifas: Record<string, Record<string, number>>
   sessionId: string | null
 }

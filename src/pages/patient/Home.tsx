@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom'
 import { LocationSheet } from '../../components/LocationSheet'
 import { MapView } from '../../components/MapView'
 import { Avatar, Card, ESTADO_LABEL, ServiceTile, StatusPill, Stars, Validated } from '../../components/ui'
-import { CATALOGO } from '../../data/seed'
+import { OFERTA } from '../../data/seed'
 import { formatKm } from '../../lib/geo'
 import { money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
-import { availableNurses, isActive, serviceOf } from '../../store/sim'
+import { availableNurses, desde, isActive, serviceOf } from '../../store/sim'
 
 export default function PatientHome() {
   const { me, state } = useApp()
@@ -19,7 +19,7 @@ export default function PatientHome() {
 
   const active = state.servicios.find((s) => s.paciente_id === me.id && isActive(s))
   const near = availableNurses(state, me.ubicacion, [], 10)
-  const list = CATALOGO.filter((c) => c.nombre.toLowerCase().includes(q.toLowerCase()))
+  const list = OFERTA.filter((c) => c.nombre.toLowerCase().includes(q.toLowerCase()))
   const first = me.nombre.split(' ')[0]
   const closest = near[0]
 
@@ -73,7 +73,7 @@ export default function PatientHome() {
                     <ServiceTile id={c.id} icon={c.icon} />
                     <span className="mt-3.5 block text-[16px] font-bold leading-tight">{c.nombre}</span>
                     <span className="mt-1 block text-[13px] text-mute">{c.duracion}</span>
-                    <span className="mt-3 block text-[13px] text-mute">Desde <b className="text-[15px] font-bold text-ink">{money(c.precio_base)}</b></span>
+                    <span className="mt-3 block text-[13px] text-mute">Desde <b className="text-[15px] font-bold text-ink">{money(desde(state, near, c.id))}</b></span>
                   </Card>
                 </button>
               ))}
@@ -92,7 +92,7 @@ export default function PatientHome() {
 
           {closest ? (
             <Card className="mb-3 overflow-hidden !p-0">
-              <button onClick={() => nav('/p/solicitar')} className="press flex w-full items-center gap-3.5 p-4 text-left">
+              <button onClick={() => nav(`/p/solicitar?e=${closest.user.id}`)} className="press flex w-full items-center gap-3.5 p-4 text-left">
                 <Avatar name={closest.user.nombre} color={closest.user.color} size={52} online />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[16px] font-bold leading-tight">{closest.user.nombre}</span>
@@ -121,7 +121,7 @@ export default function PatientHome() {
           {near.length > 1 && (
             <div className="-mx-5 mt-3 flex snap-x gap-3 overflow-x-auto px-5 pb-1 scroll-y">
               {near.slice(1, 6).map((c) => (
-                <button key={c.user.id} onClick={() => nav('/p/solicitar')} className="press w-60 shrink-0 snap-start text-left">
+                <button key={c.user.id} onClick={() => nav(`/p/solicitar?e=${c.user.id}`)} className="press w-60 shrink-0 snap-start text-left">
                   <Card className="flex items-center gap-3 !p-3">
                     <Avatar name={c.user.nombre} color={c.user.color} online />
                     <span className="min-w-0">

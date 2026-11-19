@@ -1,16 +1,16 @@
 import { ArrowLeft, Banknote, Calendar, CreditCard, Landmark, MapPin, Zap } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LocationSheet } from '../../components/LocationSheet'
 import { MapView } from '../../components/MapView'
 import { Avatar, Button, Card, Field, ServiceTile, Stars, SuccessMark, inputCls } from '../../components/ui'
 import { Segmented } from '../Login'
-import { CATALOGO } from '../../data/seed'
+import { OFERTA } from '../../data/seed'
 import { etaMinutes, formatKm } from '../../lib/geo'
 import { money } from '../../lib/format'
 import { supabase } from '../../lib/supabase'
 import { useApp, type Quote } from '../../store/AppContext'
-import { availableNurses } from '../../store/sim'
+import { availableNurses, desde, tarifaDe } from '../../store/sim'
 import type { MetodoPago } from '../../types'
 
 const PAGOS: { id: MetodoPago; label: string; sub: string; icon: typeof CreditCard }[] = [
@@ -26,7 +26,7 @@ export default function Request() {
   const [step, setStep] = useState(0)
   // ?s= viene de la URL: solo aceptar ids del catálogo para no romper la vista
   const fromUrl = params.get('s')
-  const [sid, setSid] = useState(CATALOGO.some((c) => c.id === fromUrl) ? fromUrl! : 'inyect')
+  const [sid, setSid] = useState(OFERTA.some((c) => c.id === fromUrl) ? fromUrl! : 'inyect')
   const [inmediato, setInmediato] = useState(true)
   const [fecha, setFecha] = useState('')
   const [notas, setNotas] = useState('')
@@ -34,12 +34,17 @@ export default function Request() {
   const [radio, setRadio] = useState<'5' | '10'>('5')
   const [loc, setLoc] = useState(false)
   const [phase, setPhase] = useState<'idle' | 'paying' | 'ok'>('idle')
+  // Profesional elegido (?e= desde el inicio); null = el más cercano.
+  const [elegido, setElegido] = useState<string | null>(params.get('e'))
 
-  const svc = CATALOGO.find((c) => c.id === sid)!
+  const svc = OFERTA.find((c) => c.id === sid)!
   const near = useMemo(
     () => (me ? availableNurses(state, me.ubicacion, [], Number(radio)) : []),
     [state, me, radio],
   )
+  // Si el elegido se desconecta o queda fuera del radio, se vuelve al más cercano.
+  const pick = near.some((c) => c.user.id === elegido) ? elegido : null
+  const pickName = near.find((c) => c.user.id === pick)?.user.nombre
   // El total lo calcula el servidor (cotizar), el mismo que cobra solicitar_servicio.
   const [q, setQ] = useState<Quote | null>(null)
   const lat = me?.ubicacion.lat
@@ -48,11 +53,11 @@ export default function Request() {
     if (step !== 2 || lat === undefined || lng === undefined) return
     let alive = true
     setQ(null)
-    cotizar(sid, inmediato, { lat, lng }).then((r) => alive && setQ(r))
+    cotizar(sid, inmediato, { lat, lng }, pick).then((r) => alive && setQ(r))
     return () => {
       alive = false
     }
-  }, [step, sid, inmediato, lat, lng, cotizar])
+  }, [step, sid, inmediato, lat, lng, pick, cotizar])
   // Sin ubicación guardada no se puede pedir: se abre el selector al entrar.
   const sinUbicacion = me !== null && me.direccion === ''
   useEffect(() => {
@@ -67,7 +72,7 @@ export default function Request() {
     setPhase('paying')
     const id = await requestService({
       servicio_id: sid, inmediato, fecha_hora: inmediato ? null : fecha, notas, metodo_pago: pago,
-      direccion: me.direccion, ubicacion: me.ubicacion,
+      direccion: me.direccion, ubicacion: me.ubicacion, enfermero: pick,
     })
     if (!id) {
       setPhase('idle') // el error ya salió como toast
@@ -111,12 +116,12 @@ export default function Request() {
           <div key="s0" className="step-enter space-y-5">
             <h1 className="text-[26px] font-extrabold leading-tight tracking-tight">¿Qué servicio necesitas?</h1>
             <div className="grid grid-cols-2 gap-2.5">
-              {CATALOGO.map((c) => (
+              {OFERTA.map((c) => (
                 <button key={c.id} onClick={() => setSid(c.id)} aria-pressed={sid === c.id}
                   className={`press rounded-2xl border-2 p-3 text-left transition-[border-color,background-color] duration-200 ${sid === c.id ? 'border-brand-600 bg-brand-50' : 'border-transparent bg-white shadow-sm'}`}>
                   <span className="mb-2.5 block"><ServiceTile id={c.id} icon={c.icon} size={40} /></span>
                   <span className="block text-[14px] font-bold leading-tight">{c.nombre}</span>
-                  <span className="text-[12px] text-mute">Desde {money(c.precio_base)} · {c.duracion}</span>
+                  <span className="text-[12px] text-mute">Desde {money(desde(state, near, c.id))} · {c.duracion}</span>
                 </button>
               ))}
             </div>
@@ -155,14 +160,20 @@ export default function Request() {
                   <span className="shrink-0 text-[30px] font-extrabold leading-none tabular-nums">~{etaMinutes(near[0].dist)}<span className="text-[15px]"> min</span></span>
                   <span className="text-[13px] font-semibold leading-snug">{near.length} {near.length === 1 ? 'disponible' : 'disponibles'} cerca, con tarjeta profesional y diploma validados.</span>
                 </div>
-                <div className="stagger space-y-2">
-                  {near.slice(0, 4).map((c, i) => (
-                    <Card key={c.user.id} className="flex items-center gap-3 !p-3" >
-                      <span style={{ ['--i' as string]: i }} className="contents" />
+                <h2 className="pt-1 text-[16px] font-extrabold tracking-tight">¿Quién te atiende?</h2>
+                <p className="-mt-1 text-[13px] text-mute">Cada profesional independiente fija su tarifa para {svc.nombre.toLowerCase()}.</p>
+                <div className="stagger space-y-2" role="radiogroup" aria-label="Profesional">
+                  <Choice on={pick === null} onClick={() => setElegido(null)}>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mint-50 text-mint-700"><Zap size={18} /></span>
+                    <span className="min-w-0 flex-1"><span className="block font-bold">El más cercano</span><span className="block text-[12px] text-mute">Llega más rápido · {near[0].user.nombre}</span></span>
+                    <span className="text-right font-extrabold tabular-nums">{money(tarifaDe(state, near[0].user.id, sid))}</span>
+                  </Choice>
+                  {near.slice(0, 6).map((c) => (
+                    <Choice key={c.user.id} on={pick === c.user.id} onClick={() => setElegido(c.user.id)}>
                       <Avatar name={c.user.nombre} color={c.user.color} online />
-                      <span className="min-w-0 flex-1"><span className="block truncate font-bold">{c.user.nombre}</span><span className="block truncate text-[12px] text-mute">{c.detail.especialidad}</span></span>
-                      <span className="text-right"><Stars value={c.user.calificacion} /><span className="block text-[12px] text-mute">{formatKm(c.dist)}</span></span>
-                    </Card>
+                      <span className="min-w-0 flex-1"><span className="block truncate font-bold">{c.user.nombre}</span><span className="flex items-center gap-1.5 text-[12px] text-mute"><Stars value={c.user.calificacion} size={11} /> · {formatKm(c.dist)}</span></span>
+                      <span className="text-right font-extrabold tabular-nums">{money(tarifaDe(state, c.user.id, sid))}</span>
+                    </Choice>
                   ))}
                 </div>
               </div>
@@ -189,7 +200,7 @@ export default function Request() {
                 <div className="shimmer h-24 rounded-2xl" aria-label="Calculando total" />
               ) : (
               <div className="space-y-2 text-[14px]">
-                <Row l={svc.nombre} r={money(q.base)} />
+                <Row l={`${svc.nombre}${pickName ? ` · ${pickName}` : ''}`} r={money(q.base)} />
                 {q.recargo > 0 && <Row l="Recargo inmediato" r={money(q.recargo)} />}
                 <Row l="Desplazamiento" r={money(q.desplazamiento)} />
                 <div className="my-2 h-px bg-slate-100" />
@@ -230,6 +241,13 @@ export default function Request() {
     </div>
   )
 }
+
+const Choice = ({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) => (
+  <button role="radio" aria-checked={on} onClick={onClick}
+    className={`press flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-left transition-[border-color,background-color] duration-200 ${on ? 'border-brand-600 bg-brand-50' : 'border-transparent bg-white shadow-sm'}`}>
+    {children}
+  </button>
+)
 
 const Row = ({ l, r }: { l: string; r: string }) => (
   <div className="flex justify-between"><span className="text-mute">{l}</span><span className="font-semibold">{r}</span></div>

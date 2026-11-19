@@ -9,6 +9,11 @@ const BUSY: Servicio['estado'][] = ['aceptado', 'en_camino', 'en_atencion']
 
 export const isActive = (s: Servicio) => ACTIVE.includes(s.estado)
 export const serviceOf = (id: string) => CATALOGO.find((c) => c.id === id)!
+/** Tarifa del profesional para el servicio; sin tarifa propia, el precio sugerido. */
+export const tarifaDe = (state: AppState, nurseId: string, sid: string) => state.tarifas[nurseId]?.[sid] ?? serviceOf(sid).precio_base
+/** Precio más bajo entre los disponibles; sin nadie cerca, el sugerido. */
+export const desde = (state: AppState, near: Candidate[], sid: string) =>
+  near.length ? Math.min(...near.map((c) => tarifaDe(state, c.user.id, sid))) : serviceOf(sid).precio_base
 
 export interface Candidate {
   user: User

@@ -29,6 +29,7 @@ end $$;
 do $$
 declare
   p uuid := gen_random_uuid();
+  p2 uuid := gen_random_uuid(); -- 0013: un servicio activo por paciente, el paso 6 necesita otro
   n1 uuid := gen_random_uuid();
   n2 uuid := gen_random_uuid();
   n3 uuid := gen_random_uuid();
@@ -49,12 +50,14 @@ begin
   -- ===== Fixtures (como postgres, sin RLS) =====
   insert into auth.users (id, email, aud, role) values
     (p, 'p@test.co', 'authenticated', 'authenticated'),
+    (p2, 'p2@test.co', 'authenticated', 'authenticated'),
     (n1, 'n1@test.co', 'authenticated', 'authenticated'),
     (n2, 'n2@test.co', 'authenticated', 'authenticated'),
     (n3, 'n3@test.co', 'authenticated', 'authenticated'),
     (a, 'a@test.co', 'authenticated', 'authenticated');
   insert into public.profiles (id, rol, nombre, telefono, lat, lng, calificacion) values
     (p, 'paciente', 'Paciente Test', '3001234567', 4.7143, -74.0645, 5),
+    (p2, 'paciente', 'Paciente Dos', '3005555555', 4.7143, -74.0645, 5),
     (n1, 'enfermero', 'Nurse Uno', '3001111111', 4.7143, -74.0645, 1),
     (n2, 'enfermero', 'Nurse Dos', '3002222222', 4.7150, -74.0650, 5),
     (n3, 'enfermero', 'Nurse Tres', '3003333333', 4.7143, -74.0645, 5),
@@ -63,8 +66,12 @@ begin
     (n1, 'General', 'aprobado', true, 10),
     (n2, 'General', 'aprobado', true, 0),
     (n3, 'General', 'pendiente', false, 0);
+  -- 0011/0012: pedir exige direccion guardada; 0018: cotizar usa la ubicacion de quien pregunta.
+  update public.profiles set direccion = 'Cra 15 #93-40' where id in (p, p2);
+  update public.nurse_details set online = false where usuario_id not in (n1, n2, n3); -- solo las de la prueba
 
   -- ===== 1. Cotizacion =====
+  perform pg_temp.as_user(p);
   select * into r from public.cotizar('inyect', true, 4.7143, -74.0645);
   if r.total <> 44000 then raise exception 'FAIL cotizar total=% (esperado 44000)', r.total; end if;
 
@@ -105,7 +112,7 @@ begin
   if est <> 'aceptado' then raise exception 'FAIL estado tras aceptar=% (esperado aceptado)', est; end if;
 
   -- ===== 6. Enfermera ocupada no recibe nueva oferta =====
-  perform pg_temp.as_user(p);
+  perform pg_temp.as_user(p2);
   s2 := public.solicitar_servicio('cura', true, null, '', 'efectivo', 4.7143, -74.0645, 'Cra 15 bis');
   perform pg_temp.as_reset();
   perform public.despachar_pendientes();
@@ -138,6 +145,7 @@ begin
   perform pg_temp.expect_err(format('select public.cancelar_servicio(%L)', s1), 'no_cancelable');
 
   -- ===== 10. Cancelar solicitud abierta =====
+  perform pg_temp.as_user(p2);
   perform public.cancelar_servicio(s2);
   perform pg_temp.as_reset();
   select estado into est from public.servicios where id = s2;
@@ -203,6 +211,9 @@ begin
   if cnt <> 0 then raise exception 'FAIL enfermeras_cerca incluye candidata con oferta'; end if;
 
   -- ===== 17. Documentos: solo rutas propias y solo si no esta aprobado =====
+  -- 0013: el archivo debe existir en el bucket; si no, gana ruta_invalida antes de no_editable.
+  perform pg_temp.as_reset();
+  insert into storage.objects (bucket_id, name) values ('documentos', n1::text || '/x.pdf');
   perform pg_temp.as_user(n1);
   perform pg_temp.expect_err(format('select public.set_documentos(array[%L])', 'otro/x.pdf'), 'ruta_invalida');
   perform pg_temp.expect_err(format('select public.set_documentos(array[%L])', n1::text || '/x.pdf'), 'no_editable');

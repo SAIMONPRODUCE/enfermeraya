@@ -7,7 +7,7 @@ import type { AppState, AprobacionEstado, CuentaCobro, Estado, LatLng, MetodoCob
 
 // ponytail: Realtime avisa de cambios y se vuelve a consultar el estado; respaldo cada 30 s.
 const FALLBACK_MS = 30000
-const EMPTY: AppState = { users: [], nurses: {}, servicios: [], notifs: [], retiros: [], cuenta: null, sessionId: null }
+const EMPTY: AppState = { users: [], nurses: {}, servicios: [], notifs: [], retiros: [], cuenta: null, tarifas: {}, sessionId: null }
 const ACTIVOS: Estado[] = ['aceptado', 'en_camino', 'en_atencion']
 
 // ---------- Filas tal como llegan de Supabase ----------
@@ -29,7 +29,7 @@ const ms = (t: string | null) => (t ? Date.parse(t) : 0)
 
 async function fetchState(session: Session): Promise<AppState> {
   const meId = session.user.id
-  const [profiles, nurses, servicios, notifs, contactos, ofertas, retiros, cuentas] = await Promise.all([
+  const [profiles, nurses, servicios, notifs, contactos, ofertas, retiros, cuentas, tarifas] = await Promise.all([
     supabase.from('profiles').select('*'), // RLS: el propio, o todos si es admin
     supabase.from('nurse_details').select('*'),
     supabase.from('servicios').select('*').order('creado', { ascending: false }).limit(100),
@@ -38,8 +38,9 @@ async function fetchState(session: Session): Promise<AppState> {
     supabase.rpc('mis_ofertas'),
     supabase.from('retiros').select('*').order('creado', { ascending: false }).limit(100), // RLS: los propios, o todos si es admin
     supabase.from('cuentas_cobro').select('*'),
+    supabase.from('tarifas').select('enfermero_id, servicio_id, precio'),
   ])
-  const failed = [profiles, nurses, servicios, notifs, contactos, ofertas, retiros, cuentas].find((r) => r.error)
+  const failed = [profiles, nurses, servicios, notifs, contactos, ofertas, retiros, cuentas, tarifas].find((r) => r.error)
   if (failed?.error) throw failed.error
 
   const meRow = (profiles.data as ProfileRow[]).find((p) => p.id === meId)
@@ -110,8 +111,14 @@ async function fetchState(session: Session): Promise<AppState> {
     })
   }
 
+  const tarifaMap: AppState['tarifas'] = {}
+  for (const t of (tarifas.data ?? []) as { enfermero_id: string; servicio_id: string; precio: number }[]) {
+    ;(tarifaMap[t.enfermero_id] ??= {})[t.servicio_id] = t.precio
+  }
+
   return {
     sessionId: meId,
+    tarifas: tarifaMap,
     users: [...users.values()],
     nurses: nurseMap,
     servicios: svcs,
@@ -132,6 +139,8 @@ export interface Draft {
   metodo_pago: MetodoPago
   direccion: string
   ubicacion: LatLng
+  /** Profesional elegido; null = el más cercano. */
+  enfermero: string | null
 }
 
 export interface Quote { base: number; recargo: number; desplazamiento: number; total: number }
@@ -162,7 +171,7 @@ interface Ctx {
   register: (r: Registro) => Promise<{ error: string | null; needsConfirm: boolean }>
   setLocation: (pos: LatLng, direccion: string) => Promise<void>
   toggleOnline: () => Promise<void>
-  cotizar: (servicio: string, inmediato: boolean, pos: LatLng) => Promise<Quote | null>
+  cotizar: (servicio: string, inmediato: boolean, pos: LatLng, enfermero: string | null) => Promise<Quote | null>
   /** Devuelve el id del servicio creado, o null si falló (ya se mostró el error). */
   requestService: (d: Draft) => Promise<string | null>
   accept: (id: string) => Promise<void>
@@ -177,6 +186,8 @@ interface Ctx {
   requestWithdrawal: (monto: number) => Promise<boolean>
   /** Admin: marca un retiro como pagado (con referencia) o rechazado (con nota). */
   resolveWithdrawal: (id: string, pagado: boolean, referencia: string, nota: string) => Promise<boolean>
+  /** Profesional: fija su tarifa para un servicio. Devuelve true si quedó guardada. */
+  setTarifa: (servicio: string, precio: number) => Promise<boolean>
   uploadDocs: (files: File[]) => Promise<boolean>
   openDoc: (path: string) => Promise<void>
   markAllRead: () => Promise<void>
@@ -367,8 +378,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toggleOnline: async () => {
         await call('set_online', { p_online: !stateRef.current.nurses[meId()]?.online })
       },
-      cotizar: async (servicio, inmediato, p) => {
-        const { data, error } = await supabase.rpc('cotizar', { p_servicio: servicio, p_inmediato: inmediato, p_lat: p.lat, p_lng: p.lng })
+      cotizar: async (servicio, inmediato, p, enfermero) => {
+        const { data, error } = await supabase.rpc('cotizar', { p_servicio: servicio, p_inmediato: inmediato, p_lat: p.lat, p_lng: p.lng, p_enfermero: enfermero })
         if (error) {
           toast(errorMsg(error))
           return null
@@ -380,7 +391,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           p_servicio: d.servicio_id, p_inmediato: d.inmediato,
           // datetime-local no trae zona: se interpreta en la hora local del dispositivo
           p_fecha: d.fecha_hora ? new Date(d.fecha_hora).toISOString() : null,
-          p_notas: d.notas, p_metodo: d.metodo_pago, p_lat: d.ubicacion.lat, p_lng: d.ubicacion.lng, p_direccion: d.direccion,
+          p_notas: d.notas, p_metodo: d.metodo_pago, p_lat: d.ubicacion.lat, p_lng: d.ubicacion.lng, p_direccion: d.direccion, p_enfermero: d.enfermero,
         })
         if (error) {
           toast(errorMsg(error))
@@ -415,6 +426,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       resolveWithdrawal: async (id, pagado, referencia, nota) => {
         return call('resolver_retiro', { p_id: id, p_pagado: pagado, p_referencia: referencia, p_nota: nota })
+      },
+      setTarifa: async (servicio, precio) => {
+        return call('set_tarifa', { p_servicio: servicio, p_precio: precio })
       },
       uploadDocs: async (files) => {
         const paths: string[] = []
