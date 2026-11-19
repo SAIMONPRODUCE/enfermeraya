@@ -1,0 +1,266 @@
+{
+  "package.json": {
+    "mtime": 1794839991.3015742,
+    "seen": 1794843818.594029,
+    "ast_hash": "8446f95f2fa9fffb5dfc892c765261a4",
+    "semantic_hash": ""
+  },
+  "public/sw.js": {
+    "mtime": 1791776209.9351015,
+    "seen": 1791780545.023071,
+    "ast_hash": "86cdca9ff5dca74ff8aa32b50c87526f",
+    "semantic_hash": ""
+  },
+  "scripts/test-sim.mjs": {
+    "mtime": 1791681100.4329293,
+    "seen": 1791682970.097057,
+    "ast_hash": "8c188f18033a94583e55184cf1d14db0",
+    "semantic_hash": ""
+  },
+  "src/App.tsx": {
+    "mtime": 1794839989.7635112,
+    "seen": 1794843818.594156,
+    "ast_hash": "821fb6e6c53e2de8d105512a94ac5f13",
+    "semantic_hash": ""
+  },
+  "src/components/ErrorBoundary.tsx": {
+    "mtime": 1794839989.7638972,
+    "seen": 1794843818.594157,
+    "ast_hash": "1b3e086f89bed03ff6241099c6648f0b",
+    "semantic_hash": ""
+  },
+  "src/components/Layout.tsx": {
+    "mtime": 1794843687.6268482,
+    "seen": 1794843818.5941582,
+    "ast_hash": "883c623ff1058e6005b30082a768eed4",
+    "semantic_hash": ""
+  },
+  "src/components/LocationSheet.tsx": {
+    "mtime": 1794840484.822353,
+    "seen": 1794843818.5941591,
+    "ast_hash": "6702e705275f19073f6af5fd138dae75",
+    "semantic_hash": ""
+  },
+  "src/components/MapView.tsx": {
+    "mtime": 1794840484.8203323,
+    "seen": 1794843818.59416,
+    "ast_hash": "09ef673ab232c878065948d07a7f92d9",
+    "semantic_hash": ""
+  },
+  "src/components/Sheet.tsx": {
+    "mtime": 1794839989.7650476,
+    "seen": 1794843818.5941608,
+    "ast_hash": "d61da444bd89e7d90d55fd372b00ad12",
+    "semantic_hash": ""
+  },
+  "src/components/Toasts.tsx": {
+    "mtime": 1794840484.822104,
+    "seen": 1794843818.5941608,
+    "ast_hash": "ac360b210a67867ed82f370095109cc0",
+    "semantic_hash": ""
+  },
+  "src/components/ui.tsx": {
+    "mtime": 1794843687.6262739,
+    "seen": 1794843818.594162,
+    "ast_hash": "e00bfb0134a4c0d34f493c954a8780c6",
+    "semantic_hash": ""
+  },
+  "src/data/seed.ts": {
+    "mtime": 1791694250.673398,
+    "seen": 1791694598.20392,
+    "ast_hash": "279559d30aa0acc6b0784e36e8b5f59a",
+    "semantic_hash": ""
+  },
+  "src/lib/format.ts": {
+    "mtime": 1791741530.4218512,
+    "seen": 1791741650.391656,
+    "ast_hash": "adad32b58eb9ec077d4e75e189a37b82",
+    "semantic_hash": ""
+  },
+  "src/lib/geo.ts": {
+    "mtime": 1794839989.7998607,
+    "seen": 1794843818.5942242,
+    "ast_hash": "92801bbc97b803a77fa14a1c9f485505",
+    "semantic_hash": ""
+  },
+  "src/main.tsx": {
+    "mtime": 1794840035.9696815,
+    "seen": 1794843818.594256,
+    "ast_hash": "871e57fc6e6da6bbfefac698719215b6",
+    "semantic_hash": ""
+  },
+  "src/pages/Login.tsx": {
+    "mtime": 1794843687.6273382,
+    "seen": 1794843818.594256,
+    "ast_hash": "7349dc739c2757867b54507a52f93961",
+    "semantic_hash": ""
+  },
+  "src/pages/Profile.tsx": {
+    "mtime": 1794840484.8236833,
+    "seen": 1794843818.5942569,
+    "ast_hash": "a16a7bc248476b1eec4b8cf861b89d3b",
+    "semantic_hash": ""
+  },
+  "src/pages/Register.tsx": {
+    "mtime": 1794840484.8234882,
+    "seen": 1794843818.5942578,
+    "ast_hash": "85b0f6c882d434b329a0e230f506c056",
+    "semantic_hash": ""
+  },
+  "src/pages/admin/Admin.tsx": {
+    "mtime": 1794843687.6278284,
+    "seen": 1794843818.594259,
+    "ast_hash": "065131356aeb517b3216e1ac18f2ef9d",
+    "semantic_hash": ""
+  },
+  "src/pages/nurse/Earnings.tsx": {
+    "mtime": 1794843687.627966,
+    "seen": 1794843818.594259,
+    "ast_hash": "18c58d9afaead7391d9b4fe811fde8b6",
+    "semantic_hash": ""
+  },
+  "src/pages/nurse/Home.tsx": {
+    "mtime": 1794843687.6274908,
+    "seen": 1794843818.59426,
+    "ast_hash": "f684a51350117ddc44c2f48faadc55d6",
+    "semantic_hash": ""
+  },
+  "src/pages/patient/Activity.tsx": {
+    "mtime": 1794840538.5553787,
+    "seen": 1794843818.594261,
+    "ast_hash": "90e1a59a87ae61ef2cfbdc2d23f610e6",
+    "semantic_hash": ""
+  },
+  "src/pages/patient/Home.tsx": {
+    "mtime": 1794843687.6270306,
+    "seen": 1794843818.594261,
+    "ast_hash": "5fe2329f2a2a75c2adf1d73ac11a8508",
+    "semantic_hash": ""
+  },
+  "src/pages/patient/Request.tsx": {
+    "mtime": 1794843687.625325,
+    "seen": 1794843818.5942621,
+    "ast_hash": "c80740baad093aa8f9f00d253849fb36",
+    "semantic_hash": ""
+  },
+  "src/pages/patient/Tracking.tsx": {
+    "mtime": 1794843687.6251526,
+    "seen": 1794843818.594263,
+    "ast_hash": "57c8b461aec29dfcbc9f4cc5349e6c3b",
+    "semantic_hash": ""
+  },
+  "src/store/AppContext.tsx": {
+    "mtime": 1791780294.5250854,
+    "seen": 1791780545.023516,
+    "ast_hash": "30811d5e8e5ab77bfca3200278d2151d",
+    "semantic_hash": ""
+  },
+  "src/store/sim.test.ts": {
+    "mtime": 1791694276.581927,
+    "seen": 1791694598.2040849,
+    "ast_hash": "8850b8a5a9068590bc1f6f4baf64a463",
+    "semantic_hash": ""
+  },
+  "src/store/sim.ts": {
+    "mtime": 1791694250.6730883,
+    "seen": 1791694598.204086,
+    "ast_hash": "7413a5d76026035bdfb65df8aee5c95a",
+    "semantic_hash": ""
+  },
+  "src/types.ts": {
+    "mtime": 1791676627.5278316,
+    "seen": 1791682970.0970712,
+    "ast_hash": "19e25ded523f0459b10d4d22c2cf46ae",
+    "semantic_hash": ""
+  },
+  "src/vite-env.d.ts": {
+    "mtime": 1791778026.4177012,
+    "seen": 1791780545.023593,
+    "ast_hash": "6630fd2bef16e31e81d3b9ec43f848d1",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1791681201.0860672,
+    "seen": 1791682970.0970721,
+    "ast_hash": "3cba9a39f550dd9de47d155498fd9148",
+    "semantic_hash": ""
+  },
+  "vite.config.ts": {
+    "mtime": 1791697925.2516425,
+    "seen": 1791698462.6574159,
+    "ast_hash": "738b9b2a513afda4db30d530c36beecc",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1794842251.0926628,
+    "seen": 1794843818.594569,
+    "ast_hash": "0059fc1fec1e6cdff410da954a444c04",
+    "semantic_hash": ""
+  },
+  "public/apple-touch-icon.png": {
+    "mtime": 1794839989.7624626,
+    "seen": 1794843818.594628,
+    "ast_hash": "b41cb715c9ad2feea0238d613e2b9626",
+    "semantic_hash": ""
+  },
+  "public/icon.svg": {
+    "mtime": 1794839989.7627237,
+    "seen": 1794843818.594629,
+    "ast_hash": "951c35aa09ad7c44c83791abf10cfbb5",
+    "semantic_hash": ""
+  },
+  "src/lib/supabase.ts": {
+    "mtime": 1791777365.9475105,
+    "seen": 1791780545.023361,
+    "ast_hash": "f7420cf64f267a59894871bff277f4f6",
+    "semantic_hash": ""
+  },
+  ".github/workflows/pages.yml": {
+    "mtime": 1791697991.4497452,
+    "seen": 1791698462.657417,
+    "ast_hash": "587825e8a3e8527f55d599aecac7b3de",
+    "semantic_hash": ""
+  },
+  "docs/EnfermeraYa-presentacion.pdf": {
+    "mtime": 1791699273.0832024,
+    "seen": 1791699311.496542,
+    "ast_hash": "fb99434611865ca3fbd290956f45b9f8",
+    "semantic_hash": ""
+  },
+  "supabase/functions/wompi-checkout/index.ts": {
+    "mtime": 1791775436.213117,
+    "seen": 1791780545.023593,
+    "ast_hash": "096284046def824724ab85af91706439",
+    "semantic_hash": ""
+  },
+  "supabase/functions/wompi-webhook/index.ts": {
+    "mtime": 1791777365.9468038,
+    "seen": 1791780545.023595,
+    "ast_hash": "96da19211effe47c68553a2599b8365a",
+    "semantic_hash": ""
+  },
+  "src/pages/Recover.tsx": {
+    "mtime": 1794840484.8231409,
+    "seen": 1794843818.5942578,
+    "ast_hash": "13c5a4ecde046967621962657856dc3f",
+    "semantic_hash": ""
+  },
+  "supabase/functions/wompi-reembolso/index.ts": {
+    "mtime": 1791778630.7050803,
+    "seen": 1791780545.023594,
+    "ast_hash": "88041295411c7d202b524a2c53a066f1",
+    "semantic_hash": ""
+  },
+  "docs/EnfermeraYa-socios.pdf": {
+    "mtime": 1791776634.9121227,
+    "seen": 1791780545.0237188,
+    "ast_hash": "cd5d4d0776bda77c80a87c322d6ac7ac",
+    "semantic_hash": ""
+  },
+  "PRODUCT.md": {
+    "mtime": 1794843763.6304345,
+    "seen": 1794843818.594568,
+    "ast_hash": "fea3ac68094ed82246033e6088239a3a",
+    "semantic_hash": ""
+  }
+}
