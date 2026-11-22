@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
+import { APP_ROL } from './app'
 
-export const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY)
+// Sesión separada por app: entrar como admin en /admin/ no deja sesión abierta en la app de clientes, ni al revés.
+export const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
+  auth: { storageKey: `ey-auth-${APP_ROL}` },
+})
 
 // Códigos que lanzan las RPC (raise exception) y Auth, en español para el usuario.
 const ERRORES: Record<string, string> = {

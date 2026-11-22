@@ -4,7 +4,8 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { useApp } from './store/AppContext'
 import type { Role } from './types'
-import Login, { homeOf } from './pages/Login'
+import { APP_NOMBRE, APP_ROL, appUrl } from './lib/app'
+import Login, { AuthShell, homeOf } from './pages/Login'
 import { Recover, ResetPassword } from './pages/Recover'
 import Activity from './pages/patient/Activity'
 import PatientHome from './pages/patient/Home'
@@ -44,38 +45,61 @@ const adminTabs = [
   { to: '/a/perfil', label: 'Perfil', icon: User },
 ]
 
+/** Una cuenta de otro tipo entró en esta app: no ve nada y se le manda a la suya. */
+function OtraApp({ rol }: { rol: Role }) {
+  const { logout } = useApp()
+  return (
+    <AuthShell>
+      <div className="space-y-4 text-center">
+        <h2 className="text-[24px] font-extrabold leading-tight tracking-tight">Esta cuenta no es de {APP_NOMBRE[APP_ROL]}</h2>
+        <p className="text-mute">Tu cuenta es de {APP_NOMBRE[rol]}. Entra por su app.</p>
+        <a href={appUrl(rol)} className="press flex h-12 items-center justify-center rounded-2xl bg-brand-600 font-bold text-white">Ir a la app de {APP_NOMBRE[rol]}</a>
+        <button onClick={logout} className="press w-full py-2 text-[14px] font-semibold text-mute">Salir</button>
+      </div>
+    </AuthShell>
+  )
+}
+
 export default function App() {
   const { me } = useApp()
+  if (me && me.rol !== APP_ROL) return <OtraApp rol={me.rol} />
+  const home = homeOf(APP_ROL)
   return (
     <Routes>
-      <Route path="/login" element={me ? <Navigate to={homeOf(me.rol)} replace /> : <Login />} />
-      <Route path="/registro" element={me ? <Navigate to={homeOf(me.rol)} replace /> : <Register />} />
-      <Route path="/recuperar" element={me ? <Navigate to={homeOf(me.rol)} replace /> : <Recover />} />
+      <Route path="/login" element={me ? <Navigate to={home} replace /> : <Login />} />
+      {APP_ROL !== 'admin' && <Route path="/registro" element={me ? <Navigate to={home} replace /> : <Register />} />}
+      <Route path="/recuperar" element={me ? <Navigate to={home} replace /> : <Recover />} />
       {/* El enlace del correo abre una sesión de recuperación: no redirigir aunque `me` exista. */}
       <Route path="/restablecer" element={<ResetPassword />} />
 
-      <Route path="/p" element={<Guard role="paciente"><Layout tabs={patientTabs} badge="Paciente" /></Guard>}>
-        <Route index element={<PatientHome />} />
-        <Route path="solicitar" element={<Request />} />
-        <Route path="seguimiento/:id" element={<Tracking />} />
-        <Route path="actividad" element={<Activity />} />
-        <Route path="perfil" element={<Profile />} />
-      </Route>
+      {APP_ROL === 'paciente' && (
+        <Route path="/p" element={<Guard role="paciente"><Layout tabs={patientTabs} badge="Paciente" /></Guard>}>
+          <Route index element={<PatientHome />} />
+          <Route path="solicitar" element={<Request />} />
+          <Route path="seguimiento/:id" element={<Tracking />} />
+          <Route path="actividad" element={<Activity />} />
+          <Route path="perfil" element={<Profile />} />
+        </Route>
+      )}
 
-      <Route path="/n" element={<Guard role="enfermero"><Layout tabs={nurseTabs} badge="Socio" /></Guard>}>
-        <Route index element={<NurseHome />} />
-        <Route path="ganancias" element={<Earnings />} />
-        <Route path="perfil" element={<Profile />} />
-      </Route>
+      {APP_ROL === 'enfermero' && (
+        <Route path="/n" element={<Guard role="enfermero"><Layout tabs={nurseTabs} badge="Socio" /></Guard>}>
+          <Route index element={<NurseHome />} />
+          <Route path="ganancias" element={<Earnings />} />
+          <Route path="perfil" element={<Profile />} />
+        </Route>
+      )}
 
-      <Route path="/a" element={<Guard role="admin"><Layout tabs={adminTabs} badge="Admin" /></Guard>}>
-        <Route index element={<Validations />} />
-        <Route path="operaciones" element={<Operations />} />
-        <Route path="retiros" element={<Withdrawals />} />
-        <Route path="perfil" element={<Profile />} />
-      </Route>
+      {APP_ROL === 'admin' && (
+        <Route path="/a" element={<Guard role="admin"><Layout tabs={adminTabs} badge="Admin" /></Guard>}>
+          <Route index element={<Validations />} />
+          <Route path="operaciones" element={<Operations />} />
+          <Route path="retiros" element={<Withdrawals />} />
+          <Route path="perfil" element={<Profile />} />
+        </Route>
+      )}
 
-      <Route path="*" element={<Navigate to={me ? homeOf(me.rol) : '/login'} replace />} />
+      <Route path="*" element={<Navigate to={me ? home : '/login'} replace />} />
     </Routes>
   )
 }

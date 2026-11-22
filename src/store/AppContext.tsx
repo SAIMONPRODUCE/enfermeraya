@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { CENTER } from '../data/seed'
+import { APP_BASE } from '../lib/app'
 import { uid } from '../lib/format'
 import { errorMsg, supabase } from '../lib/supabase'
 import type { AppState, AprobacionEstado, CuentaCobro, Estado, LatLng, MetodoCobro, MetodoPago, Notificacion, NurseDetail, Retiro, Role, Servicio, User } from '../types'
@@ -347,7 +348,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       requestReset: async (email) => {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}restablecer`,
+          redirectTo: `${window.location.origin}${APP_BASE}restablecer`,
         })
         return error ? errorMsg(error) : null
       },
@@ -362,7 +363,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { rol, nombre, telefono, especialidad }, emailRedirectTo: window.location.origin },
+          options: { data: { rol, nombre, telefono, especialidad }, emailRedirectTo: `${window.location.origin}${APP_BASE}` },
         })
         return { error: error ? errorMsg(error) : null, needsConfirm: !error && !data.session }
       },

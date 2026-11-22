@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Field, inputCls } from '../components/ui'
 import { useAppActions } from '../store/AppContext'
-import { AuthShell, Segmented } from './Login'
+import { APP_ROL } from '../lib/app'
+import { AuthShell } from './Login'
 
 type Kind = 'paciente' | 'enfermero'
 const ESPECIALIDADES = ['Enfermera/o profesional', 'Inyectología y terapia IV', 'Curaciones', 'Postoperatorio', 'Cuidado de adulto mayor']
@@ -11,7 +12,8 @@ const ESPECIALIDADES = ['Enfermera/o profesional', 'Inyectología y terapia IV',
 export default function Register() {
   const nav = useNavigate()
   const { register } = useAppActions()
-  const [kind, setKind] = useState<Kind>('paciente')
+  // El tipo de cuenta lo da la app: la de clientes crea pacientes y la de profesionales, enfermeros.
+  const kind: Kind = APP_ROL === 'enfermero' ? 'enfermero' : 'paciente'
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
@@ -58,9 +60,8 @@ export default function Register() {
         <ArrowLeft size={18} /> Volver
       </button>
       <h2 className="text-[26px] font-extrabold leading-tight tracking-tight">Crea tu cuenta</h2>
-      <p className="mb-5 text-mute">Toma menos de un minuto.</p>
-      <Segmented value={kind} onChange={setKind} options={[{ id: 'paciente', label: 'Soy paciente' }, { id: 'enfermero', label: 'Soy profesional' }]} />
-      <form onSubmit={submit} className="mt-5 space-y-3">
+      <p className="mb-5 text-mute">{kind === 'enfermero' ? 'Cuenta de profesional de enfermería.' : 'Toma menos de un minuto.'}</p>
+      <form onSubmit={submit} className="space-y-3">
         <Field label="Nombre completo">
           <input className={inputCls} autoComplete="name" enterKeyHint="next" maxLength={80} value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ana Martínez" />
         </Field>

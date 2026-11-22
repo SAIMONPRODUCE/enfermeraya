@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Field, inputCls } from '../components/ui'
 import { useAppActions } from '../store/AppContext'
+import { APP_ROL } from '../lib/app'
 import type { Role } from '../types'
 
 export const homeOf = (r: Role) => (r === 'paciente' ? '/p' : r === 'enfermero' ? '/n' : '/a')
@@ -18,8 +19,8 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-brand-600 shadow-lg">
               <HeartPulse size={30} />
             </span>
-            <h1 className="mt-5 text-[32px] font-extrabold leading-tight tracking-tight">EnfermeraYa</h1>
-            <p className="mt-1 max-w-[260px] text-[15px] text-white/85">Enfermería profesional en tu casa, en minutos.</p>
+            <h1 className="mt-5 text-[32px] font-extrabold leading-tight tracking-tight">EnfermeraYa{APP_ROL !== 'paciente' && <span className="ml-2 align-middle text-[15px] font-bold uppercase tracking-wide text-white/80">{APP_ROL === 'admin' ? 'Admin' : 'Profesional'}</span>}</h1>
+            <p className="mt-1 max-w-[260px] text-[15px] text-white/85">{APP_ROL === 'paciente' ? 'Enfermería profesional en tu casa, en minutos.' : APP_ROL === 'enfermero' ? 'Recibe servicios cerca de ti y cobra tus ganancias.' : 'Validaciones, operación y retiros.'}</p>
           </div>
         </div>
         <div className="relative -mt-8 flex-1 rounded-t-[32px] bg-gradient-to-b from-[#e2ecfc] to-[#d6efe6] px-6 pb-10 pt-7">{children}</div>
@@ -90,9 +91,11 @@ export default function Login() {
           ¿Olvidaste tu contraseña?
         </button>
 
-        <button onClick={() => nav('/registro')} className="press w-full rounded-2xl py-3 text-[15px] font-semibold text-brand-700" style={{ ['--i' as string]: 2 }}>
-          ¿Nuevo aquí? <span className="underline underline-offset-4">Crear cuenta</span>
-        </button>
+        {APP_ROL !== 'admin' && (
+          <button onClick={() => nav('/registro')} className="press w-full rounded-2xl py-3 text-[15px] font-semibold text-brand-700" style={{ ['--i' as string]: 2 }}>
+            ¿Nuevo aquí? <span className="underline underline-offset-4">Crear cuenta</span>
+          </button>
+        )}
       </div>
     </AuthShell>
   )

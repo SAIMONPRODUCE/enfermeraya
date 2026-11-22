@@ -1,0 +1,18 @@
+{
+  "name": "EnfermeraYa Profesional",
+  "short_name": "EY Profesional",
+  "description": "Recibe servicios de enfermería cerca de ti.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "../icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "scope": "./"
+}

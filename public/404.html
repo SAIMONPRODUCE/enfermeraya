@@ -1,0 +1,11 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>EnfermeraYa</title>
+<script>
+  // GitHub Pages no reescribe rutas: se manda a la app que corresponde (clientes, /profesional/ o /admin/)
+  // con la ruta pedida en ?__r=, y src/lib/app.ts la restaura. El hash se conserva (enlaces de Supabase).
+  var root = '/enfermeraya/'
+  var p = location.pathname
+  var app = /^\/enfermeraya\/(profesional|admin)(\/|$)/.exec(p)
+  location.replace(root + (app ? app[1] + '/' : '') + '?__r=' + encodeURIComponent(p + location.search) + location.hash)
+</script>
