@@ -8,7 +8,7 @@ import type { AppState, AprobacionEstado, CuentaCobro, Estado, LatLng, MetodoCob
 
 // ponytail: Realtime avisa de cambios y se vuelve a consultar el estado; respaldo cada 30 s.
 const FALLBACK_MS = 30000
-const EMPTY: AppState = { users: [], nurses: {}, servicios: [], notifs: [], retiros: [], cuenta: null, tarifas: {}, sessionId: null }
+const EMPTY: AppState = { users: [], nurses: {}, servicios: [], notifs: [], retiros: [], cuenta: null, tarifas: {}, saldo: 0, deudas: [], sessionId: null }
 const ACTIVOS: Estado[] = ['aceptado', 'en_camino', 'en_atencion']
 
 // ---------- Filas tal como llegan de Supabase ----------
@@ -50,6 +50,8 @@ async function fetchState(session: Session): Promise<AppState> {
     meRow.rol === 'paciente' && meRow.lat !== null
       ? ((await supabase.rpc('enfermeras_cerca', { p_lat: meRow.lat, p_lng: meRow.lng, p_radio: 10 })).data ?? [])
       : []
+  const saldo: number = meRow.rol === 'enfermero' ? ((await supabase.rpc('saldo_disponible')).data ?? 0) : 0
+  const deudas: AppState['deudas'] = meRow.rol === 'admin' ? ((await supabase.rpc('deudas_comision')).data ?? []) : []
 
   const users = new Map<string, User>()
   const pos = new Map<string, LatLng>() // posición real conocida (no el CENTER de relleno)
@@ -120,6 +122,8 @@ async function fetchState(session: Session): Promise<AppState> {
   return {
     sessionId: meId,
     tarifas: tarifaMap,
+    saldo,
+    deudas,
     users: [...users.values()],
     nurses: nurseMap,
     servicios: svcs,
@@ -187,6 +191,8 @@ interface Ctx {
   requestWithdrawal: (monto: number) => Promise<boolean>
   /** Admin: marca un retiro como pagado (con referencia) o rechazado (con nota). */
   resolveWithdrawal: (id: string, pagado: boolean, referencia: string, nota: string) => Promise<boolean>
+  /** Admin: registra un pago de comisión de efectivo hecho por fuera. Devuelve true si quedó registrado. */
+  registerAbono: (usuario: string, monto: number, referencia: string) => Promise<boolean>
   /** Profesional: fija su tarifa para un servicio. Devuelve true si quedó guardada. */
   setTarifa: (servicio: string, precio: number) => Promise<boolean>
   uploadDocs: (files: File[]) => Promise<boolean>
@@ -427,6 +433,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       resolveWithdrawal: async (id, pagado, referencia, nota) => {
         return call('resolver_retiro', { p_id: id, p_pagado: pagado, p_referencia: referencia, p_nota: nota })
+      },
+      registerAbono: async (usuario, monto, referencia) => {
+        return call('registrar_abono', { p_usuario: usuario, p_monto: monto, p_referencia: referencia })
       },
       setTarifa: async (servicio, precio) => {
         return call('set_tarifa', { p_servicio: servicio, p_precio: precio })

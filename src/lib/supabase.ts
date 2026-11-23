@@ -35,6 +35,8 @@ const ERRORES: Record<string, string> = {
   tarifa_fuera_de_rango: 'La tarifa debe estar dentro del rango del servicio.',
   enfermero_no_disponible: 'Ese profesional ya no está disponible. Elige otro o el más cercano.',
   muchas_cancelaciones: 'Cancelaste varias solicitudes en la última hora. Espera un rato antes de cancelar otra.',
+  deuda_pendiente: 'Tienes comisiones de efectivo por pagar sobre el límite. Págalas para volver a conectarte.',
+  abono_invalido: 'El monto debe ser mayor a cero y no superar lo que debe.',
   ruta_invalida: 'Los documentos no son válidos.',
   no_editable: 'Tu perfil ya fue aprobado.',
   'Invalid login credentials': 'Correo o contraseña incorrectos.',

@@ -62,9 +62,8 @@ export function proximoRetiro(retiros: { estado: string; creado: number }[], now
   return ultimo && next > now ? next : null
 }
 
-/** Saldo disponible: ganancias menos los retiros pendientes o pagados. Espejo de saldo_disponible() para mostrarlo. */
-export const saldoDisponible = (ganancias: number, retiros: { estado: string; monto: number }[]) =>
-  ganancias - retiros.filter((r) => r.estado !== 'rechazado').reduce((a, r) => a + r.monto, 0)
+/** Deuda de comisiones de efectivo a partir de la cual el profesional no puede conectarse (limite_deuda() en 0021). */
+export const LIMITE_DEUDA = 100000
 
 /** "•••• 4567" */
 export const enmascarar = (numero: string) => `•••• ${numero.slice(-4)}`

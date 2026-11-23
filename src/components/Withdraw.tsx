@@ -1,7 +1,7 @@
 import { Banknote, Check, Clock, Landmark, Pencil, Smartphone, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Segmented } from '../pages/Login'
-import { RETIRO_CADA_DIAS, RETIRO_MINIMO, enmascarar, formatDate, money, proximoRetiro } from '../lib/format'
+import { LIMITE_DEUDA, RETIRO_CADA_DIAS, RETIRO_MINIMO, enmascarar, formatDate, money, proximoRetiro } from '../lib/format'
 import { useApp } from '../store/AppContext'
 import type { CuentaCobro, MetodoCobro, Retiro } from '../types'
 import { Sheet } from './Sheet'
@@ -134,7 +134,9 @@ export function RetirosProfesional({ saldo }: { saldo: number }) {
     setVolver(true)
     setCuenta(true)
   }
-  const hint = pendiente
+  const hint = saldo < 0
+    ? `Debes ${money(-saldo)} de comisión (15 %) por servicios en efectivo. Se descuenta de tus próximas ganancias por tarjeta o transferencia, o págala al administrador. Con más de ${money(LIMITE_DEUDA)} no puedes conectarte.`
+    : pendiente
     ? 'Tienes un retiro por pagar. Cuando se pague podrás pedir otro.'
     : espera
       ? `Retiras una vez cada ${RETIRO_CADA_DIAS} días. Podrás volver a pedir el ${formatDate(espera).replace(/\.$/, "")}.`
@@ -146,8 +148,8 @@ export function RetirosProfesional({ saldo }: { saldo: number }) {
       <Card>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-[13px] text-mute">Saldo disponible</p>
-            <p className="text-[28px] font-extrabold leading-tight tracking-tight tabular-nums">{money(saldo)}</p>
+            <p className="text-[13px] text-mute">{saldo < 0 ? 'Comisión por pagar' : 'Saldo disponible'}</p>
+            <p className={`text-[28px] font-extrabold leading-tight tracking-tight tabular-nums ${saldo < 0 ? 'text-red-700' : ''}`}>{money(Math.abs(saldo))}</p>
           </div>
           <Button variant="mint" disabled={!puede} onClick={abrir}><Banknote size={18} /> Retirar</Button>
         </div>

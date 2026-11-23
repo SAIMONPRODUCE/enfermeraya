@@ -4,7 +4,7 @@ import { MapView } from '../../components/MapView'
 import { Sheet } from '../../components/Sheet'
 import { METODO_LABEL, RetiroPill } from '../../components/Withdraw'
 import { Avatar, Button, Card, Field, StatusPill, inputCls } from '../../components/ui'
-import { docName, formatDate, money } from '../../lib/format'
+import { LIMITE_DEUDA, docName, formatDate, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { isActive, serviceOf } from '../../store/sim'
 import type { Retiro } from '../../types'
@@ -105,8 +105,25 @@ export function Operations() {
 
 /** Retiros de los profesionales: el admin paga por fuera de la app y aquí lo marca pagado (con referencia) o rechazado (con motivo). */
 export function Withdrawals() {
-  const { state, resolveWithdrawal } = useApp()
+  const { state, resolveWithdrawal, registerAbono } = useApp()
   const [sel, setSel] = useState<{ r: Retiro; pagado: boolean } | null>(null)
+  // Pago de comisión de efectivo que el profesional hizo por fuera
+  const [abono, setAbono] = useState<{ id: string; debe: number } | null>(null)
+  const [abonoMonto, setAbonoMonto] = useState('')
+  const [abonoRef, setAbonoRef] = useState('')
+  const abonoValor = Number(abonoMonto.replace(/\D/g, ''))
+  const abrirAbono = (id: string, debe: number) => {
+    setAbonoMonto(String(debe))
+    setAbonoRef('')
+    setAbono({ id, debe })
+  }
+  const enviarAbono = async () => {
+    if (!abono) return
+    setBusy(true)
+    const ok = await registerAbono(abono.id, abonoValor, abonoRef.trim())
+    setBusy(false)
+    if (ok) setAbono(null)
+  }
   const [txt, setTxt] = useState('')
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState('')
@@ -141,6 +158,25 @@ export function Withdrawals() {
       <p className="mb-4 text-[14px] text-mute">
         {pendientes.length === 0 ? 'No hay retiros por pagar.' : <><b>{pendientes.length}</b> {pendientes.length === 1 ? 'retiro por pagar' : 'retiros por pagar'} por <b>{money(pendientes.reduce((a, r) => a + r.monto, 0))}</b></>}
       </p>
+
+      {state.deudas.length > 0 && (
+        <section className="mb-6">
+          <h2 className="mb-1 font-extrabold">Comisiones por cobrar</h2>
+          <p className="mb-2 text-[13px] text-mute">15 % de servicios en efectivo. Registra aquí lo que el profesional te pague por fuera.</p>
+          <div className="space-y-2">
+            {state.deudas.map((d) => (
+              <Card key={d.usuario_id} className="flex items-center gap-3 !p-3.5">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-bold">{nameOf(d.usuario_id)}</span>
+                  <span className="text-[13px] text-mute">{d.debe > LIMITE_DEUDA ? 'Bloqueado hasta pagar' : 'Se descuenta de sus ganancias'}</span>
+                </span>
+                <span className="font-extrabold tabular-nums text-red-700">{money(d.debe)}</span>
+                <Button variant="mint" onClick={() => abrirAbono(d.usuario_id, d.debe)}>Registrar pago</Button>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="space-y-3">
         {pendientes.map((r) => (
@@ -194,6 +230,22 @@ export function Withdrawals() {
           </div>
         </>
       )}
+
+      <Sheet open={!!abono} onClose={() => setAbono(null)} title="Registrar pago de comisión">
+        {abono && (
+          <div className="space-y-3 pb-2">
+            <h2 className="text-[22px] font-extrabold tracking-tight">Pago de {nameOf(abono.id)}</h2>
+            <p className="text-[14px] text-mute">Debe {money(abono.debe)}.</p>
+            <Field label="Monto recibido">
+              <input className={inputCls + ' tabular-nums'} inputMode="numeric" value={abonoMonto ? money(abonoValor) : ''} onChange={(e) => setAbonoMonto(e.target.value.replace(/\D/g, ''))} />
+            </Field>
+            <Field label="Referencia del pago">
+              <input className={inputCls} value={abonoRef} maxLength={80} onChange={(e) => setAbonoRef(e.target.value)} placeholder="Ej: Nequi 123456" />
+            </Field>
+            <Button block variant="mint" loading={busy} disabled={abonoValor <= 0 || abonoValor > abono.debe || abonoRef.trim().length < 3} onClick={enviarAbono}>Registrar {money(abonoValor)}</Button>
+          </div>
+        )}
+      </Sheet>
 
       <Sheet open={!!sel} onClose={() => setSel(null)} title={sel?.pagado ? 'Marcar pagado' : 'Rechazar retiro'}>
         {sel && (

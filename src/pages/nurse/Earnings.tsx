@@ -2,7 +2,7 @@ import { Star, TrendingUp } from 'lucide-react'
 import { Card, ServiceTile } from '../../components/ui'
 import { TarifasProfesional } from '../../components/Tarifas'
 import { RetirosProfesional } from '../../components/Withdraw'
-import { formatDate, isSameDay, money, saldoDisponible } from '../../lib/format'
+import { formatDate, isSameDay, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
 import { serviceOf } from '../../store/sim'
 
@@ -33,7 +33,7 @@ export default function Earnings() {
           <p className="text-[34px] font-extrabold leading-tight tabular-nums">{money(myNurse.ganancias)}</p>
           <p className="mt-1 flex items-center gap-1.5 text-[13px] text-white/85"><TrendingUp size={15} /> Recibes el 85% de cada servicio pagado en la app</p>
         </Card>
-        <RetirosProfesional saldo={saldoDisponible(myNurse.ganancias, state.retiros)} />
+        <RetirosProfesional saldo={state.saldo} />
         <TarifasProfesional />
         <div className="grid grid-cols-2 gap-3">
           <Card><p className="text-[13px] text-mute">Servicios</p><p className="text-[26px] font-extrabold leading-tight tracking-tight">{myNurse.servicios}</p></Card>
@@ -63,7 +63,7 @@ export default function Earnings() {
                   <ServiceTile id={s.servicio_id} icon={serviceOf(s.servicio_id).icon} size={40} />
                   <span className="min-w-0 flex-1"><span className="block truncate font-bold">{serviceOf(s.servicio_id).nombre}</span><span className="text-[12px] text-mute">{formatDate(s.estado_ts)}{s.calificacion ? ` · ${s.calificacion} de 5` : ''}</span></span>
                   {s.metodo_pago === 'efectivo'
-                    ? <span className="text-right"><span className="block font-extrabold">{money(s.total)}</span><span className="text-[12px] text-mute">En efectivo</span></span>
+                    ? <span className="text-right"><span className="block font-extrabold">{money(s.total)}</span><span className="text-[12px] text-mute">En efectivo · comisión {money(s.total - Math.round(s.total * 0.85))}</span></span>
                     : <span className="font-extrabold text-mint-700">+{money(s.total * 0.85)}</span>}
                 </Card>
               ))}

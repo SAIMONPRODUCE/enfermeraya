@@ -126,5 +126,9 @@ export interface AppState {
   cuenta: CuentaCobro | null
   /** Tarifa propia de cada profesional: tarifas[enfermeroId][servicioId]. Sin entrada = precio sugerido. */
   tarifas: Record<string, Record<string, number>>
+  /** Profesional: saldo del servidor (ganancias - retiros - comisiones de efectivo + abonos). Negativo = debe comisión. */
+  saldo: number
+  /** Admin: profesionales que deben comisión de servicios en efectivo. */
+  deudas: { usuario_id: string; debe: number }[]
   sessionId: string | null
 }

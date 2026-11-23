@@ -21,6 +21,8 @@ function stateWith(pairs: [User, NurseDetail][], servicios: Partial<Servicio>[] 
     retiros: [],
     cuenta: null,
     tarifas: {},
+    saldo: 0,
+    deudas: [],
     users: pairs.map(([u]) => u),
     nurses: Object.fromEntries(pairs.map(([u, d]) => [u.id, d])),
     servicios: servicios as Servicio[],
