@@ -85,32 +85,6 @@
       "source_location": "L16"
     },
     {
-      "id": "src_store_appcontext_quote",
-      "label": "Quote",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "Request.tsx",
-      "file_type": "code",
-      "norm_label": "quote",
-      "source_file": "src/store/AppContext.tsx",
-      "source_location": "L147"
-    },
-    {
-      "id": "src_types_servicecatalog",
-      "label": "ServiceCatalog",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "Request.tsx",
-      "file_type": "code",
-      "norm_label": "servicecatalog",
-      "source_file": "src/types.ts",
-      "source_location": "L34"
-    },
-    {
       "id": "src_pages_register_kind",
       "label": "Kind",
       "_callable": true,
@@ -122,19 +96,6 @@
       "norm_label": "kind",
       "source_file": "src/pages/Register.tsx",
       "source_location": "L9"
-    },
-    {
-      "id": "src_types_role",
-      "label": "Role",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "App.tsx",
-      "file_type": "code",
-      "norm_label": "role",
-      "source_file": "src/types.ts",
-      "source_location": "L1"
     },
     {
       "id": "src_vite_env_d_importmetaenv",
@@ -304,6 +265,19 @@
       "norm_label": "profilerow",
       "source_file": "src/store/AppContext.tsx",
       "source_location": "L15"
+    },
+    {
+      "id": "src_store_appcontext_quote",
+      "label": "Quote",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "AppContext.tsx",
+      "file_type": "code",
+      "norm_label": "quote",
+      "source_file": "src/store/AppContext.tsx",
+      "source_location": "L147"
     },
     {
       "id": "src_store_appcontext_registro",
@@ -514,6 +488,32 @@
       "source_location": "L95"
     },
     {
+      "id": "src_types_role",
+      "label": "Role",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "AppContext.tsx",
+      "file_type": "code",
+      "norm_label": "role",
+      "source_file": "src/types.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_types_servicecatalog",
+      "label": "ServiceCatalog",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "AppContext.tsx",
+      "file_type": "code",
+      "norm_label": "servicecatalog",
+      "source_file": "src/types.ts",
+      "source_location": "L34"
+    },
+    {
       "id": "src_types_servicio",
       "label": "Servicio",
       "_callable": true,
@@ -657,7 +657,7 @@
       "file_type": "code",
       "norm_label": "timeago()",
       "source_file": "src/lib/format.ts",
-      "source_location": "L11"
+      "source_location": "L14"
     },
     {
       "id": "src_components_locationsheet_locationsheet",
@@ -684,6 +684,30 @@
       "source_location": "L73"
     },
     {
+      "id": "src_components_tarifas_tarifasheet",
+      "label": "TarifaSheet()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "tarifasheet()",
+      "source_file": "src/components/Tarifas.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_components_tarifas_tarifasprofesional",
+      "label": "TarifasProfesional()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "tarifasprofesional()",
+      "source_file": "src/components/Tarifas.tsx",
+      "source_location": "L44"
+    },
+    {
       "id": "src_components_ui_avatar",
       "label": "Avatar()",
       "_callable": true,
@@ -706,6 +730,18 @@
       "norm_label": "serviceicon()",
       "source_file": "src/components/ui.tsx",
       "source_location": "L11"
+    },
+    {
+      "id": "src_components_ui_servicetile",
+      "label": "ServiceTile()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "servicetile()",
+      "source_file": "src/components/ui.tsx",
+      "source_location": "L126"
     },
     {
       "id": "src_components_ui_stars",
@@ -732,6 +768,18 @@
       "source_location": "L110"
     },
     {
+      "id": "src_components_ui_switch",
+      "label": "Switch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "switch()",
+      "source_file": "src/components/ui.tsx",
+      "source_location": "L61"
+    },
+    {
       "id": "src_components_ui_validated",
       "label": "Validated()",
       "_callable": true,
@@ -742,6 +790,30 @@
       "norm_label": "validated()",
       "source_file": "src/components/ui.tsx",
       "source_location": "L133"
+    },
+    {
+      "id": "src_lib_format_docname",
+      "label": "docName()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "docname()",
+      "source_file": "src/lib/format.ts",
+      "source_location": "L37"
+    },
+    {
+      "id": "src_lib_format_money",
+      "label": "money()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "money()",
+      "source_file": "src/lib/format.ts",
+      "source_location": "L1"
     },
     {
       "id": "src_lib_geo_etaminutes",
@@ -804,16 +876,88 @@
       "source_location": "L5"
     },
     {
-      "id": "src_pages_login_segmented",
-      "label": "Segmented()",
+      "id": "src_pages_admin_admin_validations",
+      "label": "Validations()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "Request.tsx",
       "file_type": "code",
-      "norm_label": "segmented()",
-      "source_file": "src/pages/Login.tsx",
-      "source_location": "L32"
+      "norm_label": "validations()",
+      "source_file": "src/pages/admin/Admin.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_pages_nurse_home_docslot",
+      "label": "DocSlot()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "docslot()",
+      "source_file": "src/pages/nurse/Home.tsx",
+      "source_location": "L21"
+    },
+    {
+      "id": "src_pages_nurse_home_nursehome",
+      "label": "NurseHome()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "nursehome()",
+      "source_file": "src/pages/nurse/Home.tsx",
+      "source_location": "L145"
+    },
+    {
+      "id": "src_pages_nurse_home_offersheet",
+      "label": "OfferSheet()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "offersheet()",
+      "source_file": "src/pages/nurse/Home.tsx",
+      "source_location": "L99"
+    },
+    {
+      "id": "src_pages_nurse_home_pending",
+      "label": "Pending()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "pending()",
+      "source_file": "src/pages/nurse/Home.tsx",
+      "source_location": "L59"
+    },
+    {
+      "id": "src_pages_nurse_home_uploaddocs",
+      "label": "UploadDocs()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "uploaddocs()",
+      "source_file": "src/pages/nurse/Home.tsx",
+      "source_location": "L38"
+    },
+    {
+      "id": "src_pages_nurse_home_usenow",
+      "label": "useNow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "usenow()",
+      "source_file": "src/pages/nurse/Home.tsx",
+      "source_location": "L12"
     },
     {
       "id": "src_pages_patient_home_patienthome",
@@ -888,6 +1032,18 @@
       "source_location": "L41"
     },
     {
+      "id": "src_store_appcontext_useapp",
+      "label": "useApp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "useapp()",
+      "source_file": "src/store/AppContext.tsx",
+      "source_location": "L484"
+    },
+    {
       "id": "src_store_sim_availablenurses",
       "label": "availableNurses()",
       "_callable": true,
@@ -910,6 +1066,30 @@
       "norm_label": "desde()",
       "source_file": "src/store/sim.ts",
       "source_location": "L15"
+    },
+    {
+      "id": "src_store_sim_serviceof",
+      "label": "serviceOf()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "serviceof()",
+      "source_file": "src/store/sim.ts",
+      "source_location": "L11"
+    },
+    {
+      "id": "src_store_sim_tarifade",
+      "label": "tarifaDe()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "tarifade()",
+      "source_file": "src/store/sim.ts",
+      "source_location": "L13"
     },
     {
       "id": "src_app_app",
@@ -948,6 +1128,18 @@
       "source_location": "L49"
     },
     {
+      "id": "src_components_ui_button",
+      "label": "Button()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "button()",
+      "source_file": "src/components/ui.tsx",
+      "source_location": "L21"
+    },
+    {
       "id": "src_components_ui_field",
       "label": "Field()",
       "_callable": true,
@@ -981,7 +1173,7 @@
       "file_type": "code",
       "norm_label": "formattelefono()",
       "source_file": "src/lib/format.ts",
-      "source_location": "L44"
+      "source_location": "L47"
     },
     {
       "id": "src_pages_login_authshell",
@@ -1080,52 +1272,40 @@
       "source_location": "L492"
     },
     {
+      "id": "src_components_mapview_esc",
+      "label": "esc()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "Withdraw.tsx",
+      "file_type": "code",
+      "norm_label": "esc()",
+      "source_file": "src/components/MapView.tsx",
+      "source_location": "L36"
+    },
+    {
+      "id": "src_components_mapview_pinof",
+      "label": "pinOf()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "Withdraw.tsx",
+      "file_type": "code",
+      "norm_label": "pinof()",
+      "source_file": "src/components/MapView.tsx",
+      "source_location": "L43"
+    },
+    {
       "id": "src_components_sheet_sheet",
       "label": "Sheet()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "sheet()",
       "source_file": "src/components/Sheet.tsx",
       "source_location": "L15"
-    },
-    {
-      "id": "src_components_tarifas_tarifasheet",
-      "label": "TarifaSheet()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "tarifasheet()",
-      "source_file": "src/components/Tarifas.tsx",
-      "source_location": "L12"
-    },
-    {
-      "id": "src_components_tarifas_tarifasprofesional",
-      "label": "TarifasProfesional()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "tarifasprofesional()",
-      "source_file": "src/components/Tarifas.tsx",
-      "source_location": "L44"
-    },
-    {
-      "id": "src_components_ui_button",
-      "label": "Button()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "button()",
-      "source_file": "src/components/ui.tsx",
-      "source_location": "L21"
     },
     {
       "id": "src_components_ui_card",
@@ -1133,23 +1313,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "card()",
       "source_file": "src/components/ui.tsx",
       "source_location": "L97"
-    },
-    {
-      "id": "src_components_ui_servicetile",
-      "label": "ServiceTile()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "servicetile()",
-      "source_file": "src/components/ui.tsx",
-      "source_location": "L126"
     },
     {
       "id": "src_components_ui_statuspill",
@@ -1157,23 +1325,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "statuspill()",
       "source_file": "src/components/ui.tsx",
       "source_location": "L93"
-    },
-    {
-      "id": "src_components_ui_switch",
-      "label": "Switch()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "switch()",
-      "source_file": "src/components/ui.tsx",
-      "source_location": "L61"
     },
     {
       "id": "src_components_withdraw_cuentaresumen",
@@ -1181,7 +1337,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "cuentaresumen()",
       "source_file": "src/components/Withdraw.tsx",
@@ -1193,7 +1349,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "cuentasheet()",
       "source_file": "src/components/Withdraw.tsx",
@@ -1205,7 +1361,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "retiropill()",
       "source_file": "src/components/Withdraw.tsx",
@@ -1217,7 +1373,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "retirosheet()",
       "source_file": "src/components/Withdraw.tsx",
@@ -1229,23 +1385,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "retirosprofesional()",
       "source_file": "src/components/Withdraw.tsx",
       "source_location": "L123"
-    },
-    {
-      "id": "src_lib_format_docname",
-      "label": "docName()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "docname()",
-      "source_file": "src/lib/format.ts",
-      "source_location": "L34"
     },
     {
       "id": "src_lib_format_enmascarar",
@@ -1253,11 +1397,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "enmascarar()",
       "source_file": "src/lib/format.ts",
-      "source_location": "L67"
+      "source_location": "L70"
     },
     {
       "id": "src_lib_format_formatdate",
@@ -1265,11 +1409,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "formatdate()",
       "source_file": "src/lib/format.ts",
-      "source_location": "L22"
+      "source_location": "L25"
+    },
+    {
+      "id": "src_lib_format_initials",
+      "label": "initials()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "Withdraw.tsx",
+      "file_type": "code",
+      "norm_label": "initials()",
+      "source_file": "src/lib/format.ts",
+      "source_location": "L6"
     },
     {
       "id": "src_lib_format_issameday",
@@ -1277,23 +1433,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "issameday()",
       "source_file": "src/lib/format.ts",
-      "source_location": "L37"
-    },
-    {
-      "id": "src_lib_format_money",
-      "label": "money()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "money()",
-      "source_file": "src/lib/format.ts",
-      "source_location": "L1"
+      "source_location": "L40"
     },
     {
       "id": "src_lib_format_proximoretiro",
@@ -1301,11 +1445,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "proximoretiro()",
       "source_file": "src/lib/format.ts",
-      "source_location": "L56"
+      "source_location": "L59"
+    },
+    {
+      "id": "src_lib_format_safecolor",
+      "label": "safeColor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "Withdraw.tsx",
+      "file_type": "code",
+      "norm_label": "safecolor()",
+      "source_file": "src/lib/format.ts",
+      "source_location": "L4"
     },
     {
       "id": "src_lib_format_saldodisponible",
@@ -1313,11 +1469,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "saldodisponible()",
       "source_file": "src/lib/format.ts",
-      "source_location": "L63"
+      "source_location": "L66"
     },
     {
       "id": "src_pages_admin_admin_operations",
@@ -1325,23 +1481,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "operations()",
       "source_file": "src/pages/admin/Admin.tsx",
       "source_location": "L69"
-    },
-    {
-      "id": "src_pages_admin_admin_validations",
-      "label": "Validations()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "validations()",
-      "source_file": "src/pages/admin/Admin.tsx",
-      "source_location": "L12"
     },
     {
       "id": "src_pages_admin_admin_withdrawals",
@@ -1349,11 +1493,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "withdrawals()",
       "source_file": "src/pages/admin/Admin.tsx",
       "source_location": "L107"
+    },
+    {
+      "id": "src_pages_login_segmented",
+      "label": "Segmented()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "Withdraw.tsx",
+      "file_type": "code",
+      "norm_label": "segmented()",
+      "source_file": "src/pages/Login.tsx",
+      "source_location": "L32"
     },
     {
       "id": "src_pages_nurse_earnings_earnings",
@@ -1361,83 +1517,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "earnings()",
       "source_file": "src/pages/nurse/Earnings.tsx",
       "source_location": "L11"
-    },
-    {
-      "id": "src_pages_nurse_home_docslot",
-      "label": "DocSlot()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "docslot()",
-      "source_file": "src/pages/nurse/Home.tsx",
-      "source_location": "L21"
-    },
-    {
-      "id": "src_pages_nurse_home_nursehome",
-      "label": "NurseHome()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "nursehome()",
-      "source_file": "src/pages/nurse/Home.tsx",
-      "source_location": "L145"
-    },
-    {
-      "id": "src_pages_nurse_home_offersheet",
-      "label": "OfferSheet()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "offersheet()",
-      "source_file": "src/pages/nurse/Home.tsx",
-      "source_location": "L99"
-    },
-    {
-      "id": "src_pages_nurse_home_pending",
-      "label": "Pending()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "pending()",
-      "source_file": "src/pages/nurse/Home.tsx",
-      "source_location": "L59"
-    },
-    {
-      "id": "src_pages_nurse_home_uploaddocs",
-      "label": "UploadDocs()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "uploaddocs()",
-      "source_file": "src/pages/nurse/Home.tsx",
-      "source_location": "L38"
-    },
-    {
-      "id": "src_pages_nurse_home_usenow",
-      "label": "useNow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "usenow()",
-      "source_file": "src/pages/nurse/Home.tsx",
-      "source_location": "L12"
     },
     {
       "id": "src_pages_patient_activity_activity",
@@ -1445,23 +1529,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "activity()",
       "source_file": "src/pages/patient/Activity.tsx",
       "source_location": "L11"
-    },
-    {
-      "id": "src_store_appcontext_useapp",
-      "label": "useApp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "useapp()",
-      "source_file": "src/store/AppContext.tsx",
-      "source_location": "L484"
     },
     {
       "id": "src_store_sim_isactive",
@@ -1469,59 +1541,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "isactive()",
       "source_file": "src/store/sim.ts",
       "source_location": "L10"
-    },
-    {
-      "id": "src_store_sim_serviceof",
-      "label": "serviceOf()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "serviceof()",
-      "source_file": "src/store/sim.ts",
-      "source_location": "L11"
-    },
-    {
-      "id": "src_store_sim_tarifade",
-      "label": "tarifaDe()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "tarifade()",
-      "source_file": "src/store/sim.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "src_components_mapview_esc",
-      "label": "esc()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AppContext.tsx",
-      "file_type": "code",
-      "norm_label": "esc()",
-      "source_file": "src/components/MapView.tsx",
-      "source_location": "L36"
-    },
-    {
-      "id": "src_components_mapview_pinof",
-      "label": "pinOf()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AppContext.tsx",
-      "file_type": "code",
-      "norm_label": "pinof()",
-      "source_file": "src/components/MapView.tsx",
-      "source_location": "L43"
     },
     {
       "id": "src_components_mapview_zoomfor",
@@ -1536,18 +1560,6 @@
       "source_location": "L61"
     },
     {
-      "id": "src_lib_format_initials",
-      "label": "initials()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "AppContext.tsx",
-      "file_type": "code",
-      "norm_label": "initials()",
-      "source_file": "src/lib/format.ts",
-      "source_location": "L3"
-    },
-    {
       "id": "src_lib_format_uid",
       "label": "uid()",
       "_callable": true,
@@ -1557,7 +1569,7 @@
       "file_type": "code",
       "norm_label": "uid()",
       "source_file": "src/lib/format.ts",
-      "source_location": "L31"
+      "source_location": "L34"
     },
     {
       "id": "src_lib_supabase_errormsg",
@@ -1569,7 +1581,7 @@
       "file_type": "code",
       "norm_label": "errormsg()",
       "source_file": "src/lib/supabase.ts",
-      "source_location": "L44"
+      "source_location": "L45"
     },
     {
       "id": "src_store_appcontext_appprovider",
@@ -1873,17 +1885,6 @@
       "norm_label": "toasts.tsx",
       "source_file": "src/components/Toasts.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_lib_app_app_base",
-      "label": "APP_BASE",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "react",
-      "file_type": "code",
-      "norm_label": "app_base",
-      "source_file": "src/lib/app.ts",
-      "source_location": "L15"
     },
     {
       "id": "src_main",
@@ -2370,15 +2371,15 @@
       "source_location": "L26"
     },
     {
-      "id": "src_app_request",
-      "label": "Request",
+      "id": "src_components_tarifas",
+      "label": "Tarifas.tsx",
       "_origin": "ast",
       "community": 3,
       "community_name": "Request.tsx",
       "file_type": "code",
-      "norm_label": "request",
-      "source_file": "src/App.tsx",
-      "source_location": "L21"
+      "norm_label": "tarifas.tsx",
+      "source_file": "src/components/Tarifas.tsx",
+      "source_location": "L1"
     },
     {
       "id": "src_components_ui",
@@ -2436,28 +2437,6 @@
       "source_location": "L122"
     },
     {
-      "id": "src_data_seed",
-      "label": "seed.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "Request.tsx",
-      "file_type": "code",
-      "norm_label": "seed.ts",
-      "source_file": "src/data/seed.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_data_seed_center",
-      "label": "CENTER",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "Request.tsx",
-      "file_type": "code",
-      "norm_label": "center",
-      "source_file": "src/data/seed.ts",
-      "source_location": "L3"
-    },
-    {
       "id": "src_data_seed_oferta",
       "label": "OFERTA",
       "_origin": "ast",
@@ -2489,6 +2468,17 @@
       "norm_label": "km_per_deg_lat",
       "source_file": "src/lib/geo.ts",
       "source_location": "L16"
+    },
+    {
+      "id": "src_pages_nurse_home",
+      "label": "nurse/Home.tsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Request.tsx",
+      "file_type": "code",
+      "norm_label": "nurse/home.tsx",
+      "source_file": "src/pages/nurse/Home.tsx",
+      "source_location": "L1"
     },
     {
       "id": "src_pages_patient_home",
@@ -2568,17 +2558,6 @@
       "source_location": "L41"
     },
     {
-      "id": "src_app_earnings",
-      "label": "Earnings",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "App.tsx",
-      "file_type": "code",
-      "norm_label": "earnings",
-      "source_file": "src/App.tsx",
-      "source_location": "L19"
-    },
-    {
       "id": "src_app_nursehome",
       "label": "NurseHome",
       "_origin": "ast",
@@ -2621,6 +2600,17 @@
       "norm_label": "patienttabs",
       "source_file": "src/App.tsx",
       "source_location": "L31"
+    },
+    {
+      "id": "src_app_request",
+      "label": "Request",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "request",
+      "source_file": "src/App.tsx",
+      "source_location": "L21"
     },
     {
       "id": "src_app_tracking",
@@ -2676,6 +2666,17 @@
       "norm_label": "app.ts",
       "source_file": "src/lib/app.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "src_lib_app_app_base",
+      "label": "APP_BASE",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "app_base",
+      "source_file": "src/lib/app.ts",
+      "source_location": "L15"
     },
     {
       "id": "src_lib_app_app_nombre",
@@ -2843,22 +2844,22 @@
       "source_location": "L14"
     },
     {
-      "id": "src_components_tarifas",
-      "label": "Tarifas.tsx",
+      "id": "src_app_earnings",
+      "label": "Earnings",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
-      "norm_label": "tarifas.tsx",
-      "source_file": "src/components/Tarifas.tsx",
-      "source_location": "L1"
+      "norm_label": "earnings",
+      "source_file": "src/App.tsx",
+      "source_location": "L19"
     },
     {
       "id": "src_components_withdraw",
       "label": "Withdraw.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "withdraw.tsx",
       "source_file": "src/components/Withdraw.tsx",
@@ -2869,7 +2870,7 @@
       "label": "EMPTY",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "empty",
       "source_file": "src/components/Withdraw.tsx",
@@ -2880,7 +2881,7 @@
       "label": "ESTADO_RETIRO",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "estado_retiro",
       "source_file": "src/components/Withdraw.tsx",
@@ -2891,7 +2892,7 @@
       "label": "METODO_LABEL",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "metodo_label",
       "source_file": "src/components/Withdraw.tsx",
@@ -2902,7 +2903,7 @@
       "label": "format.ts",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "format.ts",
       "source_file": "src/lib/format.ts",
@@ -2913,29 +2914,29 @@
       "label": "RETIRO_CADA_DIAS",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "retiro_cada_dias",
       "source_file": "src/lib/format.ts",
-      "source_location": "L53"
+      "source_location": "L56"
     },
     {
       "id": "src_lib_format_retiro_minimo",
       "label": "RETIRO_MINIMO",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "retiro_minimo",
       "source_file": "src/lib/format.ts",
-      "source_location": "L50"
+      "source_location": "L53"
     },
     {
       "id": "src_pages_admin_admin",
       "label": "Admin.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "admin.tsx",
       "source_file": "src/pages/admin/Admin.tsx",
@@ -2946,7 +2947,7 @@
       "label": "Earnings.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "earnings.tsx",
       "source_file": "src/pages/nurse/Earnings.tsx",
@@ -2957,29 +2958,18 @@
       "label": "DAYS",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "days",
       "source_file": "src/pages/nurse/Earnings.tsx",
       "source_location": "L9"
     },
     {
-      "id": "src_pages_nurse_home",
-      "label": "nurse/Home.tsx",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "useApp",
-      "file_type": "code",
-      "norm_label": "nurse/home.tsx",
-      "source_file": "src/pages/nurse/Home.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "src_pages_patient_activity",
       "label": "Activity.tsx",
       "_origin": "ast",
       "community": 5,
-      "community_name": "useApp",
+      "community_name": "Withdraw.tsx",
       "file_type": "code",
       "norm_label": "activity.tsx",
       "source_file": "src/pages/patient/Activity.tsx",
@@ -3261,6 +3251,17 @@
       "source_location": "L34"
     },
     {
+      "id": "src_data_seed",
+      "label": "seed.ts",
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "AppContext.tsx",
+      "file_type": "code",
+      "norm_label": "seed.ts",
+      "source_file": "src/data/seed.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_data_seed_catalogo",
       "label": "CATALOGO",
       "_origin": "ast",
@@ -3270,6 +3271,17 @@
       "norm_label": "catalogo",
       "source_file": "src/data/seed.ts",
       "source_location": "L5"
+    },
+    {
+      "id": "src_data_seed_center",
+      "label": "CENTER",
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "AppContext.tsx",
+      "file_type": "code",
+      "norm_label": "center",
+      "source_file": "src/data/seed.ts",
+      "source_location": "L3"
     },
     {
       "id": "src_store_appcontext",
@@ -3909,6 +3921,18 @@
       "weight": 1.0
     },
     {
+      "source": "src_components_mapview_pinof",
+      "target": "src_lib_format_safecolor",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/MapView.tsx",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
       "source": "src_components_tarifas_tarifasheet",
       "target": "src_store_appcontext_useapp",
       "relation": "calls",
@@ -4074,6 +4098,18 @@
       "context": "call",
       "source_file": "src/components/Toasts.tsx",
       "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_ui_avatar",
+      "target": "src_lib_format_safecolor",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/ui.tsx",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -4721,7 +4757,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/nurse/Earnings.tsx",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -4733,7 +4769,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/nurse/Earnings.tsx",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -4745,7 +4781,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/nurse/Earnings.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -4757,7 +4793,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/nurse/Earnings.tsx",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -4769,7 +4805,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/nurse/Earnings.tsx",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -4781,7 +4817,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/nurse/Earnings.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -4793,7 +4829,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/nurse/Earnings.tsx",
-      "source_location": "L62",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -4805,7 +4841,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/nurse/Earnings.tsx",
-      "source_location": "L62",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -4817,7 +4853,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/pages/nurse/Earnings.tsx",
-      "source_location": "L63",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -7098,6 +7134,18 @@
     },
     {
       "source": "src_components_mapview",
+      "target": "src_lib_format_safecolor",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/MapView.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_mapview",
       "target": "src_types_latlng",
       "relation": "imports",
       "_origin": "ast",
@@ -7267,6 +7315,18 @@
     {
       "source": "src_components_ui",
       "target": "src_lib_format_initials",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/ui.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_ui",
+      "target": "src_lib_format_safecolor",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13079,7 +13139,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L11",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -13090,18 +13150,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L22",
-      "weight": 1.0
-    },
-    {
-      "source": "src_lib_format",
-      "target": "src_lib_format_initials",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/lib/format.ts",
-      "source_location": "L3",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -13112,7 +13161,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L31",
+      "source_location": "L34",
       "weight": 1.0
     },
     {
@@ -13123,7 +13172,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L34",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_format",
+      "target": "src_lib_format_safecolor",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/format.ts",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -13134,7 +13194,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L37",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -13145,7 +13205,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L44",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -13156,7 +13216,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L50",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -13167,7 +13227,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L53",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -13178,7 +13238,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L56",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_format",
+      "target": "src_lib_format_initials",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/lib/format.ts",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -13189,7 +13260,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L63",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -13200,7 +13271,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/format.ts",
-      "source_location": "L67",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -13288,7 +13359,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/lib/supabase.ts",
-      "source_location": "L44",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -14489,5 +14560,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "04c2d7501c03a84a8b9a16bc21a53c101627e229"
+  "built_at_commit": "8ea887eca8f02cbf890dc8f6ab47977e733305b8"
 }

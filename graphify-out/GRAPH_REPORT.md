@@ -1,7 +1,7 @@
 # Graph Report - enfermeraya  (2026-11-22)
 
 ## Corpus Check
-- 70 files · ~45,429 words
+- 72 files · ~47,756 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 5 file(s) not represented in the graph (top: .webmanifest 3, (none) 1, .css 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8ea887ec`
+- Built from commit: `de62fb73`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,7 +21,7 @@
 - package.json
 - Request.tsx
 - App.tsx
-- Withdraw.tsx
+- useApp
 - compilerOptions
 - vite-env.d.ts
 - AppContext.tsx
@@ -65,24 +65,24 @@ Cohesion: 0.05
 Nodes (37): dependencies, @fontsource-variable/inter, leaflet, lucide-react, react, react-dom, react-router-dom, @supabase/supabase-js (+29 more)
 
 ### Community 3 - "Request.tsx"
-Cohesion: 0.14
-Nodes (45): LocationSheet(), MapView(), TarifaSheet(), TarifasProfesional(), Avatar(), BtnProps, ESTADO_LABEL, ESTADO_STYLE (+37 more)
+Cohesion: 0.15
+Nodes (31): Request, LocationSheet(), MapView(), zoomFor(), Avatar(), BtnProps, ESTADO_LABEL, ESTADO_STYLE (+23 more)
 
 ### Community 4 - "App.tsx"
-Cohesion: 0.12
-Nodes (37): lucide-react, react-router-dom, @supabase/supabase-js, adminTabs, App(), Guard(), NurseHome, nurseTabs (+29 more)
+Cohesion: 0.14
+Nodes (34): lucide-react, react-router-dom, adminTabs, App(), Earnings, Guard(), NurseHome, nurseTabs (+26 more)
 
-### Community 5 - "Withdraw.tsx"
-Cohesion: 0.15
-Nodes (30): Earnings, esc(), pinOf(), Sheet(), Card(), StatusPill(), cuentaResumen(), CuentaSheet() (+22 more)
+### Community 5 - "useApp"
+Cohesion: 0.16
+Nodes (41): Sheet(), TarifaSheet(), TarifasProfesional(), Card(), ServiceTile(), StatusPill(), Switch(), cuentaResumen() (+33 more)
 
 ### Community 6 - "compilerOptions"
 Cohesion: 0.12
 Nodes (16): compilerOptions, allowImportingTsExtensions, isolatedModules, jsx, lib, module, moduleDetection, moduleResolution (+8 more)
 
 ### Community 9 - "AppContext.tsx"
-Cohesion: 0.06
-Nodes (52): PRESETS, DEFAULT_CENTER, Live, MapMarker, Props, zoomFor(), CATALOGO, CENTER (+44 more)
+Cohesion: 0.05
+Nodes (58): @supabase/supabase-js, PRESETS, DEFAULT_CENTER, esc(), Live, MapMarker, pinOf(), Props (+50 more)
 
 ### Community 11 - "react"
 Cohesion: 0.13
@@ -96,17 +96,17 @@ Nodes (12): @fontsource-variable/inter, react, react-dom, ErrorBoundary, Props, 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `package.json`, `Request.tsx`, `App.tsx`, `Withdraw.tsx`, `AppContext.tsx`?**
-  _High betweenness centrality (0.104) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `package.json`, `Request.tsx`, `App.tsx`, `useApp`, `AppContext.tsx`?**
+  _High betweenness centrality (0.105) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `version` to the rest of the system?**
   _98 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `package.json` be split into smaller, more focused modules?**
   _Cohesion score 0.05121951219512195 - nodes in this community are weakly interconnected._
-- **Why does `lucide-react` connect `App.tsx` to `package.json`, `Request.tsx`, `Withdraw.tsx`, `AppContext.tsx`, `react`?**
-  _High betweenness centrality (0.062) - this node is a cross-community bridge._
+- **Why does `lucide-react` connect `App.tsx` to `package.json`, `Request.tsx`, `useApp`, `AppContext.tsx`, `react`?**
+  _High betweenness centrality (0.061) - this node is a cross-community bridge._
 - **Should `Request.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.13650075414781296 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.14603174603174604 - nodes in this community are weakly interconnected._
 - **Should `App.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12156448202959831 - nodes in this community are weakly interconnected._
-- **Should `Withdraw.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.14789915966386555 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.13974358974358975 - nodes in this community are weakly interconnected._
+- **Should `compilerOptions` be split into smaller, more focused modules?**
+  _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
