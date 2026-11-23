@@ -18,9 +18,9 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1795052980.768628,
-    "seen": 1795054535.936956,
-    "ast_hash": "412a1141b5c9b15b4204b006c4ae1b2d",
+    "mtime": 1795319571.8916945,
+    "seen": 1795321068.8731918,
+    "ast_hash": "18bba81dbaa62892d6f87101a773285d",
     "semantic_hash": ""
   },
   "src/components/ErrorBoundary.tsx": {
@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "src/data/seed.ts": {
-    "mtime": 1795056268.2668388,
-    "seen": 1795057686.538193,
-    "ast_hash": "71f8c94ca2d99e149fab9830065d1871",
+    "mtime": 1795058159.1953046,
+    "seen": 1795321068.873441,
+    "ast_hash": "ff82251e3e36fbcff97210b71b9d57bb",
     "semantic_hash": ""
   },
   "src/lib/format.ts": {
@@ -84,15 +84,15 @@
     "semantic_hash": ""
   },
   "src/main.tsx": {
-    "mtime": 1794840035.9696815,
-    "seen": 1794843818.594256,
-    "ast_hash": "871e57fc6e6da6bbfefac698719215b6",
+    "mtime": 1795319559.0258677,
+    "seen": 1795321068.873505,
+    "ast_hash": "9661aecab187fc075b979bb4ad52f084",
     "semantic_hash": ""
   },
   "src/pages/Login.tsx": {
-    "mtime": 1794843687.6273382,
-    "seen": 1794843818.594256,
-    "ast_hash": "7349dc739c2757867b54507a52f93961",
+    "mtime": 1795319559.0277283,
+    "seen": 1795321068.873505,
+    "ast_hash": "0622a4517e1dff8c263314c90b33a4aa",
     "semantic_hash": ""
   },
   "src/pages/Profile.tsx": {
@@ -102,9 +102,9 @@
     "semantic_hash": ""
   },
   "src/pages/Register.tsx": {
-    "mtime": 1794840484.8234882,
-    "seen": 1794843818.5942578,
-    "ast_hash": "85b0f6c882d434b329a0e230f506c056",
+    "mtime": 1795319559.0271602,
+    "seen": 1795321068.8735628,
+    "ast_hash": "7fe3d9c1f9501db613c2f134e018011c",
     "semantic_hash": ""
   },
   "src/pages/admin/Admin.tsx": {
@@ -132,15 +132,15 @@
     "semantic_hash": ""
   },
   "src/pages/patient/Home.tsx": {
-    "mtime": 1795056290.6974053,
-    "seen": 1795057686.538485,
-    "ast_hash": "98294f25120197ca687201283ad4cd23",
+    "mtime": 1795058159.195812,
+    "seen": 1795321068.8737001,
+    "ast_hash": "44d724f17c28c74eddc243c69314f60c",
     "semantic_hash": ""
   },
   "src/pages/patient/Request.tsx": {
-    "mtime": 1795056328.1858087,
-    "seen": 1795057686.538485,
-    "ast_hash": "87752fae62a7d94c9a433a75647e2bfb",
+    "mtime": 1795058159.1955714,
+    "seen": 1795321068.873701,
+    "ast_hash": "90bc0729348ed9f1558735d1e0806dee",
     "semantic_hash": ""
   },
   "src/pages/patient/Tracking.tsx": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "src/store/AppContext.tsx": {
-    "mtime": 1795056268.2683032,
-    "seen": 1795057686.5385191,
-    "ast_hash": "0363ef92befbc0807e2bb3c57361f710",
+    "mtime": 1795319559.0265253,
+    "seen": 1795321068.873732,
+    "ast_hash": "073535a524e81adec8f4d5db44f75ec1",
     "semantic_hash": ""
   },
   "src/store/sim.test.ts": {
@@ -168,9 +168,9 @@
     "semantic_hash": ""
   },
   "src/types.ts": {
-    "mtime": 1795056268.2670605,
-    "seen": 1795057686.538521,
-    "ast_hash": "b8979addb2e62a8910e0ad57f97c8714",
+    "mtime": 1795058159.1950874,
+    "seen": 1795321068.8738,
+    "ast_hash": "a2e3c7f0a478514bcb8ca3198835a811",
     "semantic_hash": ""
   },
   "src/vite-env.d.ts": {
@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1791697925.2516425,
-    "seen": 1791698462.6574159,
-    "ast_hash": "738b9b2a513afda4db30d530c36beecc",
+    "mtime": 1795319592.6943908,
+    "seen": 1795321068.8739488,
+    "ast_hash": "7427664dba976984744f63faa77eb9ec",
     "semantic_hash": ""
   },
   "index.html": {
@@ -210,15 +210,15 @@
     "semantic_hash": ""
   },
   "src/lib/supabase.ts": {
-    "mtime": 1795056268.2685282,
-    "seen": 1795057686.53825,
-    "ast_hash": "434b1083f1011220576c031620481981",
+    "mtime": 1795319559.0254197,
+    "seen": 1795321068.8734999,
+    "ast_hash": "032d6269a608ebe804577214f23d62b4",
     "semantic_hash": ""
   },
   ".github/workflows/pages.yml": {
-    "mtime": 1791697991.4497452,
-    "seen": 1791698462.657417,
-    "ast_hash": "587825e8a3e8527f55d599aecac7b3de",
+    "mtime": 1795319586.9723666,
+    "seen": 1795321068.87395,
+    "ast_hash": "d7e4a20b9a5c6f3a097bc18ce1cc6a1e",
     "semantic_hash": ""
   },
   "docs/EnfermeraYa-presentacion.pdf": {
@@ -258,9 +258,9 @@
     "semantic_hash": ""
   },
   "PRODUCT.md": {
-    "mtime": 1794843763.6304345,
-    "seen": 1794843818.594568,
-    "ast_hash": "fea3ac68094ed82246033e6088239a3a",
+    "mtime": 1795058159.1963356,
+    "seen": 1795321068.873951,
+    "ast_hash": "6367af2656b1101fd14a55eee4f661e8",
     "semantic_hash": ""
   },
   "src/components/Withdraw.tsx": {
@@ -270,9 +270,33 @@
     "semantic_hash": ""
   },
   "src/components/Tarifas.tsx": {
-    "mtime": 1795056490.288537,
-    "seen": 1795057686.5381088,
-    "ast_hash": "9f08cc7a528c68fbb124681c2a45baa1",
+    "mtime": 1795058159.1960776,
+    "seen": 1795321068.873352,
+    "ast_hash": "c4f4da990d2536a6ee41cf23835bd697",
+    "semantic_hash": ""
+  },
+  "src/lib/app.ts": {
+    "mtime": 1795319559.0070026,
+    "seen": 1795321068.873442,
+    "ast_hash": "cf0197eaf330fb5f45d61688f224514c",
+    "semantic_hash": ""
+  },
+  "admin/index.html": {
+    "mtime": 1795319586.9206655,
+    "seen": 1795321068.873951,
+    "ast_hash": "01a085575a70dda8f19acad9fb9a0c40",
+    "semantic_hash": ""
+  },
+  "profesional/index.html": {
+    "mtime": 1795319586.9181342,
+    "seen": 1795321068.873974,
+    "ast_hash": "3397af04133c0c8e4f4f000c3775462b",
+    "semantic_hash": ""
+  },
+  "public/404.html": {
+    "mtime": 1795319586.9525776,
+    "seen": 1795321068.873975,
+    "ast_hash": "dfba8f722c232f4247d9abc18daa4957",
     "semantic_hash": ""
   }
 }
