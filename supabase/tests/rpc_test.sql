@@ -131,7 +131,8 @@ begin
   -- ===== 8. Ganancia 85% y conteo, sumados en servidor =====
   perform pg_temp.as_reset();
   select ganancias, servicios into g, sv from public.nurse_details where usuario_id = n1;
-  if g <> 37400 then raise exception 'FAIL ganancias=% (esperado 37400)', g; end if;
+  -- 0020: un servicio en efectivo no suma saldo retirable (el paciente le paga al profesional).
+  if g <> 0 then raise exception 'FAIL ganancias=% (esperado 0 por ser efectivo)', g; end if;
   if sv <> 11 then raise exception 'FAIL servicios=% (esperado 11)', sv; end if;
 
   -- ===== 9. Calificacion: promedio sobre n-1 previos; una sola vez =====
@@ -233,8 +234,9 @@ begin
   if cnt <> 0 then raise exception 'FAIL trigger creo perfil admin'; end if;
 
   -- ===== 19. Avisos al profesional (0006): ganancia y oferta vencida =====
-  select count(*) into cnt from public.notificaciones where user_id = n1 and titulo = 'Ganancia registrada' and cuerpo = '+ $ 37.400';
-  if cnt <> 1 then raise exception 'FAIL aviso ganancia: %', cnt; end if;
+  -- 0020: el servicio de la prueba es en efectivo, el aviso es el de cobro directo.
+  select count(*) into cnt from public.notificaciones where user_id = n1 and titulo = 'Servicio en efectivo completado';
+  if cnt <> 1 then raise exception 'FAIL aviso efectivo: %', cnt; end if;
   cand := r.candidato; -- candidata actual de s2 (bloque 15)
   update public.servicios set oferta_inicio = now() - interval '30 seconds' where id = s2;
   perform public.despachar_pendientes();

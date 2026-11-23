@@ -1,5 +1,8 @@
 export const money = (n: number) => '$ ' + Math.round(n).toLocaleString('es-CO')
 
+/** Solo colores #rrggbb llegan a estilos (el servidor ya lo exige; esto cubre datos viejos o alterados). */
+export const safeColor = (c: string | undefined, fallback = '#1d6fe8') => (c && /^#[0-9a-fA-F]{6}$/.test(c) ? c : fallback)
+
 export const initials = (name: string) =>
   name
     .split(' ')

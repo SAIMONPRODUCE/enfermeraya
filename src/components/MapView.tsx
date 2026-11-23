@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type * as Leaflet from 'leaflet'
-import { initials } from '../lib/format'
+import { initials, safeColor } from '../lib/format'
 import type { LatLng } from '../types'
 
 export interface MapMarker {
@@ -52,7 +52,7 @@ function pinOf(m: MapMarker): { html: string; size: [number, number]; anchor: [n
     return { html: `<span class="flex h-9 w-9 items-center justify-center rounded-full border-[3px] border-white bg-amber-500 text-white shadow-lg">${PIN_SVG}</span>`, size: [36, 36], anchor: [18, 36] }
   const d = m.highlight ? 44 : 32
   return {
-    html: `<span class="flex items-center justify-center rounded-full border-[3px] border-white text-[12px] font-bold text-white shadow-md ${m.highlight ? 'ring-4 ring-mint-400/40' : ''} ${m.offline ? 'opacity-50 grayscale' : ''}" style="width:${d}px;height:${d}px;background:${esc(m.color ?? '#0ea5a4')}">${esc(initials(m.label ?? 'E'))}</span>`,
+    html: `<span class="flex items-center justify-center rounded-full border-[3px] border-white text-[12px] font-bold text-white shadow-md ${m.highlight ? 'ring-4 ring-mint-400/40' : ''} ${m.offline ? 'opacity-50 grayscale' : ''}" style="width:${d}px;height:${d}px;background:${safeColor(m.color, '#0ea5a4')}">${esc(initials(m.label ?? 'E'))}</span>`,
     size: [d, d], anchor: [d / 2, d / 2],
   }
 }

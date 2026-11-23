@@ -2,7 +2,7 @@ import {
   Baby, Bandage, Droplet, FlaskConical, HeartPulse, ShieldCheck, Star, Syringe, Users, type LucideIcon,
 } from 'lucide-react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { initials } from '../lib/format'
+import { initials, safeColor } from '../lib/format'
 import type { Estado } from '../types'
 
 const ICONS: Record<string, LucideIcon> = {
@@ -40,7 +40,7 @@ export function Button({ variant = 'primary', loading, block, className = '', ch
 
 export function Avatar({ name, color, size = 44, online }: { name: string; color: string; size?: number; online?: boolean }) {
   return (
-    <span className="relative inline-flex shrink-0 items-center justify-center rounded-full font-bold text-white" style={{ width: size, height: size, background: color, fontSize: size * 0.36 }}>
+    <span className="relative inline-flex shrink-0 items-center justify-center rounded-full font-bold text-white" style={{ width: size, height: size, background: safeColor(color), fontSize: size * 0.36 }}>
       {initials(name)}
       {online !== undefined && (
         <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${online ? 'bg-mint-500' : 'bg-slate-300'}`} />

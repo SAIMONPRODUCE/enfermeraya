@@ -34,6 +34,7 @@ const ERRORES: Record<string, string> = {
   nota_requerida: 'Escribe el motivo del rechazo.',
   tarifa_fuera_de_rango: 'La tarifa debe estar dentro del rango del servicio.',
   enfermero_no_disponible: 'Ese profesional ya no está disponible. Elige otro o el más cercano.',
+  muchas_cancelaciones: 'Cancelaste varias solicitudes en la última hora. Espera un rato antes de cancelar otra.',
   ruta_invalida: 'Los documentos no son válidos.',
   no_editable: 'Tu perfil ya fue aprobado.',
   'Invalid login credentials': 'Correo o contraseña incorrectos.',
