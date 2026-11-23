@@ -9,11 +9,12 @@ declare
   r record;
   ref text;
 begin
+  update public.catalogo set requiere_orden = false; -- 0022: la orden medica se prueba en legales_test.sql
   insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data)
   values (pac, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'test-pac@example.invalid',
-          '{"rol":"paciente","nombre":"Pac Prueba","telefono":"+573000000001"}'::jsonb),
+          '{"terminos":"v1-2026-11","rol":"paciente","nombre":"Pac Prueba","telefono":"+573000000001"}'::jsonb),
          (enf, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'test-enf@example.invalid',
-          '{"rol":"enfermero","nombre":"Enf Prueba","telefono":"+573000000002","especialidad":"Inyectologia"}'::jsonb);
+          '{"terminos":"v1-2026-11","documento":"1012345678","reps":"110010000001","rol":"enfermero","nombre":"Enf Prueba","telefono":"+573000000002","especialidad":"Inyectologia"}'::jsonb);
   update public.profiles set direccion = 'Calle 1', lat = 4.60, lng = -74.20 where id = pac;
   update public.profiles set lat = 4.60, lng = -74.20 where id = enf;
   update public.nurse_details set aprobado = 'aprobado', online = true where usuario_id = enf;

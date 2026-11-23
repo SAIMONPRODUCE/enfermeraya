@@ -10,13 +10,14 @@ declare
   ref1 text; ref2 text;
   r record;
 begin
+  update public.catalogo set requiere_orden = false; -- 0022: la orden medica se prueba en legales_test.sql
   insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data)
   values (pac, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ree-pac@example.invalid',
-          '{"rol":"paciente","nombre":"Pac Reembolso","telefono":"+573000000021"}'::jsonb),
+          '{"terminos":"v1-2026-11","rol":"paciente","nombre":"Pac Reembolso","telefono":"+573000000021"}'::jsonb),
          (enf, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ree-enf@example.invalid',
-          '{"rol":"enfermero","nombre":"Enf Reembolso","telefono":"+573000000022","especialidad":"Inyectologia"}'::jsonb),
+          '{"terminos":"v1-2026-11","documento":"1012345678","reps":"110010000001","rol":"enfermero","nombre":"Enf Reembolso","telefono":"+573000000022","especialidad":"Inyectologia"}'::jsonb),
          (adm, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ree-adm@example.invalid',
-          '{"rol":"paciente","nombre":"Adm Reembolso","telefono":"+573000000023"}'::jsonb);
+          '{"terminos":"v1-2026-11","rol":"paciente","nombre":"Adm Reembolso","telefono":"+573000000023"}'::jsonb);
   update public.profiles set rol = 'admin' where id = adm;
   update public.profiles set direccion = 'Calle 1', lat = 4.60, lng = -74.20 where id = pac;
   update public.profiles set lat = 4.60, lng = -74.20 where id = enf;

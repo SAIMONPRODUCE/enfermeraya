@@ -35,6 +35,11 @@ export function Validations() {
               <div key={u.id} style={{ ['--i' as string]: i }}>
                 <Card className={`space-y-3 transition-[opacity,transform] duration-200 ${leaving === u.id ? 'scale-95 opacity-0' : ''}`}>
                   <div className="flex items-center gap-3"><Avatar name={u.nombre} color={u.color} size={48} /><div><p className="font-extrabold">{u.nombre}</p><p className="text-[13px] text-mute">{d.especialidad} · {d.experiencia} {d.experiencia === 1 ? 'año' : 'años'}</p></div></div>
+                  <dl className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-50 p-3 text-[13px]">
+                    <div><dt className="text-mute">Cédula (ReTHUS)</dt><dd className="font-bold tabular-nums">{d.documento || '—'}</dd></div>
+                    <div><dt className="text-mute">Código REPS</dt><dd className="font-bold tabular-nums">{d.reps || '—'}</dd></div>
+                  </dl>
+                  <p className="text-[12px] text-mute">Verifica la cédula en la consulta pública de ReTHUS y el código en el REPS antes de aprobar. Solo enfermeros profesionales, no auxiliares.</p>
                   <div className="space-y-1.5">
                     {d.documentos_url.length === 0 && <p className="rounded-xl bg-amber-50 px-3 py-2 text-[13px] font-semibold text-amber-700">Aún no subió documentos</p>}
                     {d.documentos_url.map((doc) => (
@@ -43,7 +48,7 @@ export function Validations() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <Button variant="danger" onClick={() => decide(u.id, false)}><X size={18} /> Rechazar</Button>
-                    <Button variant="mint" disabled={d.documentos_url.length === 0} onClick={() => decide(u.id, true)}><Check size={18} /> Aprobar</Button>
+                    <Button variant="mint" disabled={d.documentos_url.length === 0 || !d.documento || !d.reps} onClick={() => decide(u.id, true)}><Check size={18} /> Aprobar</Button>
                   </div>
                 </Card>
               </div>

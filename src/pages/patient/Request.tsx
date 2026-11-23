@@ -1,4 +1,4 @@
-import { ArrowLeft, Banknote, Calendar, CreditCard, Landmark, MapPin, Zap } from 'lucide-react'
+import { ArrowLeft, Banknote, Calendar, CreditCard, FileUp, Landmark, MapPin, Phone, Zap } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LocationSheet } from '../../components/LocationSheet'
@@ -22,7 +22,7 @@ const PAGOS: { id: MetodoPago; label: string; sub: string; icon: typeof CreditCa
 export default function Request() {
   const nav = useNavigate()
   const [params] = useSearchParams()
-  const { me, state, requestService, cotizar } = useApp()
+  const { me, state, requestService, cotizar, uploadOrden } = useApp()
   const [step, setStep] = useState(0)
   // ?s= viene de la URL: solo aceptar ids del catálogo para no romper la vista
   const fromUrl = params.get('s')
@@ -34,6 +34,9 @@ export default function Request() {
   const [radio, setRadio] = useState<'5' | '10'>('5')
   const [loc, setLoc] = useState(false)
   const [phase, setPhase] = useState<'idle' | 'paying' | 'ok'>('idle')
+  // Orden médica (inyectología, terapia IV): se sube al bucket privado antes de pedir.
+  const [orden, setOrden] = useState<{ sid: string; path: string; name: string } | null>(null)
+  const [subiendo, setSubiendo] = useState(false)
   // Profesional elegido (?e= desde el inicio); null = el más cercano.
   const [elegido, setElegido] = useState<string | null>(params.get('e'))
 
@@ -65,14 +68,23 @@ export default function Request() {
   }, [sinUbicacion])
   if (!me) return null
 
-  const canNext = step === 0 ? inmediato || (fecha !== '' && new Date(fecha).getTime() > Date.now()) : step === 1 ? near.length > 0 && !sinUbicacion : true
+  const ordenOk = !svc.requiere_orden || orden?.sid === sid
+  const canNext = step === 0 ? ordenOk && (inmediato || (fecha !== '' && new Date(fecha).getTime() > Date.now())) : step === 1 ? near.length > 0 && !sinUbicacion : true
+  const pickOrden = async (f: File | undefined) => {
+    if (!f) return
+    if (f.size > 5 * 1024 * 1024) return alert('La orden debe pesar menos de 5 MB.')
+    setSubiendo(true)
+    const path = await uploadOrden(f)
+    setSubiendo(false)
+    if (path) setOrden({ sid, path, name: f.name })
+  }
   const back = () => (step === 0 ? nav(-1) : setStep(step - 1))
 
   const confirm = async () => {
     setPhase('paying')
     const id = await requestService({
       servicio_id: sid, inmediato, fecha_hora: inmediato ? null : fecha, notas, metodo_pago: pago,
-      direccion: me.direccion, ubicacion: me.ubicacion, enfermero: pick,
+      direccion: me.direccion, ubicacion: me.ubicacion, enfermero: pick, orden: svc.requiere_orden && orden?.sid === sid ? orden.path : '',
     })
     if (!id) {
       setPhase('idle') // el error ya salió como toast
@@ -114,6 +126,10 @@ export default function Request() {
       <div key={step} className="scroll-y min-h-0 flex-1 px-5 pb-4">
         {step === 0 && (
           <div key="s0" className="step-enter space-y-5">
+            <p role="note" className="flex items-start gap-2.5 rounded-2xl bg-red-50 p-3 text-[13px] font-semibold text-red-800">
+              <Phone size={16} className="mt-0.5 shrink-0" />
+              <span>EnfermeraYa no atiende urgencias. Si es una emergencia, llama al <a href="tel:123" className="underline">123</a>.</span>
+            </p>
             <h1 className="text-[26px] font-extrabold leading-tight tracking-tight">¿Qué servicio necesitas?</h1>
             <div className="grid grid-cols-2 gap-2.5">
               {OFERTA.map((c) => (
@@ -126,6 +142,16 @@ export default function Request() {
               ))}
             </div>
             <p className="rounded-2xl bg-white p-3 text-[13px] text-mute shadow-sm">{svc.descripcion}</p>
+            {svc.requiere_orden && (
+              <label className="press flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-brand-200 bg-white p-3.5">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><FileUp size={20} /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-bold">{orden?.sid === sid ? 'Orden médica adjunta' : 'Adjunta la orden médica'}</span>
+                  <span className="block truncate text-[12px] text-mute">{subiendo ? 'Subiendo…' : orden?.sid === sid ? orden.name : 'Obligatoria para este servicio · PDF o foto'}</span>
+                </span>
+                <input type="file" accept="application/pdf,image/jpeg,image/png" className="sr-only" onChange={(e) => pickOrden(e.target.files?.[0])} />
+              </label>
+            )}
 
             <div className="space-y-3">
               <h2 className="text-[18px] font-extrabold tracking-tight">¿Cuándo?</h2>
@@ -161,7 +187,7 @@ export default function Request() {
                   <span className="text-[13px] font-semibold leading-snug">{near.length} {near.length === 1 ? 'disponible' : 'disponibles'} cerca, con tarjeta profesional y diploma validados.</span>
                 </div>
                 <h2 className="pt-1 text-[16px] font-extrabold tracking-tight">¿Quién te atiende?</h2>
-                <p className="-mt-1 text-[13px] text-mute">Cada profesional independiente fija su tarifa para {svc.nombre.toLowerCase()}.</p>
+                <p className="-mt-1 text-[13px] text-mute">Son profesionales independientes: cada uno fija su tarifa para {svc.nombre.toLowerCase()} y responde por su atención.</p>
                 <div className="stagger space-y-2" role="radiogroup" aria-label="Profesional">
                   <Choice on={pick === null} onClick={() => setElegido(null)}>
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mint-50 text-mint-700"><Zap size={18} /></span>

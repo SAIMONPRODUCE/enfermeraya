@@ -47,6 +47,7 @@ declare
   cal numeric;
   ap text;
 begin
+  update public.catalogo set requiere_orden = false; -- 0022: la orden medica se prueba en legales_test.sql
   -- ===== Fixtures (como postgres, sin RLS) =====
   insert into auth.users (id, email, aud, role) values
     (p, 'p@test.co', 'authenticated', 'authenticated'),
@@ -62,10 +63,10 @@ begin
     (n2, 'enfermero', 'Nurse Dos', '3002222222', 4.7150, -74.0650, 5),
     (n3, 'enfermero', 'Nurse Tres', '3003333333', 4.7143, -74.0645, 5),
     (a, 'admin', 'Admin Test', '3004444444', null, null, 5);
-  insert into public.nurse_details (usuario_id, especialidad, aprobado, online, servicios) values
-    (n1, 'General', 'aprobado', true, 10),
-    (n2, 'General', 'aprobado', true, 0),
-    (n3, 'General', 'pendiente', false, 0);
+  insert into public.nurse_details (usuario_id, especialidad, aprobado, online, servicios, documento, reps) values
+    (n1, 'General', 'aprobado', true, 10, '1012345671', '110010000001'),
+    (n2, 'General', 'aprobado', true, 0, '1012345672', '110010000002'),
+    (n3, 'General', 'pendiente', false, 0, '1012345673', '110010000003');
   -- 0011/0012: pedir exige direccion guardada; 0018: cotizar usa la ubicacion de quien pregunta.
   update public.profiles set direccion = 'Cra 15 #93-40' where id in (p, p2);
   update public.nurse_details set online = false where usuario_id not in (n1, n2, n3); -- solo las de la prueba
@@ -224,12 +225,12 @@ begin
   a := gen_random_uuid();
   insert into auth.users (id, email, aud, role, raw_user_meta_data) values
     (a, 'nuevo@test.co', 'authenticated', 'authenticated',
-     '{"rol":"enfermero","nombre":"Nuevo Nurse","telefono":"3005555555","especialidad":"Curaciones"}');
+     '{"terminos":"v1-2026-11","documento":"1012345678","reps":"110010000001","rol":"enfermero","nombre":"Nuevo Nurse","telefono":"3005555555","especialidad":"Curaciones"}');
   select aprobado into ap from public.nurse_details where usuario_id = a;
   if ap is distinct from 'pendiente' then raise exception 'FAIL trigger enfermero aprobado=%', ap; end if;
   a := gen_random_uuid();
   insert into auth.users (id, email, aud, role, raw_user_meta_data) values
-    (a, 'malo@test.co', 'authenticated', 'authenticated', '{"rol":"admin","nombre":"Malo","telefono":"3006666666"}');
+    (a, 'malo@test.co', 'authenticated', 'authenticated', '{"terminos":"v1-2026-11","rol":"admin","nombre":"Malo","telefono":"3006666666"}');
   select count(*) into cnt from public.profiles where id = a;
   if cnt <> 0 then raise exception 'FAIL trigger creo perfil admin'; end if;
 

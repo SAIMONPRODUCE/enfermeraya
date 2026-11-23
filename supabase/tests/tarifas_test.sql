@@ -11,10 +11,11 @@ declare
   q2 record;
   msg text;
 begin
+  update public.catalogo set requiere_orden = false; -- 0022: la orden medica se prueba en legales_test.sql
   insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data) values
-    (pac, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'tar-pac@example.invalid', '{"rol":"paciente","nombre":"Pac Tarifa","telefono":"+573000000061"}'::jsonb),
-    (a, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'tar-a@example.invalid', '{"rol":"enfermero","nombre":"Enf Tarifa A","telefono":"+573000000062","especialidad":"Inyectologia"}'::jsonb),
-    (b, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'tar-b@example.invalid', '{"rol":"enfermero","nombre":"Enf Tarifa B","telefono":"+573000000063","especialidad":"Inyectologia"}'::jsonb);
+    (pac, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'tar-pac@example.invalid', '{"terminos":"v1-2026-11","rol":"paciente","nombre":"Pac Tarifa","telefono":"+573000000061"}'::jsonb),
+    (a, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'tar-a@example.invalid', '{"terminos":"v1-2026-11","documento":"1012345678","reps":"110010000001","rol":"enfermero","nombre":"Enf Tarifa A","telefono":"+573000000062","especialidad":"Inyectologia"}'::jsonb),
+    (b, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'tar-b@example.invalid', '{"terminos":"v1-2026-11","documento":"1012345678","reps":"110010000001","rol":"enfermero","nombre":"Enf Tarifa B","telefono":"+573000000063","especialidad":"Inyectologia"}'::jsonb);
   update public.profiles set direccion = 'Calle 1', lat = 4.60, lng = -74.20 where id = pac;
   update public.profiles set lat = 4.601, lng = -74.20 where id = a;
   update public.profiles set lat = 4.62, lng = -74.20 where id = b;

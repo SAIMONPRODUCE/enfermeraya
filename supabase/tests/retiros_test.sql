@@ -11,9 +11,9 @@ declare
   n integer;
 begin
   insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data) values
-    (a, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ret-a@example.invalid', '{"rol":"enfermero","nombre":"Enf Retiro A","telefono":"+573000000051","especialidad":"Inyectologia"}'::jsonb),
-    (b, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ret-b@example.invalid', '{"rol":"enfermero","nombre":"Enf Retiro B","telefono":"+573000000052","especialidad":"Curaciones"}'::jsonb),
-    (adm, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ret-adm@example.invalid', '{"rol":"paciente","nombre":"Admin Retiro","telefono":"+573000000053"}'::jsonb);
+    (a, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ret-a@example.invalid', '{"terminos":"v1-2026-11","documento":"1012345678","reps":"110010000001","rol":"enfermero","nombre":"Enf Retiro A","telefono":"+573000000051","especialidad":"Inyectologia"}'::jsonb),
+    (b, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ret-b@example.invalid', '{"terminos":"v1-2026-11","documento":"1012345678","reps":"110010000001","rol":"enfermero","nombre":"Enf Retiro B","telefono":"+573000000052","especialidad":"Curaciones"}'::jsonb),
+    (adm, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'ret-adm@example.invalid', '{"terminos":"v1-2026-11","rol":"paciente","nombre":"Admin Retiro","telefono":"+573000000053"}'::jsonb);
   update public.profiles set rol = 'admin' where id = adm;
   update public.nurse_details set aprobado = 'aprobado', ganancias = 120000 where usuario_id = a;
   update public.nurse_details set aprobado = 'aprobado', ganancias = 30000 where usuario_id = b;

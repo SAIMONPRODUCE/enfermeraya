@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { CENTER } from '../data/seed'
 import { APP_BASE } from '../lib/app'
+import { TERMINOS_VERSION } from '../lib/legal'
 import { uid } from '../lib/format'
 import { errorMsg, supabase } from '../lib/supabase'
 import type { AppState, AprobacionEstado, CuentaCobro, Estado, LatLng, MetodoCobro, MetodoPago, Notificacion, NurseDetail, Retiro, Role, Servicio, User } from '../types'
@@ -12,13 +13,13 @@ const EMPTY: AppState = { users: [], nurses: {}, servicios: [], notifs: [], reti
 const ACTIVOS: Estado[] = ['aceptado', 'en_camino', 'en_atencion']
 
 // ---------- Filas tal como llegan de Supabase ----------
-interface ProfileRow { id: string; rol: Role; nombre: string; telefono: string; direccion: string; lat: number | null; lng: number | null; calificacion: number; color: string }
-interface NurseRow { usuario_id: string; especialidad: string; documentos: string[]; aprobado: AprobacionEstado; ganancias: number; online: boolean; visto: string; servicios: number; experiencia: number; bio: string }
+interface ProfileRow { id: string; rol: Role; nombre: string; telefono: string; direccion: string; lat: number | null; lng: number | null; calificacion: number; color: string; terminos_version?: string }
+interface NurseRow { usuario_id: string; especialidad: string; documentos: string[]; aprobado: AprobacionEstado; ganancias: number; online: boolean; visto: string; servicios: number; experiencia: number; bio: string; documento: string; reps: string }
 interface ServicioRow {
   id: string; paciente_id: string; enfermero_id: string | null; candidato: string | null; servicio_id: string; estado: Estado
   lat: number; lng: number; direccion: string; inmediato: boolean; fecha_hora: string | null; notas: string; total: number
   metodo_pago: MetodoPago; calificacion: number | null; resena: string; llego: boolean; rechazados: string[]
-  oferta_inicio: string | null; creado: string; estado_ts: string
+  oferta_inicio: string | null; creado: string; estado_ts: string; orden: string
 }
 interface RetiroRow { id: string; usuario_id: string; monto: number; estado: Retiro['estado']; metodo: MetodoCobro; banco: string; tipo_cuenta: CuentaCobro['tipo_cuenta']; numero: string; titular: string; referencia: string; nota: string; creado: string; resuelto_ts: string | null }
 interface NotifRow { id: string; user_id: string; titulo: string; cuerpo: string; tipo: Notificacion['tipo']; leida: boolean; creado: string }
@@ -60,7 +61,7 @@ async function fetchState(session: Session): Promise<AppState> {
     nurseMap[id] = {
       ...(nurseMap[id] ?? {
         usuario_id: id, especialidad: '', documentos_url: [], aprobado_por_admin: 'aprobado', ganancias: 0,
-        online: false, servicios: 0, experiencia: 0, bio: '',
+        online: false, servicios: 0, experiencia: 0, bio: '', documento: '', reps: '',
       }),
       ...p,
     }
@@ -81,13 +82,13 @@ async function fetchState(session: Session): Promise<AppState> {
   for (const p of profiles.data as ProfileRow[]) {
     const loc = p.lat !== null && p.lng !== null ? { lat: p.lat, lng: p.lng } : null
     if (loc) pos.set(p.id, loc)
-    user({ id: p.id, rol: p.rol, nombre: p.nombre, telefono: p.telefono, direccion: p.direccion, ubicacion: loc ?? CENTER, calificacion: p.calificacion, color: p.color, email: p.id === meId ? session.user.email ?? '' : '' })
+    user({ id: p.id, rol: p.rol, nombre: p.nombre, telefono: p.telefono, direccion: p.direccion, ubicacion: loc ?? CENTER, calificacion: p.calificacion, color: p.color, email: p.id === meId ? session.user.email ?? '' : '', terminos: p.terminos_version })
   }
   for (const d of nurses.data as NurseRow[]) {
     nurse(d.usuario_id, {
       especialidad: d.especialidad, documentos_url: d.documentos, aprobado_por_admin: d.aprobado, ganancias: d.ganancias,
       // El servidor solo ofrece servicios a quien reportó actividad hace menos de 2 min; aquí se refleja igual para los demás usuarios.
-      online: d.online && (d.usuario_id === meId || Date.now() - new Date(d.visto).getTime() < 120_000), servicios: d.servicios, experiencia: d.experiencia, bio: d.bio,
+      online: d.online && (d.usuario_id === meId || Date.now() - new Date(d.visto).getTime() < 120_000), servicios: d.servicios, experiencia: d.experiencia, bio: d.bio, documento: d.documento ?? '', reps: d.reps ?? '',
     })
   }
 
@@ -100,7 +101,7 @@ async function fetchState(session: Session): Promise<AppState> {
       ubicacion_paciente: pac, direccion: r.direccion, inmediato: r.inmediato, fecha_hora: r.fecha_hora, notas: r.notas,
       total: r.total, metodo_pago: r.metodo_pago, calificacion: r.calificacion, resena: r.resena, creado: ms(r.creado),
       estado_ts: ms(r.estado_ts), nursePos: !activo ? null : r.llego ? pac : pos.get(r.enfermero_id!) ?? null,
-      llego: r.llego, candidato: r.candidato, oferta_inicio: ms(r.oferta_inicio), rechazados: r.rechazados,
+      llego: r.llego, candidato: r.candidato, oferta_inicio: ms(r.oferta_inicio), rechazados: r.rechazados, orden: r.orden ?? '',
     }
   })
   // Ofertas: no están en `servicios` (RLS) y la ubicación es aproximada hasta aceptar.
@@ -110,7 +111,7 @@ async function fetchState(session: Session): Promise<AppState> {
       ubicacion_paciente: { lat: o.lat_aprox, lng: o.lng_aprox }, direccion: 'Dirección exacta al aceptar',
       inmediato: o.inmediato, fecha_hora: o.fecha_hora, notas: o.notas, total: o.total, metodo_pago: 'efectivo',
       calificacion: null, resena: '', creado: ms(o.oferta_inicio), estado_ts: ms(o.oferta_inicio), nursePos: null,
-      llego: false, candidato: meId, oferta_inicio: ms(o.oferta_inicio),
+      llego: false, candidato: meId, oferta_inicio: ms(o.oferta_inicio), orden: '',
     })
   }
 
@@ -146,6 +147,8 @@ export interface Draft {
   ubicacion: LatLng
   /** Profesional elegido; null = el más cercano. */
   enfermero: string | null
+  /** Ruta de la orden médica subida (vacía si el servicio no la exige). */
+  orden: string
 }
 
 export interface Quote { base: number; recargo: number; desplazamiento: number; total: number }
@@ -157,6 +160,9 @@ export interface Registro {
   telefono: string
   password: string
   especialidad?: string
+  /** Profesional: cédula y código REPS. */
+  documento?: string
+  reps?: string
 }
 
 interface Ctx {
@@ -196,7 +202,13 @@ interface Ctx {
   /** Profesional: fija su tarifa para un servicio. Devuelve true si quedó guardada. */
   setTarifa: (servicio: string, precio: number) => Promise<boolean>
   uploadDocs: (files: File[]) => Promise<boolean>
-  openDoc: (path: string) => Promise<void>
+  /** Sube la orden médica del paciente al bucket privado; devuelve la ruta o null. */
+  uploadOrden: (file: File) => Promise<string | null>
+  /** Acepta la versión vigente de términos y política de datos. */
+  acceptTerms: () => Promise<boolean>
+  /** Profesional: guarda cédula y código REPS. */
+  setRegistros: (documento: string, reps: string) => Promise<boolean>
+  openDoc: (path: string, bucket?: 'documentos' | 'ordenes') => Promise<void>
   markAllRead: () => Promise<void>
 }
 
@@ -365,11 +377,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       logout: async () => {
         await supabase.auth.signOut()
       },
-      register: async ({ rol, nombre, email, telefono, password, especialidad }) => {
+      register: async ({ rol, nombre, email, telefono, password, especialidad, documento, reps }) => {
+        // terminos: la casilla del registro es obligatoria; el trigger rechaza la cuenta sin la versión vigente.
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { rol, nombre, telefono, especialidad }, emailRedirectTo: `${window.location.origin}${APP_BASE}` },
+          options: { data: { rol, nombre, telefono, especialidad, documento, reps, terminos: TERMINOS_VERSION }, emailRedirectTo: `${window.location.origin}${APP_BASE}` },
         })
         return { error: error ? errorMsg(error) : null, needsConfirm: !error && !data.session }
       },
@@ -398,7 +411,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           p_servicio: d.servicio_id, p_inmediato: d.inmediato,
           // datetime-local no trae zona: se interpreta en la hora local del dispositivo
           p_fecha: d.fecha_hora ? new Date(d.fecha_hora).toISOString() : null,
-          p_notas: d.notas, p_metodo: d.metodo_pago, p_lat: d.ubicacion.lat, p_lng: d.ubicacion.lng, p_direccion: d.direccion, p_enfermero: d.enfermero,
+          p_notas: d.notas, p_metodo: d.metodo_pago, p_lat: d.ubicacion.lat, p_lng: d.ubicacion.lng, p_direccion: d.direccion, p_enfermero: d.enfermero, p_orden: d.orden,
         })
         if (error) {
           toast(errorMsg(error))
@@ -454,10 +467,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         return call('set_documentos', { p_paths: paths })
       },
-      openDoc: async (path) => {
+      uploadOrden: async (f) => {
+        const path = `${meId()}/${Date.now()}-${f.name.replace(/[^\w.-]+/g, '_')}`
+        const { error } = await supabase.storage.from('ordenes').upload(path, f)
+        if (error) {
+          toast(errorMsg(error))
+          return null
+        }
+        return path
+      },
+      acceptTerms: async () => {
+        return call('aceptar_terminos', { p_version: TERMINOS_VERSION })
+      },
+      setRegistros: async (documento, reps) => {
+        return call('set_registros', { p_documento: documento, p_reps: reps })
+      },
+      openDoc: async (path, bucket = 'documentos') => {
         // Se abre la pestaña antes del await: Safari bloquea window.open fuera del gesto del usuario.
         const w = window.open('', '_blank')
-        const { data, error } = await supabase.storage.from('documentos').createSignedUrl(path, 60)
+        if (w) w.opener = null
+        const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60)
         if (error || !data) {
           w?.close()
           toast(errorMsg(error ?? { message: 'No se pudo abrir el documento.' }))

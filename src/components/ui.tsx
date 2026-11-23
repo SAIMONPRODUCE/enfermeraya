@@ -136,3 +136,13 @@ export const Validated = () => (
     Tarjeta profesional y diploma validados
   </p>
 )
+
+/** Casilla de consentimiento: el texto es la etiqueta y tiene zona táctil completa. */
+export function Check({ on, onChange, children }: { on: boolean; onChange: (v: boolean) => void; children: React.ReactNode }) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-white/70 p-3 text-[13px] leading-snug">
+      <input type="checkbox" checked={on} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-brand-600" />
+      <span>{children}</span>
+    </label>
+  )
+}

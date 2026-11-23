@@ -1,9 +1,9 @@
 import { ArrowLeft, MailCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Field, inputCls } from '../components/ui'
+import { Button, Check, Field, inputCls } from '../components/ui'
 import { useAppActions } from '../store/AppContext'
-import { APP_ROL } from '../lib/app'
+import { APP_BASE, APP_ROL } from '../lib/app'
 import { AuthShell } from './Login'
 
 type Kind = 'paciente' | 'enfermero'
@@ -19,13 +19,21 @@ export default function Register() {
   const [telefono, setTelefono] = useState('')
   const [password, setPassword] = useState('')
   const [esp, setEsp] = useState(ESPECIALIDADES[0])
+  const [documento, setDocumento] = useState('')
+  const [reps, setReps] = useState('')
+  const [acepta, setAcepta] = useState(false)
+  const [autoriza, setAutoriza] = useState(false)
+  const [profesional, setProfesional] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [sentTo, setSentTo] = useState<string | null>(null)
 
   // Mismos límites que los CHECK de la tabla profiles (nombre 3-80, teléfono 7-20).
   const tel = telefono.replace(/[^\d+]/g, '')
-  const valid = nombre.trim().length >= 3 && /\S+@\S+\.\S+/.test(email) && tel.length >= 7 && tel.length <= 20 && password.length >= 8
+  const doc = documento.replace(/\D/g, '')
+  const repsNum = reps.replace(/\D/g, '')
+  const nurseOk = kind !== 'enfermero' || (profesional && /^\d{5,12}$/.test(doc) && /^\d{6,15}$/.test(repsNum))
+  const valid = nombre.trim().length >= 3 && /\S+@\S+\.\S+/.test(email) && tel.length >= 7 && tel.length <= 20 && password.length >= 8 && acepta && autoriza && nurseOk
 
   // Con sesión, App redirige a la home del rol en cuanto carga el perfil.
   const submit = async (e: React.FormEvent) => {
@@ -36,6 +44,8 @@ export default function Register() {
     const { error, needsConfirm } = await register({
       rol: kind, nombre: nombre.trim().slice(0, 80), email: mail, telefono: tel, password,
       especialidad: kind === 'enfermero' ? esp : undefined,
+      documento: kind === 'enfermero' ? doc : undefined,
+      reps: kind === 'enfermero' ? repsNum : undefined,
     })
     setBusy(false)
     setErr(error ?? '')
@@ -82,10 +92,21 @@ export default function Register() {
                 {ESPECIALIDADES.map((x) => (<option key={x}>{x}</option>))}
               </select>
             </Field>
+            <Field label="Cédula">
+              <input className={inputCls} inputMode="numeric" value={documento} onChange={(e) => setDocumento(e.target.value)} placeholder="Para verificar tu inscripción en ReTHUS" />
+            </Field>
+            <Field label="Código REPS de prestador independiente">
+              <input className={inputCls} inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} placeholder="Código de habilitación" />
+            </Field>
+            <Check on={profesional} onChange={setProfesional}>Soy enfermera o enfermero <b>profesional</b> con tarjeta profesional, inscrito en ReTHUS y en el REPS. No soy auxiliar de enfermería.</Check>
             <p className="rounded-2xl bg-amber-50 p-3 text-[13px] text-amber-700">Después de crear tu cuenta subirás tu tarjeta profesional y diploma. Un administrador los revisará antes de que recibas servicios.</p>
           </div>
         )}
 
+        <div className="space-y-2 pt-1">
+          <Check on={acepta} onChange={setAcepta}>Acepto los <a href={`${APP_BASE}terminos`} target="_blank" rel="noreferrer" className="font-semibold text-brand-700 underline">términos y condiciones</a> y la <a href={`${APP_BASE}privacidad`} target="_blank" rel="noreferrer" className="font-semibold text-brand-700 underline">política de datos</a>.</Check>
+          <Check on={autoriza} onChange={setAutoriza}>Autorizo de forma expresa el tratamiento de mis datos de <b>salud</b> y de <b>ubicación</b> para prestar el servicio.</Check>
+        </div>
         {err && <p role="alert" className="text-[13px] font-semibold text-red-600">{err}</p>}
         <Button type="submit" block loading={busy} disabled={!valid} className="mt-2">
           {kind === 'paciente' ? 'Crear cuenta' : 'Crear cuenta profesional'}
@@ -94,3 +115,4 @@ export default function Register() {
     </AuthShell>
   )
 }
+

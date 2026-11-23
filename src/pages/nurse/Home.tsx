@@ -1,8 +1,8 @@
-import { Check, Clock, FileCheck2, MapPin, Navigation, Upload, Wallet, X, Zap } from 'lucide-react'
+import { Check, Clock, FileCheck2, FileText, IdCard, MapPin, Navigation, Upload, Wallet, X, Zap } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { MapView } from '../../components/MapView'
 import { Sheet } from '../../components/Sheet'
-import { Avatar, Button, Card, ServiceTile, Stars, Switch } from '../../components/ui'
+import { Avatar, Button, Card, Field, ServiceTile, Stars, Switch, inputCls } from '../../components/ui'
 import { formatKm, haversine } from '../../lib/geo'
 import { docName, isSameDay, money } from '../../lib/format'
 import { useApp } from '../../store/AppContext'
@@ -56,6 +56,29 @@ function UploadDocs() {
   )
 }
 
+/** Cédula (para ReTHUS) y código REPS: obligatorios para aprobar (modo A, solo profesionales independientes). */
+function Registros() {
+  const { myNurse, setRegistros } = useApp()
+  const [doc, setDoc] = useState(myNurse?.documento ?? '')
+  const [reps, setReps] = useState(myNurse?.reps ?? '')
+  const [busy, setBusy] = useState(false)
+  const ok = /^\d{5,12}$/.test(doc.replace(/\D/g, '')) && /^\d{6,15}$/.test(reps.replace(/\D/g, ''))
+  const save = async () => {
+    setBusy(true)
+    await setRegistros(doc, reps)
+    setBusy(false)
+  }
+  return (
+    <Card className="w-full space-y-3 text-left">
+      <p className="flex items-center gap-2 font-extrabold"><IdCard size={18} className="text-brand-600" /> Registros profesionales</p>
+      <p className="text-[13px] text-mute">Necesitamos tu cédula para verificar tu inscripción en ReTHUS y tu código REPS de prestador independiente.</p>
+      <Field label="Cédula"><input className={inputCls} inputMode="numeric" value={doc} onChange={(e) => setDoc(e.target.value)} /></Field>
+      <Field label="Código REPS"><input className={inputCls} inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} /></Field>
+      <Button block loading={busy} disabled={!ok} onClick={save}>Guardar registros</Button>
+    </Card>
+  )
+}
+
 function Pending() {
   const { me, myNurse } = useApp()
   const rejected = myNurse?.aprobado_por_admin === 'rechazado'
@@ -71,6 +94,7 @@ function Pending() {
           <p style={{ ['--i' as string]: 2 }} className="max-w-[300px] text-mute">
             {rejected ? 'Vuelve a enviar tu tarjeta profesional y diploma para una nueva revisión.' : `Hola ${me?.nombre.split(' ')[0]}, para validar tu perfil necesitamos tu tarjeta profesional y tu diploma.`}
           </p>
+          {(!myNurse?.documento || !myNurse?.reps) && <Registros />}
           <UploadDocs />
         </div>
       </div>
@@ -85,6 +109,7 @@ function Pending() {
         <p style={{ ['--i' as string]: 2 }} className="max-w-[300px] text-mute">
           {`Hola ${me?.nombre.split(' ')[0]}, un administrador está validando tu tarjeta profesional y diploma. Te avisaremos apenas esté listo.`}
         </p>
+        {(!myNurse?.documento || !myNurse?.reps) && <Registros />}
         <Card className="w-full text-left" >
           <p className="mb-2 text-[13px] font-bold text-mute">Documentos enviados</p>
           {docs.map((d) => (
@@ -143,7 +168,7 @@ function OfferSheet({ s }: { s: Servicio }) {
 }
 
 export default function NurseHome() {
-  const { me, myNurse, state, toggleOnline, advance } = useApp()
+  const { me, myNurse, state, toggleOnline, advance, openDoc } = useApp()
   if (!me || !myNurse) return null
   if (myNurse.aprobado_por_admin !== 'aprobado') return <Pending />
 
@@ -189,6 +214,7 @@ export default function NurseHome() {
               routes={active.llego ? [] : [{ from: active.nursePos ?? me.ubicacion, to: active.ubicacion_paciente }]} />
             <p className="flex items-center gap-2 text-[14px] font-semibold"><MapPin size={16} className="text-brand-600" />{active.direccion}</p>
             {active.notas && <p className="rounded-2xl bg-slate-50 p-3 text-[13px] text-mute">“{active.notas}”</p>}
+            {active.orden && <button onClick={() => openDoc(active.orden, 'ordenes')} className="press flex w-full items-center gap-2 rounded-2xl bg-brand-50 px-3 py-2.5 text-left text-[14px] font-semibold text-brand-700"><FileText size={16} /> Ver orden médica</button>}
             {btn && <Button block onClick={() => advance(active.id)} variant={btn.label === 'Terminé servicio' ? 'mint' : 'primary'}><btn.icon size={18} /> {btn.label}</Button>}
           </Card>
         ) : (

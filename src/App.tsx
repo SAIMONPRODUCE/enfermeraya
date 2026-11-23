@@ -10,6 +10,7 @@ import { Recover, ResetPassword } from './pages/Recover'
 import Activity from './pages/patient/Activity'
 import PatientHome from './pages/patient/Home'
 import Profile from './pages/Profile'
+import { Privacidad, Terminos } from './pages/Legal'
 import Register from './pages/Register'
 
 // Rutas por rol y flujos pesados (mapa, pago) se cargan al entrar: el inicio de paciente y el login quedan ligeros.
@@ -62,13 +63,15 @@ function OtraApp({ rol }: { rol: Role }) {
 
 export default function App() {
   const { me } = useApp()
-  if (me && me.rol !== APP_ROL) return <OtraApp rol={me.rol} />
+  if (me && me.rol !== APP_ROL && !/\/(terminos|privacidad)$/.test(location.pathname)) return <OtraApp rol={me.rol} />
   const home = homeOf(APP_ROL)
   return (
     <Routes>
       <Route path="/login" element={me ? <Navigate to={home} replace /> : <Login />} />
       {APP_ROL !== 'admin' && <Route path="/registro" element={me ? <Navigate to={home} replace /> : <Register />} />}
       <Route path="/recuperar" element={me ? <Navigate to={home} replace /> : <Recover />} />
+      <Route path="/terminos" element={<Terminos />} />
+      <Route path="/privacidad" element={<Privacidad />} />
       {/* El enlace del correo abre una sesión de recuperación: no redirigir aunque `me` exista. */}
       <Route path="/restablecer" element={<ResetPassword />} />
 

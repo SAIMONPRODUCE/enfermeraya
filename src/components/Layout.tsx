@@ -1,7 +1,10 @@
 import { Bell, HeartPulse, type LucideIcon } from 'lucide-react'
 import { Suspense, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { APP_BASE } from '../lib/app'
 import { timeAgo } from '../lib/format'
+import { TERMINOS_VERSION } from '../lib/legal'
+import { Button, Check } from './ui'
 import { useApp } from '../store/AppContext'
 import { Sheet } from './Sheet'
 import { Toasts } from './Toasts'
@@ -110,6 +113,31 @@ export function Layout({ tabs, badge }: { tabs: Tab[]; badge: string }) {
           </ul>
         )}
       </Sheet>
+      {me && me.terminos !== TERMINOS_VERSION && <TermsGate />}
     </div>
+  )
+}
+
+/** Cuentas creadas antes de los términos vigentes deben aceptarlos para seguir usando la app. */
+function TermsGate() {
+  const { acceptTerms } = useApp()
+  const [acepta, setAcepta] = useState(false)
+  const [autoriza, setAutoriza] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const send = async () => {
+    setBusy(true)
+    await acceptTerms()
+    setBusy(false)
+  }
+  return (
+    <Sheet open onClose={() => {}} dismissible={false} title="Términos y datos">
+      <div className="space-y-3 pb-2">
+        <h2 className="text-[22px] font-extrabold tracking-tight">Actualizamos los términos</h2>
+        <p className="text-[14px] text-mute">Para seguir usando EnfermeraYa necesitamos tu aceptación.</p>
+        <Check on={acepta} onChange={setAcepta}>Acepto los <a href={`${APP_BASE}terminos`} target="_blank" rel="noreferrer" className="font-semibold text-brand-700 underline">términos y condiciones</a> y la <a href={`${APP_BASE}privacidad`} target="_blank" rel="noreferrer" className="font-semibold text-brand-700 underline">política de datos</a>.</Check>
+        <Check on={autoriza} onChange={setAutoriza}>Autorizo de forma expresa el tratamiento de mis datos de <b>salud</b> y de <b>ubicación</b> para prestar el servicio.</Check>
+        <Button block loading={busy} disabled={!acepta || !autoriza} onClick={send}>Aceptar y continuar</Button>
+      </div>
+    </Sheet>
   )
 }

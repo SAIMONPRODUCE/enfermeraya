@@ -15,6 +15,8 @@ export interface User {
   direccion: string
   calificacion: number
   color: string
+  /** Versión de términos aceptada (solo se conoce la propia). */
+  terminos?: string
 }
 
 export type AprobacionEstado = 'pendiente' | 'aprobado' | 'rechazado'
@@ -29,6 +31,9 @@ export interface NurseDetail {
   servicios: number
   experiencia: number
   bio: string
+  /** Cédula (para verificar ReTHUS) y código REPS; solo los ve el propio profesional y el admin. */
+  documento: string
+  reps: string
 }
 
 export interface ServiceCatalog {
@@ -40,6 +45,8 @@ export interface ServiceCatalog {
   precio_max: number
   /** false = ya no se ofrece; se conserva para mostrar servicios viejos. */
   activo?: boolean
+  /** Exige adjuntar orden médica (inyectología, terapia IV). */
+  requiere_orden?: boolean
   descripcion: string
   icon: string
   duracion: string
@@ -80,6 +87,8 @@ export interface Servicio {
   candidato: string | null
   oferta_inicio: number
   rechazados: string[]
+  /** Ruta de la orden médica en el bucket privado 'ordenes' ('' si el servicio no la exige). */
+  orden: string
 }
 
 export interface Notificacion {

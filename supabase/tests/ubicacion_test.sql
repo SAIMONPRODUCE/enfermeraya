@@ -6,9 +6,10 @@ declare
   r record;
   msg text;
 begin
+  update public.catalogo set requiere_orden = false; -- 0022: la orden medica se prueba en legales_test.sql
   insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data)
   values (u, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'test-ubic@example.invalid',
-          '{"rol":"paciente","nombre":"Prueba","telefono":"+573000000000"}'::jsonb);
+          '{"terminos":"v1-2026-11","rol":"paciente","nombre":"Prueba","telefono":"+573000000000"}'::jsonb);
   select direccion, lat, lng into r from public.profiles where id = u;
   if r.direccion <> '' or r.lat is not null or r.lng is not null then raise exception 'FAIL perfil nuevo trae ubicacion: %', r; end if;
   perform set_config('request.jwt.claims', json_build_object('sub', u, 'role', 'authenticated')::text, true);
